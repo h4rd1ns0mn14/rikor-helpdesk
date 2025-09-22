@@ -3,46 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rikor HelpDesk • Техническая поддержка</title>
+  <title>Rikor HelpDesk • Профессиональная техническая поддержка</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <meta name="description" content="Rikor HelpDesk - Профессиональная система технической поддержки">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+  <meta name="description" content="Rikor HelpDesk - Enterprise система технической поддержки">
+  <meta name="theme-color" content="#1e40af">
 </head>
-<body>
+<body data-theme="light">
   <div id="app">
-    <!-- Боковая панель -->
+    <!-- Боковая панель с улучшенными цветами -->
     <aside class="sidebar">
       <div class="sidebar__brand">
-        <div class="sidebar__logo">💻</div>
+        <div class="sidebar__logo">
+          <i class="fas fa-headphones"></i>
+        </div>
         <div class="sidebar__brand-text">
           <div class="sidebar__title">Rikor HelpDesk</div>
-          <div class="sidebar__subtitle">Техническая поддержка</div>
+          <div class="sidebar__subtitle">Enterprise поддержка</div>
         </div>
+        <button class="theme-toggle" id="themeToggle" title="Переключить тему">
+          <i class="fas fa-moon"></i>
+        </button>
       </div>
-      
+
       <nav class="sidebar__nav">
         <a href="#dashboard" class="sidebar__link active" data-route="dashboard">
-          <span class="sidebar__icon">📊</span>
+          <i class="fas fa-chart-pie"></i>
           <span>Панель управления</span>
         </a>
         <a href="#tickets" class="sidebar__link" data-route="tickets">
-          <span class="sidebar__icon">🎫</span>
+          <i class="fas fa-ticket-alt"></i>
           <span>Тикеты</span>
+          <span class="sidebar__badge">12</span>
         </a>
         <a href="#knowledge" class="sidebar__link" data-route="knowledge">
-          <span class="sidebar__icon">📚</span>
+          <i class="fas fa-book"></i>
           <span>База знаний</span>
         </a>
         <a href="#reports" class="sidebar__link" data-route="reports">
-          <span class="sidebar__icon">📈</span>
+          <i class="fas fa-chart-bar"></i>
           <span>Отчеты</span>
         </a>
         <a href="#users" class="sidebar__link" data-route="users">
-          <span class="sidebar__icon">👥</span>
+          <i class="fas fa-users"></i>
           <span>Пользователи</span>
         </a>
         <a href="#settings" class="sidebar__link" data-route="settings">
-          <span class="sidebar__icon">⚙️</span>
+          <i class="fas fa-cog"></i>
           <span>Настройки</span>
         </a>
       </nav>
@@ -52,188 +61,50 @@
         <div class="sidebar__profile-info">
           <div class="sidebar__name">Петр Сидоров</div>
           <div class="sidebar__role">Администратор</div>
-          <div class="sidebar__status online">
-            <span class="status-dot"></span>
-            Онлайн
-          </div>
         </div>
-        <button class="sidebar__profile-menu" onclick="app.toggleProfileMenu()">⋮</button>
+        <div class="sidebar__status online"></div>
       </div>
     </aside>
 
     <!-- Основной контент -->
     <main class="main-content">
-      <header class="topbar">
-        <div class="topbar__left">
-          <button class="mobile-menu-toggle" onclick="app.toggleSidebar()">☰</button>
-          <div class="breadcrumb" id="breadcrumb"></div>
-        </div>
-        <div class="topbar__right">
-          <div class="search-box">
-            <input type="text" placeholder="Поиск тикетов, статей..." id="globalSearch">
-            <button class="search-btn">🔍</button>
-          </div>
-          <div class="topbar__notifications">
-            <button class="notification-btn" onclick="app.toggleNotifications()">
-              🔔
-              <span class="notification-badge">3</span>
-            </button>
-          </div>
-          <div class="user-menu">
-            <button class="user-menu-btn" onclick="app.toggleUserMenu()">
-              <div class="user-avatar">ПС</div>
-            </button>
-          </div>
-        </div>
-      </header>
+      <!-- Хлебные крошки -->
+      <div class="breadcrumb">
+        <span class="breadcrumb__item">Rikor HelpDesk</span>
+        <span class="breadcrumb__separator"><i class="fas fa-chevron-right"></i></span>
+        <span class="breadcrumb__item breadcrumb__item--active" id="currentPage">Панель управления</span>
+      </div>
 
-      <div id="router-view" class="page-content"></div>
+      <!-- Контейнер контента -->
+      <div id="content" class="content"></div>
     </main>
 
     <!-- Модальные окна -->
-    <div id="modal-backdrop" class="modal-backdrop hidden"></div>
-    
-    <!-- Модальное окно тикета -->
-    <div id="ticket-modal" class="modal hidden">
-      <div class="modal__content">
-        <div class="modal__header">
-          <h2 class="modal__title" id="ticket-modal-title">Детали тикета</h2>
-          <button class="modal__close" onclick="app.closeModal()">&times;</button>
-        </div>
-        <div class="modal__body" id="ticket-modal-body"></div>
-        <div class="modal__footer" id="ticket-modal-footer"></div>
-      </div>
-    </div>
-
-    <!-- Модальное окно создания тикета -->
-    <div id="create-ticket-modal" class="modal hidden">
-      <div class="modal__content">
-        <div class="modal__header">
-          <h2 class="modal__title">Создать новый тикет</h2>
-          <button class="modal__close" onclick="app.closeModal()">&times;</button>
-        </div>
-        <div class="modal__body">
-          <form id="create-ticket-form" class="ticket-form">
-            <div class="form-grid">
-              <div class="form-group form-group--full">
-                <label for="ticket-title" class="form-label">Заголовок тикета*</label>
-                <input type="text" id="ticket-title" name="title" class="form-control" required>
-                <div class="form-error" id="title-error"></div>
-              </div>
-              
-              <div class="form-group">
-                <label for="ticket-device-type" class="form-label">Тип устройства*</label>
-                <select id="ticket-device-type" name="deviceType" class="form-control" required>
-                  <option value="">Выберите тип устройства</option>
-                  <option value="Ноутбук">💻 Ноутбук</option>
-                  <option value="Сервер">🖥️ Сервер</option>
-                  <option value="Мини ПК">📦 Мини ПК</option>
-                  <option value="Телефон">📞 Телефон</option>
-                  <option value="Другое">🔧 Другое</option>
-                </select>
-                <div class="form-error" id="deviceType-error"></div>
-              </div>
-              
-              <div class="form-group">
-                <label for="ticket-category" class="form-label">Категория*</label>
-                <select id="ticket-category" name="category" class="form-control" required>
-                  <option value="">Выберите категорию</option>
-                </select>
-                <div class="form-error" id="category-error"></div>
-              </div>
-              
-              <div class="form-group">
-                <label for="ticket-priority" class="form-label">Приоритет*</label>
-                <select id="ticket-priority" name="priority" class="form-control" required>
-                  <option value="low">Низкий</option>
-                  <option value="medium" selected>Средний</option>
-                  <option value="high">Высокий</option>
-                  <option value="critical">Критический</option>
-                </select>
-                <div class="form-error" id="priority-error"></div>
-              </div>
-              
-              <div class="form-group form-group--full">
-                <label for="ticket-description" class="form-label">Описание проблемы*</label>
-                <textarea id="ticket-description" name="description" class="form-control" rows="5" required></textarea>
-                <div class="form-error" id="description-error"></div>
-              </div>
-              
-              <div class="form-group form-group--full">
-                <label class="form-label">Прикрепить файлы</label>
-                <div class="file-upload-area" id="file-upload">
-                  <div class="file-upload-content">
-                    <span class="file-upload-icon">📎</span>
-                    <p>Перетащите файлы сюда или <button type="button" class="file-upload-btn">выберите файлы</button></p>
-                    <small>Максимальный размер файла: 10MB</small>
-                  </div>
-                  <input type="file" id="file-input" multiple hidden>
-                </div>
-                <div id="uploaded-files" class="uploaded-files"></div>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal__footer">
-          <button type="button" class="btn btn--secondary" onclick="app.closeModal()">Отмена</button>
-          <button type="submit" form="create-ticket-form" class="btn btn--primary">Создать тикет</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Модальное окно статьи -->
-    <div id="article-modal" class="modal hidden">
-      <div class="modal__content modal__content--large">
-        <div class="modal__header">
-          <h2 class="modal__title" id="article-modal-title">Статья базы знаний</h2>
-          <button class="modal__close" onclick="app.closeModal()">&times;</button>
-        </div>
-        <div class="modal__body" id="article-modal-body"></div>
-        <div class="modal__footer" id="article-modal-footer"></div>
-      </div>
-    </div>
+    <div id="modal-overlay" class="modal-overlay hidden"></div>
+    <div id="modal-container" class="modal-container hidden"></div>
 
     <!-- Уведомления -->
-    <div id="notifications-container" class="notifications-container"></div>
-    
-    <!-- Боковая панель уведомлений -->
-    <div id="notifications-panel" class="notifications-panel hidden">
-      <div class="notifications-header">
-        <h3>Уведомления</h3>
-        <button onclick="app.toggleNotifications()">&times;</button>
-      </div>
-      <div class="notifications-content">
-        <div class="notification-item">
-          <div class="notification-icon">🎫</div>
-          <div class="notification-content">
-            <p><strong>Новый тикет:</strong> RIK-2025-001</p>
-            <small>2 минуты назад</small>
-          </div>
-        </div>
-        <div class="notification-item">
-          <div class="notification-icon">✅</div>
-          <div class="notification-content">
-            <p><strong>Тикет решен:</strong> RIK-2025-003</p>
-            <small>1 час назад</small>
-          </div>
-        </div>
-        <div class="notification-item">
-          <div class="notification-icon">⚠️</div>
-          <div class="notification-content">
-            <p><strong>SLA нарушение:</strong> RIK-2025-005</p>
-            <small>3 часа назад</small>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div id="notifications" class="notifications"></div>
 
-    <!-- Меню пользователя -->
-    <div id="user-menu-dropdown" class="user-menu-dropdown hidden">
-      <a href="#profile" onclick="app.navigate('profile')">👤 Мой профиль</a>
-      <a href="#settings" onclick="app.navigate('settings')">⚙️ Настройки</a>
-      <hr>
-      <a href="#help">❓ Помощь</a>
-      <a href="#logout">🚪 Выйти</a>
+    <!-- Floating Action Button -->
+    <button class="fab" id="fabButton" title="Быстрые действия">
+      <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Floating Action Menu -->
+    <div class="fab-menu hidden" id="fabMenu">
+      <button class="fab-menu__item" onclick="app.showCreateTicketModal()">
+        <i class="fas fa-ticket-alt"></i>
+        <span>Новый тикет</span>
+      </button>
+      <button class="fab-menu__item" onclick="app.navigate('knowledge')">
+        <i class="fas fa-book"></i>
+        <span>База знаний</span>
+      </button>
+      <button class="fab-menu__item" onclick="app.showCreateUserModal()">
+        <i class="fas fa-user-plus"></i>
+        <span>Новый пользователь</span>
+      </button>
     </div>
   </div>
 
