@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rikor HelpDesk • Профессиональная техническая поддержка</title>
+  <title>Rikor HelpDesk v2.3.0 • Профессиональная техническая поддержка</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-  <meta name="description" content="Rikor HelpDesk - Enterprise система технической поддержки">
+  <meta name="description" content="Rikor HelpDesk v2.3.0 - Enterprise система технической поддержки с расширенными возможностями">
   <meta name="theme-color" content="#1e40af">
 </head>
 <body data-theme="light">
   <div id="app">
-    <!-- Боковая панель с улучшенными цветами -->
+    <!-- Боковая панель -->
     <aside class="sidebar">
       <div class="sidebar__brand">
         <div class="sidebar__logo">
@@ -21,7 +21,7 @@
         </div>
         <div class="sidebar__brand-text">
           <div class="sidebar__title">Rikor HelpDesk</div>
-          <div class="sidebar__subtitle">Enterprise поддержка</div>
+          <div class="sidebar__subtitle">Enterprise v2.3.0</div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Переключить тему">
           <i class="fas fa-moon"></i>
@@ -70,7 +70,7 @@
     <main class="main-content">
       <!-- Хлебные крошки -->
       <div class="breadcrumb">
-        <span class="breadcrumb__item">Rikor HelpDesk</span>
+        <span class="breadcrumb__item">Rikor HelpDesk v2.3.0</span>
         <span class="breadcrumb__separator"><i class="fas fa-chevron-right"></i></span>
         <span class="breadcrumb__item breadcrumb__item--active" id="currentPage">Панель управления</span>
       </div>
@@ -106,6 +106,9 @@
         <span>Новый пользователь</span>
       </button>
     </div>
+
+    <!-- Скрытый input для загрузки файлов -->
+    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.md,.jpg,.png" multiple style="display: none;">
   </div>
 
   <script src="app.js"></script>

@@ -1,4 +1,4 @@
-/* Rikor HelpDesk - Исправленная версия с улучшенной темной темой */
+/* Rikor HelpDesk v2.3.0 - Исправленная версия с улучшенной темной темой */
 
 :root {
   /* Корпоративная палитра Rikor */
@@ -1002,6 +1002,41 @@ body {
   font-size: 13px;
   color: var(--rikor-text-muted);
   font-weight: 500;
+}
+
+/* НОВЫЕ стили для системы ответов */
+.reply {
+  transition: all var(--transition-fast);
+}
+
+.reply:hover {
+  transform: translateX(2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.reply--solution {
+  border-left-color: var(--rikor-success) !important;
+  background: rgba(16, 185, 129, 0.05) !important;
+}
+
+/* НОВЫЕ стили для управления файлами */
+.file-upload-zone {
+  border: 2px dashed var(--rikor-border);
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  background: var(--rikor-bg-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.file-upload-zone:hover {
+  border-color: var(--rikor-primary);
+  background: rgba(30, 64, 175, 0.05);
+}
+
+.file-upload-zone.drag-over {
+  border-color: var(--rikor-success);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 /* Утилиты */
