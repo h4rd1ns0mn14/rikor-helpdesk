@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rikor HelpDesk v2.3.0 • Профессиональная техническая поддержка</title>
+  <title>Rikor HelpDesk v2.3.1 • Исправленная версия с переключением пользователей</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-  <meta name="description" content="Rikor HelpDesk v2.3.0 - Enterprise система технической поддержки с расширенными возможностями">
+  <meta name="description" content="Rikor HelpDesk v2.3.1 - Исправленная система с переключением пользователей и быстрыми ответами">
   <meta name="theme-color" content="#1e40af">
 </head>
 <body data-theme="light">
@@ -21,7 +21,7 @@
         </div>
         <div class="sidebar__brand-text">
           <div class="sidebar__title">Rikor HelpDesk</div>
-          <div class="sidebar__subtitle">Enterprise v2.3.0</div>
+          <div class="sidebar__subtitle">Fixed v2.3.1</div>
         </div>
         <button class="theme-toggle" id="themeToggle" title="Переключить тему">
           <i class="fas fa-moon"></i>
@@ -56,11 +56,26 @@
         </a>
       </nav>
 
+      <!-- НОВОЕ: Переключение пользователя -->
+      <div class="sidebar__user-switcher">
+        <div class="user-switcher-header">
+          <i class="fas fa-user-circle"></i>
+          <span>Сменить пользователя</span>
+        </div>
+        <select id="userSwitcher" class="user-switcher-select">
+          <option value="1">Петр Сидоров (Админ)</option>
+          <option value="2">Иван Петров (Агент)</option>
+          <option value="3">Елена Новикова (Агент)</option>
+          <option value="4">Анна Смирнова (Пользователь)</option>
+          <option value="5">Алексей Морозов (Агент)</option>
+        </select>
+      </div>
+
       <div class="sidebar__profile">
-        <div class="sidebar__avatar">ПС</div>
+        <div class="sidebar__avatar" id="currentUserAvatar">ПС</div>
         <div class="sidebar__profile-info">
-          <div class="sidebar__name">Петр Сидоров</div>
-          <div class="sidebar__role">Администратор</div>
+          <div class="sidebar__name" id="currentUserName">Петр Сидоров</div>
+          <div class="sidebar__role" id="currentUserRole">Администратор</div>
         </div>
         <div class="sidebar__status online"></div>
       </div>
@@ -70,7 +85,7 @@
     <main class="main-content">
       <!-- Хлебные крошки -->
       <div class="breadcrumb">
-        <span class="breadcrumb__item">Rikor HelpDesk v2.3.0</span>
+        <span class="breadcrumb__item">Rikor HelpDesk v2.3.1</span>
         <span class="breadcrumb__separator"><i class="fas fa-chevron-right"></i></span>
         <span class="breadcrumb__item breadcrumb__item--active" id="currentPage">Панель управления</span>
       </div>
@@ -109,6 +124,34 @@
 
     <!-- Скрытый input для загрузки файлов -->
     <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.md,.jpg,.png" multiple style="display: none;">
+
+    <!-- НОВОЕ: Панель быстрых ответов -->
+    <div id="quickRepliesPanel" class="quick-replies-panel hidden">
+      <div class="quick-replies-header">
+        <h4><i class="fas fa-lightning-bolt"></i> Быстрые ответы</h4>
+        <button class="close-btn" onclick="app.hideQuickReplies()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="quick-replies-list">
+        <div class="quick-reply" data-reply="Проблема принята в работу. Приступаю к диагностике.">
+          <i class="fas fa-tools"></i> Принято в работу
+        </div>
+        <div class="quick-reply" data-reply="Требуется дополнительная информация для решения проблемы.">
+          <i class="fas fa-question-circle"></i> Нужна доп. информация
+        </div>
+        <div class="quick-reply" data-reply="Проблема решена. Пожалуйста, проверьте работу оборудования.">
+          <i class="fas fa-check-circle"></i> Проблема решена
+        </div>
+        <div class="quick-reply" data-reply="Требуется перезагрузка системы для применения изменений.">
+          <i class="fas fa-redo"></i> Требуется перезагрузка
+        </div>
+        <div class="quick-reply" data-reply="Обращение передано специалисту более высокого уровня.">
+          <i class="fas fa-level-up-alt"></i> Эскалация
+        </div>
+        <div class="quick-reply" data-reply="Работы будут проведены в рамках планового обслуживания.">
+          <i class="fas fa-calendar"></i> Плановые работы
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
