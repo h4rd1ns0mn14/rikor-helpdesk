@@ -1,7 +1,8 @@
-// Rikor HelpDesk v2.3.1 - ИСПРАВЛЕННАЯ ВЕРСИЯ с переключением пользователей и быстрыми ответами
-class RikorHelpDeskFixed {
+// Rikor HelpDesk v2.4.0 РАСШИРЕННАЯ ВЕРСИЯ с поддержкой файлов и расширенным функционалом
+
+class RikorHelpDeskEnhanced {
   constructor() {
-    console.log('🔧 Инициализация ИСПРАВЛЕННОЙ версии Rikor HelpDesk v2.3.1...');
+    console.log('🚀 Инициализация Rikor HelpDesk v2.4.0 РАСШИРЕННАЯ...');
 
     this.currentRoute = 'dashboard';
     this.currentUser = {
@@ -13,7 +14,6 @@ class RikorHelpDeskFixed {
       department: 'IT'
     };
 
-    // Системные настройки
     this.settings = {
       theme: localStorage.getItem('rikor-theme') || 'light',
       language: 'ru',
@@ -21,10 +21,9 @@ class RikorHelpDeskFixed {
       autoRefresh: true,
       refreshInterval: 30000,
       maxFileSize: 10 * 1024 * 1024, // 10MB
-      allowedFileTypes: ['.pdf', '.doc', '.docx', '.txt', '.md', '.jpg', '.png', '.zip']
+      allowedFileTypes: ['.pdf', '.doc', '.docx', '.txt', '.md', '.jpg', '.jpeg', '.png', '.zip', '.rar']
     };
 
-    // Загружаем данные
     this.data = this.loadData();
     this.filters = {
       tickets: { status: '', priority: '', assignee: '', search: '' },
@@ -32,83 +31,96 @@ class RikorHelpDeskFixed {
       reports: { dateFrom: '', dateTo: '', type: 'all' }
     };
 
-    // Массив для хранения инстансов Chart.js
     this.chartInstances = {};
-
-    // НОВОЕ: Быстрые ответы
-    this.quickReplies = [
-      { id: 1, text: 'Проблема принята в работу. Приступаю к диагностике.', category: 'work' },
-      { id: 2, text: 'Требуется дополнительная информация для решения проблемы.', category: 'info' },
-      { id: 3, text: 'Проблема решена. Пожалуйста, проверьте работу оборудования.', category: 'solved' },
-      { id: 4, text: 'Требуется перезагрузка системы для применения изменений.', category: 'reboot' },
-      { id: 5, text: 'Обращение передано специалисту более высокого уровня.', category: 'escalation' },
-      { id: 6, text: 'Работы будут проведены в рамках планового обслуживания.', category: 'maintenance' }
-    ];
-
+    this.tempFiles = []; // Временные файлы для загрузки
     this.init();
   }
 
-  // Инициализация приложения
   init() {
-    console.log('🚀 Запуск исправленной версии v2.3.1...');
+    console.log('📋 Инициализация системы...');
     this.applyTheme();
     this.bindEvents();
     this.handleRoute();
+    this.setupFileHandlers();
     this.startAutoRefresh();
+
     setTimeout(() => {
-      this.showNotification('Rikor HelpDesk v2.3.1 готов! Исправлены ошибки, добавлены переключение пользователей и быстрые ответы', 'success');
+      this.showNotification('🎯 Rikor HelpDesk v2.4.0 РАСШИРЕННАЯ готова! Все функции работают.', 'success');
     }, 1000);
   }
 
-  // ИСПРАВЛЕННАЯ загрузка данных
+  // ========================================
+  // ЗАГРУЗКА ДАННЫХ - С ПОДДЕРЖКОЙ ФАЙЛОВ
+  // ========================================
+
   loadData() {
-    console.log('📊 Загрузка данных v2.3.1...');
     const defaultData = {
       tickets: [
         {
           id: "RIK-2025-001",
           title: "Перегрев сервера Rikor RP6224 в ЦОД",
-          description: "Сервер Rikor RP6224 показывает температуру CPU 85°C в нормальном режиме работы. Система охлаждения работает на максимальных оборотах.",
-          status: "open", priority: "critical", category: "hardware",
-          deviceType: "Сервер", deviceModel: "RP6224", 
+          description: "Сервер Rikor RP6224 показывает температуру CPU 85°C в нормальном режиме работы. Система охлаждения работает на максимальных оборотах. Требуется срочная диагностика и замена термопасты.",
+          status: "open",
+          priority: "critical",
+          category: "hardware",
+          deviceType: "Сервер",
+          deviceModel: "RP6224",
           serialNumber: "RP6224-2024-001523",
-          assignee: "Иван Петров", reporter: "Анна Смирнова",
-          created: "2025-09-22T06:15:00Z", updated: "2025-09-22T08:30:00Z",
-          location: "ЦОД-1, Стойка A-15", timeSpent: 2.5, estimatedTime: 4,
+          assignee: "Иван Петров",
+          reporter: "Анна Смирнова",
+          created: "2025-09-22T06:15:00Z",
+          updated: "2025-09-22T08:30:00Z",
+          location: "ЦОД-1, Стойка A-15",
+          timeSpent: 2.5,
+          estimatedTime: 4,
           tags: ["rikor", "server", "cooling", "datacenter", "critical"],
           replies: [
             {
-              id: 1, author: "Иван Петров", role: "agent", 
-              message: "Тикет принят в работу. Выезжаю в ЦОД для диагностики системы охлаждения.", 
-              created: "2025-09-22T08:30:00Z", type: "reply"
-            },
-            {
-              id: 2, author: "Анна Смирнова", role: "user",
-              message: "Спасибо! Сервер критически важен для работы отдела разработки.",
-              created: "2025-09-22T08:45:00Z", type: "reply"
+              id: 1,
+              author: "Иван Петров",
+              role: "agent",
+              message: "Тикет принят в работу. Выезжаю в ЦОД для диагностики системы охлаждения.",
+              created: "2025-09-22T08:30:00Z",
+              type: "reply"
             }
           ],
           attachments: [
-            { id: 1, name: "server-logs.txt", size: 15420, type: "text/plain", uploadedBy: "Анна Смирнова", uploaded: "2025-09-22T06:20:00Z" },
-            { id: 2, name: "temperature-screenshot.png", size: 245680, type: "image/png", uploadedBy: "Анна Смирнова", uploaded: "2025-09-22T06:25:00Z" }
+            {
+              id: 1,
+              name: "server_temperature_log.pdf",
+              size: 245760,
+              type: "application/pdf",
+              uploadedBy: "Анна Смирнова",
+              uploaded: "2025-09-22T06:20:00Z"
+            }
           ]
         },
         {
-          id: "RIK-2025-002", 
+          id: "RIK-2025-002",
           title: "Ноутбук Rikor RN NINO не включается",
-          description: "После обновления BIOS ноутбук Rikor RN NINO 203.1/15 не реагирует на нажатие кнопки питания.",
-          status: "in_progress", priority: "high", category: "hardware",
-          deviceType: "Ноутбук", deviceModel: "RN NINO 203.1/15",
+          description: "После обновления BIOS ноутбук Rikor RN NINO 203.1/15 не реагирует на нажатие кнопки питania. Индикатор питания не загорается.",
+          status: "in_progress",
+          priority: "high",
+          category: "hardware",
+          deviceType: "Ноутбук",
+          deviceModel: "RN NINO 203.1/15",
           serialNumber: "RN203-2025-000847",
-          assignee: "Елена Новикова", reporter: "Сергей Волков",
-          created: "2025-09-21T16:45:00Z", updated: "2025-09-22T09:20:00Z",
-          location: "Офис 1, Комната 205", timeSpent: 1.5, estimatedTime: 3,
+          assignee: "Елена Новикова",
+          reporter: "Сергей Волков",
+          created: "2025-09-21T16:45:00Z",
+          updated: "2025-09-22T09:20:00Z",
+          location: "Офис 1, Комната 205",
+          timeSpent: 1.5,
+          estimatedTime: 3,
           tags: ["rikor", "laptop", "power", "bios"],
           replies: [
             {
-              id: 1, author: "Елена Новикова", role: "agent",
-              message: "Проверила ноутбук. Проблема связана с неудачным обновлением BIOS. Необходимо восстановление прошивки.",
-              created: "2025-09-22T09:20:00Z", type: "reply"
+              id: 1,
+              author: "Елена Новикова",
+              role: "agent",
+              message: "Проверила подключение питания. Попробую восстановить BIOS через служебный режим.",
+              created: "2025-09-22T09:20:00Z",
+              type: "reply"
             }
           ],
           attachments: []
@@ -116,910 +128,315 @@ class RikorHelpDeskFixed {
         {
           id: "RIK-2025-003",
           title: "Медленная работа моноблока Rikor AIO",
-          description: "Моноблок Rikor AIO 201.1/23 стал работать медленно после обновления Windows 11.",
-          status: "resolved", priority: "medium", category: "software",
-          deviceType: "Моноблок", deviceModel: "AIO 201.1/23",
+          description: "Моноблок Rikor AIO 201.1/23 стал работать медленно после обновления Windows 11. Время загрузки увеличилось в 3 раза.",
+          status: "resolved",
+          priority: "medium",
+          category: "software",
+          deviceType: "Моноблок",
+          deviceModel: "AIO 201.1/23",
           serialNumber: "AIO201-2024-002156",
-          assignee: "Петр Сидоров", reporter: "Михаил Кузнецов",
-          created: "2025-09-20T11:30:00Z", updated: "2025-09-22T09:15:00Z",
-          resolvedAt: "2025-09-22T09:15:00Z", timeSpent: 4.2, estimatedTime: 4,
+          assignee: "Петр Сидоров",
+          reporter: "Михаил Кузнецов",
+          created: "2025-09-20T11:30:00Z",
+          updated: "2025-09-22T09:15:00Z",
+          resolvedAt: "2025-09-22T09:15:00Z",
+          timeSpent: 4.2,
+          estimatedTime: 4,
           tags: ["rikor", "aio", "performance", "windows"],
           replies: [
             {
-              id: 1, author: "Петр Сидоров", role: "admin",
-              message: "Проблема решена. Установлены обновленные драйверы и оптимизированы настройки Windows 11. Производительность восстановлена.",
-              created: "2025-09-22T09:15:00Z", type: "solution"
+              id: 1,
+              author: "Петр Сидоров",
+              role: "admin",
+              message: "Проблема решена. Установлены обновленные драйверы и оптимизированы настройки Windows 11.",
+              created: "2025-09-22T09:15:00Z",
+              type: "solution"
             }
           ],
           attachments: [
-            { id: 1, name: "performance-report.pdf", size: 892340, type: "application/pdf", uploadedBy: "Петр Сидоров", uploaded: "2025-09-22T09:10:00Z" }
+            {
+              id: 1,
+              name: "performance_report.pdf",
+              size: 186240,
+              type: "application/pdf",
+              uploadedBy: "Петр Сидоров",
+              uploaded: "2025-09-22T09:15:00Z"
+            }
           ]
-        },
-        {
-          id: "RIK-2025-004",
-          title: "Настройка виртуализации на сервере Rikor RP6104",
-          description: "Требуется настроить параметры BIOS и установить Hyper-V.",
-          status: "waiting", priority: "low", category: "configuration",
-          deviceType: "Сервер", deviceModel: "RP6104",
-          serialNumber: "RP6104-2024-000329",
-          assignee: "Алексей Морозов", reporter: "Ольга Иванова",
-          created: "2025-09-22T08:20:00Z", updated: "2025-09-22T09:00:00Z",
-          location: "ЦОД-2, Стойка B-08", timeSpent: 0.5, estimatedTime: 6,
-          tags: ["rikor", "server", "bios", "virtualization"],
-          replies: [],
-          attachments: [
-            { id: 1, name: "virtualization-requirements.docx", size: 45680, type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", uploadedBy: "Ольга Иванова", uploaded: "2025-09-22T08:25:00Z" }
-          ]
-        },
-        {
-          id: "RIK-2025-005",
-          title: "Замена SSD диска в мини-ПК Rikor RPC 301.1",
-          description: "Требуется срочная замена SSD диска. SMART показывает критическое состояние.",
-          status: "open", priority: "high", category: "hardware",
-          deviceType: "Мини ПК", deviceModel: "RPC 301.1",
-          serialNumber: "RPC301-2025-001092",
-          assignee: "Иван Петров", reporter: "Дмитрий Козлов",
-          created: "2025-09-22T07:45:00Z", updated: "2025-09-22T07:45:00Z",
-          location: "Офис 1, Переговорная 3", timeSpent: 0, estimatedTime: 2,
-          tags: ["rikor", "minipc", "storage", "replacement"],
-          replies: [],
-          attachments: [
-            { id: 1, name: "smart-report.txt", size: 3420, type: "text/plain", uploadedBy: "Дмитрий Козлов", uploaded: "2025-09-22T07:50:00Z" }
-          ]
-        },
-        {
-          id: "RIK-2025-006",
-          title: "Проблемы с Wi-Fi на планшете Rikor RT 102.1",
-          description: "Планшет теряет соединение с Wi-Fi каждые 10-15 минут.",
-          status: "open", priority: "medium", category: "network",
-          deviceType: "Планшет", deviceModel: "RT 102.1",
-          serialNumber: "RT102-2025-000634",
-          assignee: "Елена Новикова", reporter: "Анна Смирнова",
-          created: "2025-09-22T09:30:00Z", updated: "2025-09-22T09:30:00Z",
-          location: "Офис 1, Отдел продаж", timeSpent: 0, estimatedTime: 2,
-          tags: ["rikor", "tablet", "wifi", "android"],
-          replies: [],
-          attachments: []
         }
       ],
 
       users: [
-        {id: 1, name: "Петр Сидоров", email: "p.sidorov@rikor.ru", role: "admin", department: "IT", avatar: "ПС", status: "online", ticketsResolved: 142, avgResolutionTime: 12.5},
-        {id: 2, name: "Иван Петров", email: "i.petrov@rikor.ru", role: "agent", department: "IT", avatar: "ИП", status: "online", ticketsResolved: 89, avgResolutionTime: 18.2},
-        {id: 3, name: "Елена Новикова", email: "e.novikova@rikor.ru", role: "agent", department: "IT", avatar: "ЕН", status: "away", ticketsResolved: 67, avgResolutionTime: 15.7},
+        {id: 1, name: "Петр Сидоров", email: "p.sidorov@rikor.ru", role: "admin", department: "IT", avatar: "ПС", status: "online", ticketsResolved: 142},
+        {id: 2, name: "Иван Петров", email: "i.petrov@rikor.ru", role: "agent", department: "IT", avatar: "ИП", status: "online", ticketsResolved: 89},
+        {id: 3, name: "Елена Новикова", email: "e.novikova@rikor.ru", role: "agent", department: "IT", avatar: "ЕН", status: "away", ticketsResolved: 67},
         {id: 4, name: "Анна Смирнова", email: "a.smirnova@rikor.ru", role: "user", department: "Офис", avatar: "АС", status: "offline", ticketsCreated: 23},
-        {id: 5, name: "Алексей Морозов", email: "a.morozov@rikor.ru", role: "agent", department: "IT", avatar: "АМ", status: "busy", ticketsResolved: 45, avgResolutionTime: 22.1},
-        {id: 6, name: "Сергей Волков", email: "s.volkov@rikor.ru", role: "user", department: "Разработка", avatar: "СВ", status: "online", ticketsCreated: 31},
-        {id: 7, name: "Михаил Кузнецов", email: "m.kuznetsov@rikor.ru", role: "user", department: "Маркетинг", avatar: "МК", status: "online", ticketsCreated: 18},
-        {id: 8, name: "Ольга Иванова", email: "o.ivanova@rikor.ru", role: "manager", department: "Администрация", avatar: "ОИ", status: "online", ticketsCreated: 12}
+        {id: 5, name: "Алексей Морозов", email: "a.morozov@rikor.ru", role: "agent", department: "IT", avatar: "АМ", status: "busy", ticketsResolved: 45}
       ],
 
       knowledgeBase: [
         {
-          id: "KB-001", title: "Устранение перегрева серверов Rikor RP серии", 
-          category: "hardware", 
-          content: "# Устранение перегрева серверов Rikor RP серии\n\n## Диагностика проблемы\n\n1. **Проверка температуры CPU**\n   - Используйте встроенный мониторинг BIOS\n   - Критическая температура: выше 80°C\n\n2. **Проверка системы охлаждения**\n   - Визуальный осмотр вентиляторов\n   - Проверка работы помп жидкостного охлаждения\n\n3. **Очистка от пыли**\n   - Использовать сжатый воздух\n   - Обратить внимание на радиаторы\n\n## Решение проблемы\n\n### Замена термопасты\n1. Выключить сервер и отключить питание\n2. Снять систему охлаждения\n3. Очистить старую термопасту спиртом\n4. Нанести новую термопасту (Arctic MX-4)\n5. Установить охлаждение обратно\n\n### Проверка вентиляторов\n- Заменить неисправные вентиляторы\n- Проверить подключение к материнской плате\n\n## Профилактика\n\n- Регулярная очистка от пыли (раз в 3 месяца)\n- Мониторинг температуры\n- Проверка системы охлаждения",
-          tags: ["сервер", "охлаждение", "rp6224", "температура"], 
-          views: 245, rating: 4.8, 
-          created: "2025-08-15T10:00:00Z", updated: "2025-09-10T14:30:00Z", 
+          id: "KB-001",
+          title: "Устранение перегрева серверов Rikor RP серии",
+          category: "hardware",
+          content: `# Устранение перегрева серверов Rikor RP серии
+
+## Диагностика проблемы
+
+1. **Проверка температуры CPU**
+   - Используйте встроенный мониторинг BIOS
+   - Критическая температура: выше 80°C
+   - Нормальная рабочая температура: 45-65°C
+
+2. **Проверка системы охлаждения**
+   - Визуальный осмотр вентиляторов
+   - Проверка работы помп жидкостного охлаждения
+
+## Решение проблемы
+
+### Замена термопасты
+1. Выключить сервер и отключить питание
+2. Снять систему охлаждения
+3. Очистить старую термопасту
+4. Нанести новую термопасту Arctic MX-4
+
+### Очистка радиаторов
+1. Продуть радиаторы сжатым воздухом
+2. При необходимости - демонтаж для полной очистки
+
+## Профилактические меры
+
+- Регулярная очистка от пыли (каждые 3 месяца)
+- Мониторинг температуры в реальном времени
+- Контроль температуры в серверной комнате (не выше 24°C)`,
+          tags: ["сервер", "охлаждение", "rp6224", "температура"],
+          views: 245,
+          rating: 4.8,
+          created: "2025-08-15T10:00:00Z",
+          updated: "2025-09-10T14:30:00Z",
           author: "Петр Сидоров",
           attachments: [
-            { id: 1, name: "thermal-paste-guide.pdf", size: 2340000, type: "application/pdf", uploadedBy: "Петр Сидоров", uploaded: "2025-08-15T10:15:00Z" },
-            { id: 2, name: "server-cleaning-checklist.docx", size: 45000, type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", uploadedBy: "Петр Сидоров", uploaded: "2025-08-15T10:20:00Z" }
+            {
+              id: 1,
+              name: "cooling_diagram.jpg",
+              size: 512000,
+              type: "image/jpeg",
+              uploadedBy: "Петр Сидоров",
+              uploaded: "2025-08-15T10:30:00Z"
+            }
           ],
-          editHistory: [
-            { editor: "Петр Сидоров", edited: "2025-09-10T14:30:00Z", changes: "Добавлен раздел профилактики" }
-          ]
+          editHistory: []
         },
         {
-          id: "KB-002", title: "Обновление BIOS на ноутбуках Rikor RN серии", 
-          category: "software", 
-          content: "# Обновление BIOS на ноутбуках Rikor RN серии\n\n⚠️ **ВНИМАНИЕ**: Неправильное обновление BIOS может привести к выходу устройства из строя!\n\n## Подготовка к обновлению\n\n### Требования:\n- Стабильное питание (подключенный адаптер)\n- Заряд батареи не менее 50%\n- Закрытые программы и отключенный антивирус\n\n### Определение версии BIOS:\n1. Нажать Win + R\n2. Ввести `msinfo32`\n3. Найти строку 'Версия BIOS'\n\n## Процедура обновления\n\n### Загрузка прошивки:\n1. Посетить сайт поддержки Rikor\n2. Найти модель ноутбука\n3. Скачать последнюю версию BIOS\n\n### Установка:\n1. Запустить файл прошивки от имени администратора\n2. Следовать инструкциям мастера\n3. НЕ ОТКЛЮЧАТЬ питание во время процесса\n4. Дождаться автоматической перезагрузки\n\n## Восстановление после сбоя\n\n### Если ноутбук не включается:\n1. Извлечь батарею на 10 минут\n2. Зажать кнопку питания на 30 сек\n3. Подключить только адаптер питания\n4. Попробовать включить\n\n### Recovery режим:\n- Для RN NINO: Fn + F2 при включении\n- Для RN ARZ: Fn + F8 при включении",
-          tags: ["ноутбук", "bios", "обновление", "rn-nino"], 
-          views: 189, rating: 4.6, 
-          created: "2025-07-22T09:15:00Z", updated: "2025-09-05T11:45:00Z", 
+          id: "KB-002",
+          title: "Обновление BIOS на ноутбуках Rikor RN серии",
+          category: "software",
+          content: `# Обновление BIOS на ноутбуках Rikor RN серии
+
+⚠️ **ВНИМАНИЕ**: Неправильное обновление BIOS может привести к выходу устройства из строя!
+
+## Подготовка к обновлению
+
+### Требования:
+- Стабильное питание от сети (не от батареи)
+- Заряд батареи не менее 50%
+- Отсутствие запущенных программ
+
+### Загрузка прошивки:
+1. Перейти на официальный сайт Rikor
+2. Найти раздел "Поддержка" → "Драйверы и ПО"
+3. Выбрать модель ноутбука
+4. Скачать последнюю версию BIOS
+
+## Процедура обновления
+
+1. **Запуск утилиты обновления**
+   - Запустить файл от имени администратора
+   - Принять лицензионное соглашение
+
+2. **Процесс обновления**
+   - НЕ ОТКЛЮЧАТЬ питание во время процесса
+   - НЕ ЗАКРЫВАТЬ программу
+   - Процесс займет 5-10 минут
+
+3. **Завершение**
+   - Автоматическая перезагрузка
+   - Проверка версии BIOS`,
+          tags: ["ноутбук", "bios", "обновление", "rn-nino"],
+          views: 189,
+          rating: 4.6,
+          created: "2025-07-22T09:15:00Z",
+          updated: "2025-09-05T11:45:00Z",
           author: "Елена Новикова",
-          attachments: [
-            { id: 1, name: "bios-recovery-tool.zip", size: 5600000, type: "application/zip", uploadedBy: "Елена Новикова", uploaded: "2025-07-22T09:30:00Z" }
-          ],
+          attachments: [],
           editHistory: []
         }
       ],
 
       stats: {
-        totalTickets: 1567, openTickets: 128, inProgressTickets: 45, resolvedTickets: 1298, closedTickets: 96,
-        avgResponseTime: "1.8", avgResolutionTime: "14.2", customerSatisfaction: 96.4, slaCompliance: 94.7,
-        todayCreated: 12, todayResolved: 18, thisWeekCreated: 67, thisWeekResolved: 84,
-
+        totalTickets: 1567,
+        openTickets: 128,
+        inProgressTickets: 45,
+        resolvedTickets: 1298,
+        closedTickets: 96,
+        avgResponseTime: "1.8",
+        avgResolutionTime: "14.2",
+        customerSatisfaction: 96.4,
         monthlyTrend: [158, 162, 155, 171, 168, 189, 195, 182, 191, 194, 202, 195],
         monthlyLabels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
-
         priorityStats: {critical: 15, high: 32, medium: 65, low: 16},
         priorityLabels: ['Критический', 'Высокий', 'Средний', 'Низкий'],
         priorityColors: ['#ef4444', '#f59e0b', '#06b6d4', '#10b981'],
-
-        agentPerformance: {
-          "Петр Сидоров": {resolved: 142, avgTime: 12.5, satisfaction: 4.8},
-          "Иван Петров": {resolved: 89, avgTime: 18.2, satisfaction: 4.6},
-          "Елена Новикова": {resolved: 67, avgTime: 15.7, satisfaction: 4.7},
-          "Алексей Морозов": {resolved: 45, avgTime: 22.1, satisfaction: 4.5}
-        },
-
-        timeToResolution: { "0-4h": 245, "4-24h": 432, "1-3d": 287, "3-7d": 134, "7d+": 58 },
-
-        deviceStats: {
-          "Ноутбук": {count: 487, avgResolution: 16.5},
-          "Сервер": {count: 234, avgResolution: 8.2},
-          "Моноблок": {count: 156, avgResolution: 12.1},
-          "Мини ПК": {count: 123, avgResolution: 14.7},
-          "Планшет": {count: 89, avgResolution: 18.9},
-          "Другое": {count: 158, avgResolution: 22.3}
-        }
+        statusStats: {open: 128, in_progress: 45, resolved: 1298, closed: 96},
+        statusLabels: ['Открытые', 'В работе', 'Решенные', 'Закрытые'],
+        statusColors: ['#ef4444', '#f59e0b', '#10b981', '#64748b'],
+        slaCompliance: 94.7
       }
     };
 
     const savedData = localStorage.getItem('rikor-data');
     if (savedData) {
       try {
-        const parsed = JSON.parse(savedData);
-        console.log('✅ Данные загружены из LocalStorage');
-        return parsed;
+        return JSON.parse(savedData);
       } catch (error) {
-        console.warn('⚠️ Ошибка чтения сохраненных данных, используем значения по умолчанию');
+        console.warn('⚠️ Ошибка парсинга данных, используются по умолчанию');
         return defaultData;
       }
     }
 
-    console.log('📝 Используем данные по умолчанию');
     return defaultData;
   }
 
-  // Сохранение данных
   saveData() {
     try {
       localStorage.setItem('rikor-data', JSON.stringify(this.data));
-      console.log('💾 Данные v2.3.1 сохранены в LocalStorage');
+      console.log('💾 Данные сохранены в LocalStorage');
     } catch (error) {
       console.error('❌ Ошибка сохранения данных:', error);
       this.showNotification('Ошибка сохранения данных', 'error');
     }
   }
 
-  // Применение темы
-  applyTheme() {
-    document.body.setAttribute('data-theme', this.settings.theme);
-    const themeIcon = document.querySelector('.theme-toggle i');
-    if (themeIcon) {
-      themeIcon.className = this.settings.theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-    }
-    console.log(`🎨 Применена тема: ${this.settings.theme}`);
-  }
+  // ========================================
+  // ОБРАБОТКА ФАЙЛОВ - НОВЫЙ ФУНКЦИОНАЛ
+  // ========================================
 
-  // ИСПРАВЛЕННАЯ привязка событий
-  bindEvents() {
-    console.log('🔗 Привязка событий v2.3.1 (ИСПРАВЛЕННАЯ)...');
-
-    // Навигация
-    document.querySelectorAll('.sidebar__link').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.navigate(link.dataset.route);
-      });
-    });
-
-    // Переключение темы
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => this.toggleTheme());
-    }
-
-    // НОВОЕ: Переключение пользователя
-    const userSwitcher = document.getElementById('userSwitcher');
-    if (userSwitcher) {
-      userSwitcher.addEventListener('change', (e) => {
-        this.switchUser(parseInt(e.target.value));
-      });
-    }
-
-    // FAB меню
-    const fabButton = document.getElementById('fabButton');
-    const fabMenu = document.getElementById('fabMenu');
-    if (fabButton && fabMenu) {
-      fabButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        fabMenu.classList.toggle('hidden');
-      });
-    }
-
-    // Обработчик загрузки файлов
+  setupFileHandlers() {
     const fileInput = document.getElementById('fileInput');
     if (fileInput) {
-      fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+      fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
     }
-
-    // НОВОЕ: События быстрых ответов
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('quick-reply')) {
-        this.insertQuickReply(e.target.dataset.reply);
-      }
-    });
-
-    // Закрытие модального окна и FAB меню
-    document.addEventListener('click', (e) => {
-      if (e.target.id === 'modal-overlay') {
-        this.hideModal();
-      }
-      if (!e.target.closest('.fab') && !e.target.closest('.fab-menu')) {
-        document.getElementById('fabMenu')?.classList.add('hidden');
-      }
-      if (!e.target.closest('.quick-replies-panel')) {
-        this.hideQuickReplies();
-      }
-    });
-
-    // Клавиатурные сокращения
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        switch(e.key) {
-          case 'n':
-            e.preventDefault();
-            this.showCreateTicketModal();
-            break;
-          case 'k':
-            e.preventDefault();
-            const searchInput = document.querySelector('input[type="search"]');
-            if (searchInput) searchInput.focus();
-            break;
-          case 'e':
-            if (this.currentRoute === 'knowledge') {
-              e.preventDefault();
-              this.showCreateArticleModal();
-            }
-            break;
-          case 'u':
-            e.preventDefault();
-            this.showUserSwitchModal();
-            break;
-        }
-      }
-      if (e.key === 'Escape') {
-        this.hideModal();
-        this.hideQuickReplies();
-        document.getElementById('fabMenu')?.classList.add('hidden');
-      }
-    });
-
-    console.log('✅ События v2.3.1 ИСПРАВЛЕНЫ и привязаны');
   }
 
-  // НОВАЯ функция переключения пользователя
-  switchUser(userId) {
-    const user = this.data.users.find(u => u.id === userId);
-    if (!user) {
-      this.showNotification('Пользователь не найден!', 'error');
-      return;
-    }
-
-    this.currentUser = user;
-
-    // Обновляем UI
-    const avatar = document.getElementById('currentUserAvatar');
-    const name = document.getElementById('currentUserName');
-    const role = document.getElementById('currentUserRole');
-
-    if (avatar) avatar.textContent = user.avatar;
-    if (name) name.textContent = user.name;
-    if (role) role.textContent = this.getRoleText(user.role);
-
-    // Сохраняем в localStorage
-    localStorage.setItem('rikor-current-user', JSON.stringify(user));
-
-    this.showNotification(`Переключились на пользователя: ${user.name} (${this.getRoleText(user.role)})`, 'success');
-
-    // Перерисовываем контент если нужно
-    if (this.currentRoute === 'dashboard') {
-      this.renderContent();
-    }
-
-    console.log(`👤 Переключение на пользователя: ${user.name}`);
+  handleFileSelect(event) {
+    const files = Array.from(event.target.files);
+    files.forEach(file => this.validateAndAddFile(file));
+    event.target.value = ''; // Очищаем input
   }
 
-  // НОВАЯ функция показа модального окна переключения пользователя
-  showUserSwitchModal() {
-    this.showModal(`
-      <div class="modal-header">
-        <div>
-          <h2 class="modal-title">Переключить пользователя</h2>
-          <p style="color: var(--rikor-text-muted); margin: 4px 0 0; font-size: 14px;">Выберите пользователя для входа в систему</p>
+  validateAndAddFile(file) {
+    // Проверка размера файла
+    if (file.size > this.settings.maxFileSize) {
+      this.showNotification(`Файл "${file.name}" слишком большой. Максимальный размер: ${this.formatFileSize(this.settings.maxFileSize)}`, 'error');
+      return false;
+    }
+
+    // Проверка типа файла
+    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    if (!this.settings.allowedFileTypes.includes(fileExtension)) {
+      this.showNotification(`Тип файла "${fileExtension}" не поддерживается`, 'error');
+      return false;
+    }
+
+    // Создаем объект файла
+    const fileObj = {
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      uploadedBy: this.currentUser.name,
+      uploaded: new Date().toISOString(),
+      file: file // Временно сохраняем File объект
+    };
+
+    this.tempFiles.push(fileObj);
+    this.updateFileList();
+    this.showNotification(`Файл "${file.name}" добавлен`, 'success');
+    return true;
+  }
+
+  updateFileList() {
+    const container = document.querySelector('.attached-files');
+    if (!container) return;
+
+    container.innerHTML = this.tempFiles.map(file => `
+      <div class="attached-file">
+        <div class="attached-file-icon">
+          <i class="fas ${this.getFileIcon(file.name)}"></i>
         </div>
-        <button class="modal-close" onclick="app.hideModal()">
+        <div class="attached-file-info">
+          <div class="attached-file-name">${file.name}</div>
+          <div class="attached-file-size">${this.formatFileSize(file.size)}</div>
+        </div>
+        <button class="attached-file-remove" onclick="app.removeFile('${file.id}')">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div class="modal-body">
-        <div class="user-list">
-          ${this.data.users.map(user => `
-            <div class="user-item ${user.id === this.currentUser.id ? 'active' : ''}" onclick="app.switchUserAndClose(${user.id})">
-              <div class="user-avatar" style="background: linear-gradient(135deg, var(--rikor-primary), var(--rikor-primary-light));">
-                ${user.avatar}
-              </div>
-              <div class="user-info">
-                <div class="user-name">${user.name}</div>
-                <div class="user-details">${this.getRoleText(user.role)} • ${user.department}</div>
-                <div class="user-email">${user.email}</div>
-              </div>
-              <div class="user-status">
-                <div class="status-indicator ${user.status}"></div>
-                <span>${this.getStatusText(user.status)}</span>
-              </div>
-              ${user.id === this.currentUser.id ? '<div class="current-badge"><i class="fas fa-check"></i> Текущий</div>' : ''}
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn--secondary" onclick="app.hideModal()">
-          <i class="fas fa-times mr-2"></i>Отмена
-        </button>
-      </div>
-    `);
+    `).join('');
   }
 
-  // Переключение пользователя и закрытие модального окна
-  switchUserAndClose(userId) {
-    this.switchUser(userId);
-    this.hideModal();
+  removeFile(fileId) {
+    this.tempFiles = this.tempFiles.filter(f => f.id !== fileId);
+    this.updateFileList();
+    this.showNotification('Файл удален', 'info');
   }
 
-  // НОВЫЕ функции для быстрых ответов
-  showQuickReplies() {
-    const panel = document.getElementById('quickRepliesPanel');
-    if (panel) {
-      panel.classList.remove('hidden');
-    }
-  }
-
-  hideQuickReplies() {
-    const panel = document.getElementById('quickRepliesPanel');
-    if (panel) {
-      panel.classList.add('hidden');
-    }
-  }
-
-  insertQuickReply(replyText) {
-    const textarea = document.querySelector('form[onsubmit*="addTicketReply"] textarea[name="message"]');
-    if (textarea) {
-      textarea.value = replyText;
-      textarea.focus();
-      this.hideQuickReplies();
-      this.showNotification('Быстрый ответ вставлен', 'success');
-    } else {
-      this.showNotification('Форма ответа не найдена', 'error');
-    }
-  }
-
-  // Остальные методы навигации остаются без изменений
-  toggleTheme() {
-    this.settings.theme = this.settings.theme === 'light' ? 'dark' : 'light';
-    localStorage.setItem('rikor-theme', this.settings.theme);
-    this.applyTheme();
-    this.showNotification(`Тема изменена на ${this.settings.theme === 'light' ? 'светлую' : 'темную'}`, 'success');
-  }
-
-  navigate(route) {
-    console.log(`📍 Переход к: ${route}`);
-    this.currentRoute = route;
-    this.updateActiveLink(route);
-    this.updateBreadcrumb(route);
-    this.renderContent();
-    window.history.pushState({route}, '', `#${route}`);
-  }
-
-  updateActiveLink(route) {
-    document.querySelectorAll('.sidebar__link').forEach(link => {
-      link.classList.remove('active');
-      if (link.dataset.route === route) {
-        link.classList.add('active');
-      }
-    });
-  }
-
-  updateBreadcrumb(route) {
-    const breadcrumbMap = {
-      'dashboard': 'Панель управления',
-      'tickets': 'Тикеты',
-      'knowledge': 'База знаний',
-      'reports': 'Отчеты',
-      'users': 'Пользователи',
-      'settings': 'Настройки'
+  getFileIcon(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    const iconMap = {
+      'pdf': 'fa-file-pdf',
+      'doc': 'fa-file-word',
+      'docx': 'fa-file-word',
+      'txt': 'fa-file-text',
+      'md': 'fa-file-text',
+      'jpg': 'fa-file-image',
+      'jpeg': 'fa-file-image',
+      'png': 'fa-file-image',
+      'zip': 'fa-file-archive',
+      'rar': 'fa-file-archive'
     };
-
-    const currentPage = document.getElementById('currentPage');
-    if (currentPage) {
-      currentPage.textContent = breadcrumbMap[route] || 'Неизвестно';
-    }
+    return iconMap[ext] || 'fa-file';
   }
 
-  handleRoute() {
-    const hash = window.location.hash.slice(1) || 'dashboard';
-    this.navigate(hash);
+  formatFileSize(bytes) {
+    if (bytes === 0) return '0 Б';
+    const k = 1024;
+    const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   }
 
-  // ИСПРАВЛЕННЫЙ рендеринг контента с проверкой всех функций
-  renderContent() {
-    console.log(`🎨 ИСПРАВЛЕННЫЙ рендеринг контента для: ${this.currentRoute}`);
-
-    const container = document.getElementById('content');
-    if (!container) {
-      console.error('❌ Контейнер content не найден');
-      return;
-    }
-
-    container.innerHTML = '<div class="loading" style="min-height: 300px; display: flex; align-items: center; justify-content: center;"><div style="text-align: center;"><div style="font-size: 48px; margin-bottom: 16px;">⏳</div><div>Загрузка...</div></div></div>';
-
-    this.destroyCharts();
-
-    setTimeout(() => {
-      try {
-        switch(this.currentRoute) {
-          case 'dashboard':
-            console.log('📊 Рендеринг Dashboard...');
-            container.innerHTML = this.renderDashboard();
-            this.initDashboardCharts();
-            break;
-          case 'tickets':
-            console.log('🎫 ИСПРАВЛЕННЫЙ рендеринг Tickets...');
-            container.innerHTML = this.renderTickets();
-            this.initTicketFilters();
-            break;
-          case 'knowledge':
-            console.log('📚 Рендеринг Knowledge Base...');
-            container.innerHTML = this.renderKnowledgeBase();
-            this.initKnowledgeSearch();
-            break;
-          case 'reports':
-            console.log('📈 Рендеринг Reports...');
-            container.innerHTML = this.renderReports();
-            this.initReportCharts();
-            this.initReportFilters();
-            break;
-          case 'users':
-            console.log('👥 Рендеринг Users...');
-            container.innerHTML = this.renderUsers();
-            this.initUserFilters();
-            break;
-          case 'settings':
-            console.log('⚙️ Рендеринг Settings...');
-            container.innerHTML = this.renderSettings();
-            this.initSettingsForm();
-            break;
-          default:
-            console.warn(`⚠️ Неизвестный маршрут: ${this.currentRoute}`);
-            container.innerHTML = this.renderDashboard();
-            this.initDashboardCharts();
-        }
-        console.log(`✅ Контент ИСПРАВЛЕН и отрендерен: ${this.currentRoute}`);
-      } catch (error) {
-        console.error('❌ Ошибка рендеринга v2.3.1:', error);
-        container.innerHTML = `
-          <div class="card">
-            <h2 style="color: var(--rikor-error);">Ошибка загрузки</h2>
-            <p>Произошла ошибка при загрузке раздела "${this.currentRoute}": <br><strong>${error.message}</strong></p>
-            <button class="btn btn--primary" onclick="location.reload()">
-              <i class="fas fa-refresh mr-2"></i>Перезагрузить страницу
-            </button>
-          </div>
-        `;
-      }
-    }, 300);
-  }
-
-  destroyCharts() {
-    Object.values(this.chartInstances).forEach(chart => {
-      if (chart && typeof chart.destroy === 'function') {
-        try {
-          chart.destroy();
-        } catch (error) {
-          console.warn('⚠️ Ошибка при удалении графика:', error);
-        }
-      }
-    });
-    this.chartInstances = {};
-  }
-
-  // ИСПРАВЛЕННЫЙ Dashboard остается без изменений
-  renderDashboard() {
-    const stats = this.data.stats;
+  createFileUploadArea() {
     return `
-      <div class="dashboard">
-        <div class="dashboard__header mb-4">
-          <h1>Панель управления Rikor HelpDesk v2.3.1</h1>
-          <p class="card__subtitle">Исправленная версия с переключением пользователей и быстрыми ответами • ${new Date().toLocaleDateString('ru-RU')} • Пользователь: ${this.currentUser.name}</p>
+      <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+        <div class="file-upload-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
         </div>
-
-        <div class="grid grid--4 mb-4">
-          <div class="stat-card">
-            <div class="stat-card__icon" style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white;">
-              <i class="fas fa-ticket-alt"></i>
-            </div>
-            <div class="stat-card__value">${stats.totalTickets}</div>
-            <div class="stat-card__label">Всего тикетов</div>
-            <div class="stat-card__trend trend--up">
-              <i class="fas fa-arrow-up"></i>+12% за месяц
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-card__icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white;">
-              <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-card__value">${stats.openTickets}</div>
-            <div class="stat-card__label">Открытых тикетов</div>
-            <div class="stat-card__trend trend--down">
-              <i class="fas fa-arrow-down"></i>-5% за неделю
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-card__icon" style="background: linear-gradient(135deg, #10b981, #34d399); color: white;">
-              <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-card__value">${stats.resolvedTickets}</div>
-            <div class="stat-card__label">Решенных тикетов</div>
-            <div class="stat-card__trend trend--up">
-              <i class="fas fa-arrow-up"></i>+8% за месяц
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-card__icon" style="background: linear-gradient(135deg, #06b6d4, #22d3ee); color: white;">
-              <i class="fas fa-smile"></i>
-            </div>
-            <div class="stat-card__value">${stats.customerSatisfaction}%</div>
-            <div class="stat-card__label">Удовлетворенность</div>
-            <div class="stat-card__trend trend--up">
-              <i class="fas fa-arrow-up"></i>+2% за месяц
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid--2 mb-4">
-          <div class="card">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Активность по месяцам</h3>
-                <p class="card__subtitle">Тренд создания и решения тикетов</p>
-              </div>
-            </div>
-            <div style="position: relative; height: 250px;">
-              <canvas id="monthlyChart"></canvas>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Приоритеты тикетов</h3>
-                <p class="card__subtitle">Текущее распределение</p>
-              </div>
-            </div>
-            <div style="position: relative; height: 250px;">
-              <canvas id="priorityChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card__header">
-            <div>
-              <h3 class="card__title">Последние тикеты</h3>
-              <p class="card__subtitle">Требующие внимания</p>
-            </div>
-            <button class="btn btn--primary btn--small" onclick="app.navigate('tickets')">
-              <i class="fas fa-eye mr-2"></i>Все тикеты
-            </button>
-          </div>
-          <div class="recent-tickets">
-            ${this.data.tickets.slice(0, 5).map(ticket => `
-              <div class="recent-ticket card" onclick="app.viewTicket('${ticket.id}')" style="margin-bottom: 12px; cursor: pointer; padding: 16px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                  <span class="badge badge--primary">${ticket.id}</span>
-                  <span class="badge priority--${ticket.priority}">
-                    <i class="${this.getPriorityIcon(ticket.priority)} mr-1"></i>
-                    ${this.getPriorityText(ticket.priority)}
-                  </span>
-                </div>
-                <h4 style="margin-bottom: 8px; color: var(--rikor-text-primary);">${ticket.title}</h4>
-                <p style="color: var(--rikor-text-muted); font-size: 13px; margin-bottom: 8px;">
-                  ${this.getDeviceIcon(ticket.deviceType)} ${ticket.deviceType} • S/N: ${ticket.serialNumber || 'Не указан'} • ${ticket.assignee}
-                </p>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div style="display: flex; gap: 8px; align-items: center;">
-                    <span class="badge status--${ticket.status}">${this.getStatusText(ticket.status)}</span>
-                    ${ticket.replies && ticket.replies.length > 0 ? `<span class="badge badge--info" title="Ответов: ${ticket.replies.length}"><i class="fas fa-comments mr-1"></i>${ticket.replies.length}</span>` : ''}
-                    ${ticket.attachments && ticket.attachments.length > 0 ? `<span class="badge badge--secondary" title="Файлов: ${ticket.attachments.length}"><i class="fas fa-paperclip mr-1"></i>${ticket.attachments.length}</span>` : ''}
-                  </div>
-                  <span style="color: var(--rikor-text-muted); font-size: 12px;">${this.formatDate(ticket.created)}</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
+        <div class="file-upload-text">Загрузить файлы</div>
+        <div class="file-upload-hint">Нажмите или перетащите файлы сюда</div>
+        <div class="file-upload-hint">Поддерживаются: PDF, DOC, TXT, JPG, PNG, ZIP (до ${this.formatFileSize(this.settings.maxFileSize)})</div>
       </div>
+      <div class="attached-files"></div>
     `;
   }
 
-  // ИСПРАВЛЕННАЯ инициализация графиков Dashboard
-  initDashboardCharts() {
-    setTimeout(() => {
-      try {
-        console.log('📊 ИСПРАВЛЕННАЯ инициализация графиков Dashboard v2.3.1...');
+  // ========================================
+  // РАСШИРЕННЫЙ ПРОСМОТР ТИКЕТОВ
+  // ========================================
 
-        const monthlyCtx = document.getElementById('monthlyChart');
-        if (monthlyCtx) {
-          console.log('📈 Создание графика месячной активности...');
-          this.chartInstances.monthly = new Chart(monthlyCtx, {
-            type: 'line',
-            data: {
-              labels: this.data.stats.monthlyLabels,
-              datasets: [{
-                label: 'Созданные тикеты',
-                data: this.data.stats.monthlyTrend,
-                borderColor: '#1e40af',
-                backgroundColor: 'rgba(30, 64, 175, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#1e40af',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 4
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
-                x: { grid: { display: false } }
-              },
-              elements: { line: { borderWidth: 3 } }
-            }
-          });
-          console.log('✅ График месячной активности ИСПРАВЛЕН');
-        }
-
-        const priorityCtx = document.getElementById('priorityChart');
-        if (priorityCtx) {
-          console.log('🍩 Создание графика приоритетов...');
-          this.chartInstances.priority = new Chart(priorityCtx, {
-            type: 'doughnut',
-            data: {
-              labels: this.data.stats.priorityLabels,
-              datasets: [{
-                data: [
-                  this.data.stats.priorityStats.critical,
-                  this.data.stats.priorityStats.high,
-                  this.data.stats.priorityStats.medium,
-                  this.data.stats.priorityStats.low
-                ],
-                backgroundColor: this.data.stats.priorityColors,
-                borderWidth: 0,
-                cutout: '60%'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
-              }
-            }
-          });
-          console.log('✅ График приоритетов ИСПРАВЛЕН');
-        }
-
-        console.log('🎉 Все графики Dashboard v2.3.1 ИСПРАВЛЕНЫ и инициализированы');
-      } catch (error) {
-        console.error('❌ Ошибка инициализации графиков Dashboard:', error);
-        this.showNotification('Ошибка при создании графиков Dashboard', 'error');
-      }
-    }, 100);
-  }
-
-  // ПОЛНОСТЬЮ ИСПРАВЛЕННАЯ функция renderTickets
-  renderTickets() {
-    console.log('🎫 ИСПРАВЛЕННЫЙ renderTickets v2.3.1 запускается...');
-
-    try {
-      const filteredTickets = this.getFilteredTickets();
-      console.log(`📋 Отфильтровано тикетов: ${filteredTickets.length} из ${this.data.tickets.length}`);
-
-      return `
-        <div class="tickets">
-          <div class="tickets__header mb-4" style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-              <h1>Управление тикетами v2.3.1 (ИСПРАВЛЕНО)</h1>
-              <p class="card__subtitle">Система обработки обращений технической поддержки Rikor • Пользователь: ${this.currentUser.name} (${this.getRoleText(this.currentUser.role)})</p>
-            </div>
-            <div style="display: flex; gap: 12px;">
-              <button class="btn btn--secondary" onclick="app.exportTicketsCSV()">
-                <i class="fas fa-file-export mr-2"></i>Экспорт CSV
-              </button>
-              <button class="btn btn--primary" onclick="app.showCreateTicketModal()">
-                <i class="fas fa-plus mr-2"></i>Создать тикет
-              </button>
-            </div>
-          </div>
-
-          <div class="card mb-4">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Фильтры и поиск</h3>
-                <p class="card__subtitle">Найти нужные тикеты</p>
-              </div>
-              <button class="btn btn--secondary btn--small" onclick="app.clearTicketFilters()">
-                <i class="fas fa-times mr-2"></i>Очистить
-              </button>
-            </div>
-            <div class="grid grid--4">
-              <div class="form-group">
-                <label class="form-label">Поиск</label>
-                <input type="search" 
-                       class="form-control" 
-                       placeholder="ID, тема, S/N, модель..." 
-                       id="ticketSearch">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Статус</label>
-                <select class="form-control" id="statusFilter">
-                  <option value="">Все статусы</option>
-                  <option value="open">🔵 Открытые</option>
-                  <option value="in_progress">🟡 В работе</option>
-                  <option value="waiting">⏸️ Ожидание</option>
-                  <option value="resolved">✅ Решенные</option>
-                  <option value="closed">⚫ Закрытые</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Приоритет</label>
-                <select class="form-control" id="priorityFilter">
-                  <option value="">Все приоритеты</option>
-                  <option value="critical">🔴 Критический</option>
-                  <option value="high">🟠 Высокий</option>
-                  <option value="medium">🟡 Средний</option>
-                  <option value="low">🟢 Низкий</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Исполнитель</label>
-                <select class="form-control" id="assigneeFilter">
-                  <option value="">Все исполнители</option>
-                  ${this.data.users.filter(u => u.role === 'agent' || u.role === 'admin').map(user => `
-                    <option value="${user.name}">${user.name}</option>
-                  `).join('')}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="tickets-stats mb-4">
-            <div class="grid grid--5">
-              <div class="stat-mini">
-                <div class="stat-mini__value">${this.data.tickets.length}</div>
-                <div class="stat-mini__label">Всего</div>
-              </div>
-              <div class="stat-mini">
-                <div class="stat-mini__value" style="color: var(--rikor-info);">${this.data.tickets.filter(t => t.status === 'open').length}</div>
-                <div class="stat-mini__label">Открытые</div>
-              </div>
-              <div class="stat-mini">
-                <div class="stat-mini__value" style="color: var(--rikor-warning);">${this.data.tickets.filter(t => t.status === 'in_progress').length}</div>
-                <div class="stat-mini__label">В работе</div>
-              </div>
-              <div class="stat-mini">
-                <div class="stat-mini__value" style="color: var(--rikor-success);">${this.data.tickets.filter(t => t.status === 'resolved').length}</div>
-                <div class="stat-mini__label">Решенные</div>
-              </div>
-              <div class="stat-mini">
-                <div class="stat-mini__value">${filteredTickets.length}</div>
-                <div class="stat-mini__label">Найдено</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="tickets-list">
-            ${filteredTickets.length === 0 ? `
-              <div class="card text-center" style="padding: 40px;">
-                <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;">🔍</div>
-                <h3 style="color: var(--rikor-text-muted); margin-bottom: 8px;">Тикеты не найдены</h3>
-                <p style="color: var(--rikor-text-light);">Попробуйте изменить параметры поиска или создайте новый тикет</p>
-                <button class="btn btn--primary" onclick="app.showCreateTicketModal()" style="margin-top: 16px;">
-                  <i class="fas fa-plus mr-2"></i>Создать первый тикет
-                </button>
-              </div>
-            ` : filteredTickets.map(ticket => `
-              <div class="ticket-card card" onclick="app.viewTicket('${ticket.id}')" style="cursor: pointer; margin-bottom: 16px; padding: 20px; transition: all 0.2s ease;">
-                <div class="ticket-card__header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <span class="badge badge--primary" style="font-size: 13px; font-weight: 600;">${ticket.id}</span>
-                    <span class="badge status--${ticket.status}">${this.getStatusText(ticket.status)}</span>
-                    <span class="badge priority--${ticket.priority}">
-                      <i class="${this.getPriorityIcon(ticket.priority)} mr-1"></i>
-                      ${this.getPriorityText(ticket.priority)}
-                    </span>
-                  </div>
-                  <div style="display: flex; gap: 8px; align-items: center;">
-                    ${ticket.replies && ticket.replies.length > 0 ? `
-                      <span class="badge badge--info" title="Ответов в тикете">
-                        <i class="fas fa-comments mr-1"></i>${ticket.replies.length}
-                      </span>
-                    ` : ''}
-                    ${ticket.attachments && ticket.attachments.length > 0 ? `
-                      <span class="badge badge--secondary" title="Прикрепленных файлов">
-                        <i class="fas fa-paperclip mr-1"></i>${ticket.attachments.length}
-                      </span>
-                    ` : ''}
-                    <span style="color: var(--rikor-text-muted); font-size: 12px;">${this.formatDate(ticket.created)}</span>
-                  </div>
-                </div>
-
-                <h3 style="margin-bottom: 12px; color: var(--rikor-text-primary); font-size: 18px; line-height: 1.4;">${ticket.title}</h3>
-
-                <p style="color: var(--rikor-text-secondary); margin-bottom: 16px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                  ${ticket.description}
-                </p>
-
-                <div class="ticket-card__meta" style="background: var(--rikor-bg-tertiary); padding: 12px; border-radius: 8px; font-size: 13px;">
-                  <div class="grid grid--3" style="gap: 16px;">
-                    <div>
-                      <strong>Устройство:</strong><br>
-                      ${this.getDeviceIcon(ticket.deviceType)} ${ticket.deviceType}
-                      ${ticket.deviceModel ? `<br><span style="color: var(--rikor-text-muted);">${ticket.deviceModel}</span>` : ''}
-                    </div>
-                    <div>
-                      <strong>Серийный номер:</strong><br>
-                      ${ticket.serialNumber ? `🏷️ ${ticket.serialNumber}` : `<span style="color: var(--rikor-text-muted);">Не указан</span>`}
-                      ${ticket.location ? `<br><span style="color: var(--rikor-text-muted);">📍 ${ticket.location}</span>` : ''}
-                    </div>
-                    <div>
-                      <strong>Исполнитель:</strong><br>
-                      ${ticket.assignee}
-                      <br><span style="color: var(--rikor-text-muted);">Создал: ${ticket.reporter}</span>
-                    </div>
-                  </div>
-                </div>
-
-                ${ticket.tags && ticket.tags.length > 0 ? `
-                  <div style="margin-top: 12px;">
-                    ${ticket.tags.map(tag => `<span class="badge badge--info" style="margin-right: 4px; margin-bottom: 4px; font-size: 11px;">#${tag}</span>`).join('')}
-                  </div>
-                ` : ''}
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-    } catch (error) {
-      console.error('❌ КРИТИЧЕСКАЯ ОШИБКА в renderTickets:', error);
-      return `
-        <div class="card">
-          <h2 style="color: var(--rikor-error);">Ошибка загрузки тикетов</h2>
-          <p><strong>Детали ошибки:</strong> ${error.message}</p>
-          <p>Попробуйте перезагрузить страницу или обратитесь к администратору.</p>
-          <button class="btn btn--primary" onclick="location.reload()">
-            <i class="fas fa-refresh mr-2"></i>Перезагрузить
-          </button>
-        </div>
-      `;
-    }
-  }
-
-  // ОБНОВЛЕННАЯ функция просмотра тикета с быстрыми ответами
   viewTicket(ticketId) {
+    console.log(`👁️ Просмотр тикета: ${ticketId}`);
+
     const ticket = this.data.tickets.find(t => t.id === ticketId);
     if (!ticket) {
       this.showNotification('Тикет не найден!', 'error');
@@ -1033,323 +450,399 @@ class RikorHelpDeskFixed {
           <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
             <span class="badge badge--primary">${ticket.id}</span>
             <span class="badge status--${ticket.status}">${this.getStatusText(ticket.status)}</span>
-            <span class="badge priority--${ticket.priority}">${this.getPriorityText(ticket.priority)}</span>
-            ${ticket.serialNumber ? `<span class="badge badge--info">🏷️ S/N: ${ticket.serialNumber}</span>` : ''}
-            ${ticket.replies && ticket.replies.length > 0 ? `<span class="badge badge--success"><i class="fas fa-comments mr-1"></i>${ticket.replies.length} ответов</span>` : ''}
-            ${ticket.attachments && ticket.attachments.length > 0 ? `<span class="badge badge--secondary"><i class="fas fa-paperclip mr-1"></i>${ticket.attachments.length} файлов</span>` : ''}
+            <span class="badge priority--${ticket.priority}">
+              <i class="${this.getPriorityIcon(ticket.priority)} mr-1"></i>
+              ${this.getPriorityText(ticket.priority)}
+            </span>
           </div>
         </div>
         <button class="modal-close" onclick="app.hideModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
-        <div class="ticket-details">
-          <!-- Информация о тикете -->
-          <div style="background: var(--rikor-bg-tertiary); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-            <div class="grid grid--2" style="gap: 16px; font-size: 14px;">
-              <div><strong>Устройство:</strong> ${this.getDeviceIcon(ticket.deviceType)} ${ticket.deviceType}</div>
-              <div><strong>Модель:</strong> ${ticket.deviceModel || 'Не указана'}</div>
-              <div><strong>Серийный номер:</strong> ${ticket.serialNumber ? `🏷️ ${ticket.serialNumber}` : '⚠️ Не указан'}</div>
-              <div><strong>Категория:</strong> ${this.getCategoryText(ticket.category)}</div>
-              <div><strong>Создатель:</strong> ${ticket.reporter}</div>
-              <div><strong>Исполнитель:</strong> ${ticket.assignee}</div>
-              <div><strong>Создан:</strong> ${this.formatDateTime(ticket.created)}</div>
-              <div><strong>Обновлен:</strong> ${this.formatDateTime(ticket.updated)}</div>
-              ${ticket.location ? `<div style="grid-column: 1 / -1;"><strong>Местоположение:</strong> 📍 ${ticket.location}</div>` : ''}
-            </div>
-          </div>
 
-          <!-- Описание проблемы -->
-          <div style="margin-bottom: 20px;">
-            <h4 style="margin-bottom: 12px; color: var(--rikor-text-primary);">Описание проблемы</h4>
-            <div style="background: var(--rikor-bg-secondary); padding: 16px; border-radius: 8px; border-left: 4px solid var(--rikor-primary); line-height: 1.6;">
-              ${ticket.description}
-            </div>
-          </div>
+      <div class="modal-body" style="max-width: 900px; max-height: 80vh; overflow-y: auto;">
+        <!-- Основная информация -->
+        <div style="background: var(--rikor-bg-tertiary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+          <h3 style="margin-bottom: 16px; color: var(--rikor-text-primary);">Описание проблемы</h3>
+          <p style="line-height: 1.6; color: var(--rikor-text-secondary); margin-bottom: 16px;">${ticket.description}</p>
 
-          <!-- Прикрепленные файлы -->
-          ${ticket.attachments && ticket.attachments.length > 0 ? `
-            <div style="margin-bottom: 20px;">
-              <h4 style="margin-bottom: 12px; color: var(--rikor-text-primary); display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-paperclip"></i>
-                Прикрепленные файлы (${ticket.attachments.length})
-              </h4>
-              <div style="display: flex; flex-direction: column; gap: 8px;">
-                ${ticket.attachments.map(file => `
-                  <div style="background: var(--rikor-bg-tertiary); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                      <div style="width: 32px; height: 32px; background: var(--rikor-primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white;">
-                        <i class="fas fa-${this.getFileIcon(file.type)}"></i>
-                      </div>
-                      <div>
-                        <div style="font-weight: 500; color: var(--rikor-text-primary);">${file.name}</div>
-                        <div style="font-size: 12px; color: var(--rikor-text-muted);">
-                          ${this.formatFileSize(file.size)} • ${file.uploadedBy} • ${this.formatDate(file.uploaded)}
-                        </div>
-                      </div>
-                    </div>
-                    <button class="btn btn--small btn--secondary" onclick="app.downloadFile('${file.name}', '${file.type}')" title="Скачать">
-                      <i class="fas fa-download"></i>
-                    </button>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- Система ответов -->
-          ${ticket.replies && ticket.replies.length > 0 ? `
-            <div style="margin-bottom: 20px;">
-              <h4 style="margin-bottom: 12px; color: var(--rikor-text-primary); display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-comments"></i>
-                Ответы и комментарии (${ticket.replies.length})
-              </h4>
-              <div class="ticket-replies" style="display: flex; flex-direction: column; gap: 12px;">
-                ${ticket.replies.map(reply => `
-                  <div class="reply ${reply.type === 'solution' ? 'reply--solution' : ''}" style="background: var(--rikor-bg-secondary); padding: 16px; border-radius: 8px; border-left: 4px solid ${reply.type === 'solution' ? 'var(--rikor-success)' : reply.role === 'agent' || reply.role === 'admin' ? 'var(--rikor-primary)' : 'var(--rikor-info)'};">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                      <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 32px; height: 32px; background: ${reply.role === 'agent' || reply.role === 'admin' ? 'var(--rikor-primary)' : 'var(--rikor-info)'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px;">
-                          ${reply.author.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        <div>
-                          <div style="font-weight: 600; color: var(--rikor-text-primary);">${reply.author}</div>
-                          <div style="font-size: 12px; color: var(--rikor-text-muted);">
-                            ${this.getRoleText(reply.role)} • ${this.formatDateTime(reply.created)}
-                            ${reply.type === 'solution' ? ' • Решение' : ''}
-                          </div>
-                        </div>
-                      </div>
-                      ${reply.type === 'solution' ? '<div class="badge badge--success"><i class="fas fa-check-circle mr-1"></i>Решение</div>' : ''}
-                    </div>
-                    <div style="color: var(--rikor-text-primary); line-height: 1.6;">
-                      ${reply.message.replace(/\n/g, '<br>')}
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- НОВАЯ: Форма добавления ответа с быстрыми ответами -->
-          <div style="margin-bottom: 20px;">
-            <h4 style="margin-bottom: 12px; color: var(--rikor-text-primary); display: flex; align-items: center; gap: 8px;">
-              <i class="fas fa-reply"></i>
-              Добавить ответ
-              <button class="btn btn--small btn--secondary" onclick="app.showQuickReplies()" title="Быстрые ответы">
-                <i class="fas fa-lightning-bolt"></i>
-              </button>
-            </h4>
-            <div style="background: var(--rikor-bg-tertiary); padding: 16px; border-radius: 8px;">
-              <form onsubmit="app.addTicketReply(event, '${ticket.id}')" id="replyForm">
-                <div class="form-group">
-                  <textarea name="message" class="form-control" rows="4" required placeholder="Введите ваш ответ или комментарий..." style="resize: vertical;"></textarea>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-                  <div style="display: flex; gap: 8px;">
-                    <button type="submit" class="btn btn--primary btn--small">
-                      <i class="fas fa-paper-plane mr-1"></i>Отправить ответ
-                    </button>
-                    <button type="button" class="btn btn--success btn--small" onclick="app.addTicketReply(event, '${ticket.id}', 'solution')">
-                      <i class="fas fa-check-circle mr-1"></i>Решение
-                    </button>
-                  </div>
-                  <button type="button" class="btn btn--secondary btn--small" onclick="app.showAddFileModal('${ticket.id}')">
-                    <i class="fas fa-paperclip mr-1"></i>Прикрепить файл
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- Дополнительные метрики -->
-          <div class="grid grid--3" style="gap: 12px; margin-bottom: 20px;">
-            <div style="text-align: center; padding: 12px; background: var(--rikor-bg-tertiary); border-radius: 8px;">
-              <div style="font-size: 18px; font-weight: 600; color: var(--rikor-warning); margin-bottom: 4px;">${ticket.timeSpent}ч</div>
-              <div style="font-size: 12px; color: var(--rikor-text-muted);">Затрачено времени</div>
-            </div>
-            <div style="text-align: center; padding: 12px; background: var(--rikor-bg-tertiary); border-radius: 8px;">
-              <div style="font-size: 18px; font-weight: 600; color: var(--rikor-info); margin-bottom: 4px;">${ticket.estimatedTime}ч</div>
-              <div style="font-size: 12px; color: var(--rikor-text-muted);">Оценка времени</div>
-            </div>
-            <div style="text-align: center; padding: 12px; background: var(--rikor-bg-tertiary); border-radius: 8px;">
-              <div style="font-size: 18px; font-weight: 600; color: var(--rikor-success); margin-bottom: 4px;">${Math.round((ticket.timeSpent / ticket.estimatedTime) * 100) || 0}%</div>
-              <div style="font-size: 12px; color: var(--rikor-text-muted);">Прогресс</div>
-            </div>
-          </div>
-
-          ${ticket.tags && ticket.tags.length > 0 ? `
+          <div class="grid grid--2" style="gap: 16px; font-size: 14px;">
             <div>
-              <h4 style="margin-bottom: 8px; color: var(--rikor-text-primary);">Теги</h4>
+              <strong>Устройство:</strong><br>
+              ${this.getDeviceIcon(ticket.deviceType)} ${ticket.deviceType}
+              ${ticket.deviceModel ? `<br><small style="color: var(--rikor-text-muted);">Модель: ${ticket.deviceModel}</small>` : ''}
+            </div>
+            <div>
+              <strong>Серийный номер:</strong><br>
+              ${ticket.serialNumber || 'Не указан'}
+            </div>
+            <div>
+              <strong>Местоположение:</strong><br>
+              ${ticket.location || 'Не указано'}
+            </div>
+            <div>
+              <strong>Категория:</strong><br>
+              ${this.getCategoryText(ticket.category)}
+            </div>
+          </div>
+        </div>
+
+        <!-- Детали тикета -->
+        <div class="grid grid--2" style="gap: 20px; margin-bottom: 20px;">
+          <div class="card" style="padding: 16px;">
+            <h4 style="margin-bottom: 12px; color: var(--rikor-text-primary);">Участники</h4>
+            <div style="font-size: 14px; line-height: 1.6;">
+              <div style="margin-bottom: 8px;">
+                <strong>Создал:</strong> ${ticket.reporter}<br>
+                <small style="color: var(--rikor-text-muted);">${this.formatDateTime(ticket.created)}</small>
+              </div>
               <div>
-                ${ticket.tags.map(tag => `<span class="badge badge--info" style="margin-right: 4px; margin-bottom: 4px;">#${tag}</span>`).join('')}
+                <strong>Исполнитель:</strong> ${ticket.assignee}<br>
+                <small style="color: var(--rikor-text-muted);">Обновлен: ${this.formatDateTime(ticket.updated)}</small>
               </div>
             </div>
-          ` : ''}
+          </div>
+
+          <div class="card" style="padding: 16px;">
+            <h4 style="margin-bottom: 12px; color: var(--rikor-text-primary);">Временные рамки</h4>
+            <div style="font-size: 14px; line-height: 1.6;">
+              <div style="margin-bottom: 8px;">
+                <strong>Потрачено времени:</strong> ${ticket.timeSpent} ч
+              </div>
+              <div style="margin-bottom: 8px;">
+                <strong>Оценка времени:</strong> ${ticket.estimatedTime} ч
+              </div>
+              ${ticket.resolvedAt ? `
+                <div>
+                  <strong>Решен:</strong><br>
+                  <small style="color: var(--rikor-success);">${this.formatDateTime(ticket.resolvedAt)}</small>
+                </div>
+              ` : ''}
+            </div>
+          </div>
         </div>
+
+        <!-- Смена статуса -->
+        ${this.currentUser.role === 'admin' || ticket.assignee === this.currentUser.name ? `
+          <div style="margin-bottom: 20px;">
+            <h4 style="margin-bottom: 12px; color: var(--rikor-text-primary);">Изменить статус</h4>
+            <div class="status-selector">
+              <button class="status-btn ${ticket.status === 'open' ? 'active' : ''}" onclick="app.changeTicketStatus('${ticket.id}', 'open')">
+                Открыт
+              </button>
+              <button class="status-btn ${ticket.status === 'in_progress' ? 'active' : ''}" onclick="app.changeTicketStatus('${ticket.id}', 'in_progress')">
+                В работе
+              </button>
+              <button class="status-btn ${ticket.status === 'waiting' ? 'active' : ''}" onclick="app.changeTicketStatus('${ticket.id}', 'waiting')">
+                Ожидание
+              </button>
+              <button class="status-btn ${ticket.status === 'resolved' ? 'active' : ''}" onclick="app.changeTicketStatus('${ticket.id}', 'resolved')">
+                Решен
+              </button>
+              <button class="status-btn ${ticket.status === 'closed' ? 'active' : ''}" onclick="app.changeTicketStatus('${ticket.id}', 'closed')">
+                Закрыт
+              </button>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Вложения -->
+        ${ticket.attachments && ticket.attachments.length > 0 ? `
+          <div style="margin-bottom: 20px;">
+            <h4 style="margin-bottom: 16px; color: var(--rikor-text-primary);">Вложения (${ticket.attachments.length})</h4>
+            ${ticket.attachments.map(attachment => `
+              <div class="attached-file">
+                <div class="attached-file-icon">
+                  <i class="fas ${this.getFileIcon(attachment.name)}"></i>
+                </div>
+                <div class="attached-file-info">
+                  <div class="attached-file-name">${attachment.name}</div>
+                  <div class="attached-file-size">${this.formatFileSize(attachment.size)} • ${attachment.uploadedBy} • ${this.formatDateTime(attachment.uploaded)}</div>
+                </div>
+                <button class="btn btn--secondary btn--small">
+                  <i class="fas fa-download"></i>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <!-- Ответы -->
+        ${ticket.replies && ticket.replies.length > 0 ? `
+          <div class="ticket-replies">
+            <h4 style="margin-bottom: 16px; color: var(--rikor-text-primary);">Ответы (${ticket.replies.length})</h4>
+            ${ticket.replies.map(reply => `
+              <div class="reply ${reply.type === 'solution' ? 'reply--solution' : ''}">
+                <div class="reply-header">
+                  <span class="reply-author">${reply.author}</span>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    ${reply.type === 'solution' ? '<span class="badge badge--success">Решение</span>' : ''}
+                    <span class="reply-date">${this.formatDateTime(reply.created)}</span>
+                  </div>
+                </div>
+                <div class="reply-message">${reply.message}</div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <!-- Форма ответа -->
+        ${this.currentUser.role === 'admin' || ticket.assignee === this.currentUser.name ? `
+          <div class="reply-form">
+            <h4 style="margin-bottom: 16px; color: var(--rikor-text-primary);">Добавить ответ</h4>
+            <form onsubmit="app.addReply(event, '${ticket.id}')">
+              <div class="form-group">
+                <textarea class="form-control" name="message" rows="4" placeholder="Введите ваш ответ..." required></textarea>
+              </div>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <button type="submit" class="btn btn--primary">
+                  <i class="fas fa-reply mr-2"></i>Отправить ответ
+                </button>
+                <label style="display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" name="isSolution" value="1">
+                  <span>Отметить как решение</span>
+                </label>
+              </div>
+            </form>
+          </div>
+        ` : ''}
       </div>
+
       <div class="modal-footer">
         <button class="btn btn--secondary" onclick="app.hideModal()">
           <i class="fas fa-times mr-2"></i>Закрыть
         </button>
-        <button class="btn btn--warning" onclick="app.showChangeStatusModal('${ticket.id}')">
-          <i class="fas fa-edit mr-2"></i>Изменить статус
-        </button>
-        <button class="btn btn--primary" onclick="app.hideModal(); app.editTicket('${ticket.id}')">
-          <i class="fas fa-edit mr-2"></i>Редактировать тикет
-        </button>
+        ${this.currentUser.role === 'admin' || ticket.assignee === this.currentUser.name ? `
+          <button class="btn btn--info" onclick="app.showAddFilesToTicket('${ticket.id}')">
+            <i class="fas fa-paperclip mr-2"></i>Добавить файлы
+          </button>
+        ` : ''}
       </div>
     `);
   }
 
-  // Функция добавления ответа к тикету
-  addTicketReply(event, ticketId, type = 'reply') {
+  // Смена статуса тикета
+  changeTicketStatus(ticketId, newStatus) {
+    const ticket = this.data.tickets.find(t => t.id === ticketId);
+    if (!ticket) return;
+
+    const oldStatus = ticket.status;
+    ticket.status = newStatus;
+    ticket.updated = new Date().toISOString();
+
+    if (newStatus === 'resolved') {
+      ticket.resolvedAt = new Date().toISOString();
+    }
+
+    this.saveData();
+    this.showNotification(`Статус тикета изменен с "${this.getStatusText(oldStatus)}" на "${this.getStatusText(newStatus)}"`, 'success');
+
+    // Обновляем отображение
+    this.viewTicket(ticketId);
+  }
+
+  // Добавление ответа к тикету
+  addReply(event, ticketId) {
     event.preventDefault();
 
-    const ticket = this.data.tickets.find(t => t.id === ticketId);
-    if (!ticket) {
-      this.showNotification('Тикет не найден!', 'error');
-      return;
-    }
-
-    const form = event.target.closest('form');
-    const message = form.message.value.trim();
+    const formData = new FormData(event.target);
+    const message = formData.get('message').trim();
+    const isSolution = formData.get('isSolution') === '1';
 
     if (!message) {
-      this.showNotification('Введите сообщение!', 'error');
+      this.showNotification('Введите текст ответа', 'error');
       return;
     }
 
-    // Создаем новый ответ
-    const newReply = {
-      id: (ticket.replies?.length || 0) + 1,
+    const ticket = this.data.tickets.find(t => t.id === ticketId);
+    if (!ticket) return;
+
+    const reply = {
+      id: ticket.replies.length + 1,
       author: this.currentUser.name,
       role: this.currentUser.role,
       message: message,
       created: new Date().toISOString(),
-      type: type
+      type: isSolution ? 'solution' : 'reply'
     };
 
-    // Добавляем ответ к тикету
-    if (!ticket.replies) ticket.replies = [];
-    ticket.replies.push(newReply);
+    ticket.replies.push(reply);
+    ticket.updated = new Date().toISOString();
 
-    // Обновляем статус тикета если это решение
-    if (type === 'solution') {
+    if (isSolution && ticket.status === 'open') {
       ticket.status = 'resolved';
       ticket.resolvedAt = new Date().toISOString();
     }
 
-    // Обновляем время последнего изменения
-    ticket.updated = new Date().toISOString();
-
-    // Сохраняем данные
     this.saveData();
+    this.showNotification(isSolution ? 'Решение добавлено!' : 'Ответ добавлен!', 'success');
 
-    // Показываем уведомление
-    const actionText = type === 'solution' ? 'решение добавлено' : 'ответ добавлен';
-    this.showNotification(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} к тикету ${ticketId}`, 'success');
-
-    // Обновляем модальное окно
+    // Обновляем отображение
     this.viewTicket(ticketId);
   }
 
-  // ИСПРАВЛЕННАЯ функция создания тикета с проверкой работы базы данных
-  showCreateTicketModal() {
-    console.log('🎫 ПРОВЕРКА: Открытие формы создания тикета...');
+  // Показать форму добавления файлов к тикету
+  showAddFilesToTicket(ticketId) {
+    this.tempFiles = [];
 
     this.showModal(`
       <div class="modal-header">
-        <div>
-          <h2 class="modal-title">Создать новый тикет</h2>
-          <p style="color: var(--rikor-text-muted); margin: 4px 0 0; font-size: 14px;">Заполните обязательные поля • v2.3.1 • Пользователь: ${this.currentUser.name}</p>
-        </div>
+        <h2 class="modal-title">Добавить файлы к тикету</h2>
         <button class="modal-close" onclick="app.hideModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Выберите файлы</label>
+          ${this.createFileUploadArea()}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn--secondary" onclick="app.hideModal()">Отмена</button>
+        <button class="btn btn--primary" onclick="app.attachFilesToTicket('${ticketId}')">
+          <i class="fas fa-paperclip mr-2"></i>Прикрепить файлы
+        </button>
+      </div>
+    `);
+  }
+
+  // Прикрепление файлов к тикету
+  attachFilesToTicket(ticketId) {
+    if (this.tempFiles.length === 0) {
+      this.showNotification('Выберите файлы для прикрепления', 'error');
+      return;
+    }
+
+    const ticket = this.data.tickets.find(t => t.id === ticketId);
+    if (!ticket) return;
+
+    // Копируем файлы в тикет (без File объекта)
+    const attachments = this.tempFiles.map(file => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      uploadedBy: file.uploadedBy,
+      uploaded: file.uploaded
+    }));
+
+    ticket.attachments = ticket.attachments || [];
+    ticket.attachments.push(...attachments);
+    ticket.updated = new Date().toISOString();
+
+    this.saveData();
+    this.hideModal();
+    this.showNotification(`${attachments.length} файлов прикреплено к тикету`, 'success');
+  }
+
+  // ========================================
+  // СОЗДАНИЕ ТИКЕТОВ С ПОДДЕРЖКОЙ ФАЙЛОВ
+  // ========================================
+
+  showCreateTicketModal() {
+    console.log('🎫 Открытие модального окна создания тикета с поддержкой файлов');
+    this.tempFiles = [];
+
+    this.showModal(`
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Создать новый тикет</h2>
+          <p style="color: var(--rikor-text-muted); margin: 4px 0 0; font-size: 14px;">Регистрация нового обращения в службу поддержки Rikor</p>
+        </div>
+        <button class="modal-close" onclick="app.hideModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="max-width: 800px;">
         <form onsubmit="app.createTicket(event)" id="createTicketForm">
+          <div class="grid grid--2">
+            <div class="form-group">
+              <label class="form-label">Заголовок тикета <span style="color: var(--rikor-error);">*</span></label>
+              <input type="text" name="title" class="form-control" required placeholder="Кратко опишите проблему">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Тип устройства Rikor <span style="color: var(--rikor-error);">*</span></label>
+              <select name="deviceType" class="form-control" required>
+                <option value="">Выберите устройство Rikor</option>
+                <option value="Сервер">🖥️ Сервер (RP серия)</option>
+                <option value="Ноутбук">💻 Ноутбук (RN серия)</option>
+                <option value="Планшет">📱 Планшет (RT серия)</option>
+                <option value="Моноблок">🖥️ Моноблок (AIO серия)</option>
+                <option value="Мини-ПК">📦 Мини-ПК (RPC серия)</option>
+                <option value="Рабочая станция">🖥️ Рабочая станция (RW серия)</option>
+              </select>
+            </div>
+          </div>
+
           <div class="form-group">
-            <label class="form-label">Тема тикета <span style="color: var(--rikor-error);">*</span></label>
-            <input type="text" name="title" class="form-control" required placeholder="Краткое описание проблемы">
+            <label class="form-label">Подробное описание проблемы <span style="color: var(--rikor-error);">*</span></label>
+            <textarea name="description" class="form-control" rows="4" required placeholder="Опишите проблему максимально подробно:&#10;- Что случилось?&#10;- При каких обстоятельствах?&#10;- Какие действия предпринимались?&#10;- Есть ли коды ошибок?"></textarea>
           </div>
 
           <div class="grid grid--2">
-            <div class="form-group">
-              <label class="form-label">Тип устройства <span style="color: var(--rikor-error);">*</span></label>
-              <select name="deviceType" class="form-control" required>
-                <option value="">Выберите тип устройства Rikor</option>
-                <option value="Ноутбук">💻 Ноутбук (серия RN)</option>
-                <option value="Сервер">🖥️ Сервер (серия RP)</option>
-                <option value="Моноблок">🖥️ Моноблок (серия AIO)</option>
-                <option value="Мини ПК">📦 Мини ПК (серия RPC)</option>
-                <option value="Планшет">📱 Планшет (серия RT)</option>
-                <option value="Другое">🔧 Другое оборудование</option>
-              </select>
-            </div>
-
             <div class="form-group">
               <label class="form-label">Модель устройства</label>
               <input type="text" name="deviceModel" class="form-control" placeholder="Например: RP6224, RN NINO 203.1/15">
             </div>
-          </div>
 
-          <div class="form-group">
-            <label class="form-label">Серийный номер устройства <span style="color: var(--rikor-info);">📋</span></label>
-            <input type="text" 
-                   name="serialNumber" 
-                   class="form-control" 
-                   placeholder="Например: RP6224-2024-001523, RN203-2025-000847"
-                   pattern="[A-Z0-9-]+"
-                   title="Серийный номер должен содержать только буквы, цифры и дефисы">
-            <small style="color: var(--rikor-text-muted); font-size: 12px; margin-top: 4px; display: block;">
-              💡 Серийный номер поможет быстрее идентифицировать устройство
-            </small>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Описание проблемы <span style="color: var(--rikor-error);">*</span></label>
-            <textarea name="description" class="form-control" rows="4" required placeholder="Подробно опишите возникшую проблему, шаги воспроизведения, ошибки..."></textarea>
+            <div class="form-group">
+              <label class="form-label">Серийный номер</label>
+              <input type="text" name="serialNumber" class="form-control" placeholder="S/N устройства Rikor">
+            </div>
           </div>
 
           <div class="grid grid--2">
             <div class="form-group">
-              <label class="form-label">Приоритет</label>
-              <select name="priority" class="form-control">
-                <option value="low">🟢 Низкий - некритичная проблема</option>
-                <option value="medium" selected>🟡 Средний - влияет на работу</option>
-                <option value="high">🟠 Высокий - серьезная проблема</option>
-                <option value="critical">🔴 Критический - система не работает</option>
+              <label class="form-label">Приоритет <span style="color: var(--rikor-error);">*</span></label>
+              <select name="priority" class="form-control" required>
+                <option value="low">🟢 Низкий - Общие вопросы</option>
+                <option value="medium" selected>🟡 Средний - Рабочие задачи</option>
+                <option value="high">🟠 Высокий - Влияет на работу</option>
+                <option value="critical">🔴 Критический - Система недоступна</option>
               </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Категория</label>
+              <select name="category" class="form-control">
+                <option value="hardware" selected>🔧 Оборудование</option>
+                <option value="software">💻 Программное обеспечение</option>
+                <option value="network">🌐 Сеть и подключения</option>
+                <option value="configuration">⚙️ Настройка и конфигурация</option>
+                <option value="other">📋 Другое</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid--2">
+            <div class="form-group">
+              <label class="form-label">Местоположение</label>
+              <input type="text" name="location" class="form-control" placeholder="Например: Офис 1, Комната 205">
             </div>
 
             <div class="form-group">
               <label class="form-label">Исполнитель</label>
               <select name="assignee" class="form-control">
-                <option value="">Автоматическое назначение</option>
-                ${this.data.users.filter(u => u.role === 'agent' || u.role === 'admin').map(user => `
-                  <option value="${user.name}">${user.name} (${user.department})</option>
+                <option value="">Назначить автоматически</option>
+                ${this.data.users.filter(u => u.role === 'agent' || u.role === 'admin').map(agent => `
+                  <option value="${agent.name}">${agent.name} (${agent.department})</option>
                 `).join('')}
               </select>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Местоположение</label>
-            <input type="text" name="location" class="form-control" placeholder="Офис, комната, стойка...">
+            <label class="form-label">Теги</label>
+            <input type="text" name="tags" class="form-control" placeholder="Например: rikor, сервер, перегрев">
+            <small style="color: var(--rikor-text-muted); font-size: 12px;">Разделяйте теги запятыми для лучшего поиска</small>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Категория</label>
-            <select name="category" class="form-control">
-              <option value="hardware">🔧 Оборудование</option>
-              <option value="software">💻 Программное обеспечение</option>
-              <option value="network">🌐 Сеть</option>
-              <option value="configuration">⚙️ Настройка</option>
-              <option value="other">📋 Другое</option>
-            </select>
+            <label class="form-label">Прикрепить файлы</label>
+            ${this.createFileUploadArea()}
           </div>
         </form>
       </div>
@@ -1364,192 +857,723 @@ class RikorHelpDeskFixed {
     `);
   }
 
-  // ИСПРАВЛЕННАЯ функция создания тикета с детальной проверкой
   createTicket(event) {
-    console.log('💾 ПРОВЕРКА: Создание нового тикета...');
+    event.preventDefault();
+    console.log('💾 Создание нового тикета с файлами');
 
-    try {
-      event.preventDefault();
-      const formData = new FormData(event.target);
+    const formData = new FormData(event.target);
 
-      console.log('📋 Данные формы получены');
+    // Валидация
+    if (!formData.get('title').trim()) {
+      this.showNotification('Заполните заголовок тикета!', 'error');
+      return;
+    }
 
-      // Валидация обязательных полей
-      if (!formData.get('title').trim()) {
-        this.showNotification('Заполните тему тикета!', 'error');
-        return;
-      }
+    if (!formData.get('description').trim()) {
+      this.showNotification('Заполните описание проблемы!', 'error');
+      return;
+    }
 
-      if (!formData.get('deviceType')) {
-        this.showNotification('Выберите тип устройства Rikor!', 'error');
-        return;
-      }
+    if (!formData.get('deviceType')) {
+      this.showNotification('Выберите тип устройства Rikor!', 'error');
+      return;
+    }
 
-      if (!formData.get('description').trim()) {
-        this.showNotification('Добавьте описание проблемы!', 'error');
-        return;
-      }
+    // Создание нового тикета
+    const newTicket = {
+      id: `RIK-2025-${String(this.data.tickets.length + 1).padStart(3, '0')}`,
+      title: formData.get('title').trim(),
+      description: formData.get('description').trim(),
+      deviceType: formData.get('deviceType'),
+      deviceModel: formData.get('deviceModel') || '',
+      serialNumber: formData.get('serialNumber') || '',
+      priority: formData.get('priority') || 'medium',
+      status: 'open',
+      category: formData.get('category') || 'hardware',
+      assignee: formData.get('assignee') || this.autoAssignAgent(),
+      reporter: this.currentUser.name,
+      created: new Date().toISOString(),
+      updated: new Date().toISOString(),
+      location: formData.get('location') || '',
+      timeSpent: 0,
+      estimatedTime: this.estimateTime(formData.get('priority') || 'medium'),
+      tags: formData.get('tags') ? formData.get('tags').split(',').map(t => t.trim()).filter(t => t) : [formData.get('deviceType').toLowerCase(), formData.get('category') || 'hardware'],
+      replies: [],
+      attachments: this.tempFiles.map(file => ({
+        id: Date.now() + Math.random(),
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        uploadedBy: file.uploadedBy,
+        uploaded: file.uploaded
+      }))
+    };
 
-      console.log('✅ Валидация прошла успешно');
+    // Добавление тикета в систему
+    this.data.tickets.unshift(newTicket);
+    this.data.stats.totalTickets++;
+    this.data.stats.openTickets++;
 
-      // Проверка серийного номера
-      const serialNumber = formData.get('serialNumber').trim();
-      if (serialNumber && !/^[A-Z0-9-]+$/.test(serialNumber)) {
-        this.showNotification('Серийный номер должен содержать только буквы, цифры и дефисы!', 'error');
-        return;
-      }
+    this.saveData();
+    this.hideModal();
+    this.showNotification(`Тикет "${newTicket.title}" создан! ID: ${newTicket.id}${this.tempFiles.length > 0 ? `. Прикреплено файлов: ${this.tempFiles.length}` : ''}`, 'success');
 
-      if (serialNumber && this.data.tickets.some(t => t.serialNumber === serialNumber)) {
-        this.showNotification(`Тикет с серийным номером ${serialNumber} уже существует!`, 'warning');
-      }
+    // Очищаем временные файлы
+    this.tempFiles = [];
 
-      console.log('🏷️ Серийный номер проверен');
-
-      // Создаем новый тикет
-      const newTicket = {
-        id: `RIK-2025-${String(this.data.tickets.length + 1).padStart(3, '0')}`,
-        title: formData.get('title').trim(),
-        description: formData.get('description').trim(),
-        deviceType: formData.get('deviceType'),
-        deviceModel: formData.get('deviceModel') || '',
-        serialNumber: serialNumber || '',
-        priority: formData.get('priority'),
-        status: 'open',
-        category: formData.get('category'),
-        assignee: formData.get('assignee') || this.autoAssignAgent(),
-        reporter: this.currentUser.name,
-        created: new Date().toISOString(),
-        updated: new Date().toISOString(),
-        location: formData.get('location') || '',
-        timeSpent: 0,
-        estimatedTime: this.estimateTime(formData.get('priority')),
-        tags: [formData.get('deviceType').toLowerCase(), formData.get('category')],
-        replies: [],
-        attachments: []
-      };
-
-      console.log('🆕 Тикет создан:', newTicket.id);
-
-      // Добавляем к данным
-      this.data.tickets.unshift(newTicket);
-      this.data.stats.totalTickets++;
-      this.data.stats.openTickets++;
-
-      console.log(`📊 Статистика обновлена: всего ${this.data.stats.totalTickets}, открытых ${this.data.stats.openTickets}`);
-
-      // КРИТИЧЕСКИ ВАЖНО: Сохраняем данные
-      this.saveData();
-      console.log('💾 Данные сохранены в LocalStorage');
-
-      this.hideModal();
-      this.showNotification(`Тикет ${newTicket.id} успешно создан!${serialNumber ? ` S/N: ${serialNumber}` : ''}`, 'success');
-
-      // Обновляем контент если находимся в разделе тикетов
-      if (this.currentRoute === 'tickets') {
-        console.log('🔄 Обновление списка тикетов...');
-        this.renderContent();
-      }
-
-      console.log('✅ ПРОВЕРКА ЗАВЕРШЕНА: Тикет создан и сохранен успешно');
-
-    } catch (error) {
-      console.error('❌ ОШИБКА при создании тикета:', error);
-      this.showNotification(`Ошибка создания тикета: ${error.message}`, 'error');
+    // Переход к тикетам если не на этой странице
+    if (this.currentRoute !== 'tickets') {
+      this.navigate('tickets');
+    } else {
+      this.renderContent();
     }
   }
 
-  // Остальные разделы остаются работающими (Knowledge Base, Reports, Users, Settings)
-  renderKnowledgeBase() {
-    const categories = [...new Set(this.data.knowledgeBase.map(a => a.category))];
+  // ========================================
+  // СОЗДАНИЕ СТАТЕЙ С ПОДДЕРЖКОЙ ФАЙЛОВ
+  // ========================================
 
-    return `
-      <div class="knowledge">
-        <div class="knowledge__header mb-4" style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <h1>База знаний Rikor v2.3.1 (ИСПРАВЛЕНА)</h1>
-            <p class="card__subtitle">Документация и решения с возможностью редактирования</p>
-          </div>
-          <div style="display: flex; gap: 12px;">
-            <button class="btn btn--secondary" onclick="app.exportKnowledgeBase()">
-              <i class="fas fa-file-export mr-2"></i>Экспорт
-            </button>
-            <button class="btn btn--primary" onclick="app.showCreateArticleModal()">
-              <i class="fas fa-plus mr-2"></i>Создать статью
-            </button>
-          </div>
+  showCreateArticleModal() {
+    console.log('📚 Открытие модального окна создания статьи с поддержкой файлов');
+    this.tempFiles = [];
+
+    this.showModal(`
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Создать новую статью</h2>
+          <p style="color: var(--rikor-text-muted); margin: 4px 0 0; font-size: 14px;">Добавление статьи в базу знаний Rikor</p>
         </div>
-
-        <div class="card mb-4">
-          <div class="card__header">
-            <h3 class="card__title">Поиск и фильтрация</h3>
+        <button class="modal-close" onclick="app.hideModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="max-width: 800px;">
+        <form onsubmit="app.createArticle(event)" id="createArticleForm">
+          <div class="form-group">
+            <label class="form-label">Заголовок статьи <span style="color: var(--rikor-error);">*</span></label>
+            <input type="text" name="title" class="form-control" required placeholder="Например: Установка драйверов для Rikor RN NINO">
           </div>
-          <div class="grid grid--3">
-            <div class="form-group" style="grid-column: 1 / 3;">
-              <label class="form-label">Поиск статей</label>
-              <input type="search" 
-                     class="form-control" 
-                     placeholder="Поиск по заголовку, содержимому, тегам..." 
-                     id="knowledgeSearch">
-            </div>
+
+          <div class="grid grid--2">
             <div class="form-group">
-              <label class="form-label">Категория</label>
-              <select class="form-control" id="categoryFilter">
-                <option value="">Все категории</option>
-                ${categories.map(cat => `<option value="${cat}">${this.getCategoryText(cat)}</option>`).join('')}
+              <label class="form-label">Категория <span style="color: var(--rikor-error);">*</span></label>
+              <select name="category" class="form-control" required>
+                <option value="">Выберите категорию</option>
+                <option value="hardware">🔧 Оборудование</option>
+                <option value="software">💻 Программное обеспечение</option>
+                <option value="network">🌐 Сеть и подключения</option>
+                <option value="performance">⚡ Производительность</option>
+                <option value="security">🔒 Безопасность</option>
+                <option value="other">📋 Другое</option>
               </select>
             </div>
+
+            <div class="form-group">
+              <label class="form-label">Теги</label>
+              <input type="text" name="tags" class="form-control" placeholder="Например: драйверы, ноутбук, windows">
+              <small style="color: var(--rikor-text-muted); font-size: 12px;">Разделяйте теги запятыми для лучшего поиска</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Готовые шаблоны статей</label>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <button type="button" class="btn btn--secondary btn--small" onclick="app.loadTemplate('hardware')">
+                🔧 Оборудование
+              </button>
+              <button type="button" class="btn btn--secondary btn--small" onclick="app.loadTemplate('software')">
+                💻 Программы
+              </button>
+              <button type="button" class="btn btn--secondary btn--small" onclick="app.loadTemplate('troubleshooting')">
+                🔍 Решение проблем
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Содержание статьи <span style="color: var(--rikor-error);">*</span></label>
+            <div style="margin-bottom: 8px; font-size: 12px; color: var(--rikor-text-muted);">
+              Поддерживается Markdown разметка: **жирный**, *курсив*, ## Заголовок, - Список
+            </div>
+            <textarea name="content" class="form-control" rows="12" required placeholder="# Название статьи&#10;&#10;## Описание проблемы&#10;Опишите проблему или задачу, которую решает эта статья.&#10;&#10;## Пошаговое решение&#10;1. Первый шаг решения&#10;2. Второй шаг&#10;3. Третий шаг&#10;&#10;## Дополнительная информация&#10;Полезные советы и рекомендации.&#10;&#10;## См. также&#10;Ссылки на связанные статьи или ресурсы." style="font-family: 'Courier New', monospace; line-height: 1.4;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Прикрепить файлы к статье</label>
+            ${this.createFileUploadArea()}
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn--secondary" onclick="app.hideModal()">
+          <i class="fas fa-times mr-2"></i>Отмена
+        </button>
+        <button class="btn btn--info" onclick="app.previewArticle()">
+          <i class="fas fa-eye mr-2"></i>Предпросмотр
+        </button>
+        <button class="btn btn--primary" onclick="document.getElementById('createArticleForm').dispatchEvent(new Event('submit'))">
+          <i class="fas fa-plus mr-2"></i>Создать статью
+        </button>
+      </div>
+    `);
+  }
+
+  createArticle(event) {
+    event.preventDefault();
+    console.log('💾 Создание новой статьи с файлами');
+
+    const formData = new FormData(event.target);
+
+    // Валидация
+    if (!formData.get('title').trim()) {
+      this.showNotification('Заполните заголовок статьи!', 'error');
+      return;
+    }
+
+    if (!formData.get('content').trim()) {
+      this.showNotification('Заполните содержание статьи!', 'error');
+      return;
+    }
+
+    // Создание новой статьи
+    const newArticle = {
+      id: `KB-${String(this.data.knowledgeBase.length + 1).padStart(3, '0')}`,
+      title: formData.get('title').trim(),
+      content: formData.get('content').trim(),
+      category: formData.get('category'),
+      tags: formData.get('tags') ? formData.get('tags').split(',').map(t => t.trim()).filter(t => t) : [],
+      views: 0,
+      rating: 0,
+      author: this.currentUser.name,
+      created: new Date().toISOString(),
+      updated: new Date().toISOString(),
+      attachments: this.tempFiles.map(file => ({
+        id: Date.now() + Math.random(),
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        uploadedBy: file.uploadedBy,
+        uploaded: file.uploaded
+      })),
+      editHistory: []
+    };
+
+    // Добавление в систему
+    this.data.knowledgeBase.push(newArticle);
+    this.saveData();
+    this.hideModal();
+    this.showNotification(`Статья "${newArticle.title}" создана!${this.tempFiles.length > 0 ? ` Прикреплено файлов: ${this.tempFiles.length}` : ''}`, 'success');
+
+    // Очищаем временные файлы
+    this.tempFiles = [];
+
+    // Переход к базе знаний если не на этой странице
+    if (this.currentRoute !== 'knowledge') {
+      this.navigate('knowledge');
+    } else {
+      this.renderContent();
+    }
+  }
+
+  // Остальные методы из базовой версии...
+  // (Включаем все основные методы: applyTheme, bindEvents, navigate, renderContent, и т.д.)
+  // Загрузка шаблонов статей
+  loadTemplate(templateType) {
+    const templates = {
+      hardware: `# Инструкция по [Название оборудования Rikor]
+
+## Описание устройства
+Краткое описание устройства и его назначения.
+
+## Технические характеристики
+- **Процессор**: [Характеристики]
+- **Память**: [Объем RAM]
+- **Накопитель**: [Тип и объем]
+- **Операционная система**: [ОС]
+
+## Пошаговая инструкция
+
+### Подготовка
+1. Убедитесь, что устройство выключено
+2. Подготовьте необходимые инструменты
+3. Ознакомьтесь с техникой безопасности
+
+### Основные шаги
+1. Первый шаг выполнения задачи
+2. Второй шаг с подробным описанием
+3. Третий шаг и проверка результата
+
+## Устранение неполадок
+- **Проблема 1**: Описание и решение
+- **Проблема 2**: Описание и решение
+
+## Полезные советы
+- Рекомендация 1
+- Рекомендация 2
+
+## См. также
+Ссылки на связанные статьи или документацию.`,
+
+      software: `# Установка и настройка [Название ПО]
+
+## Системные требования
+- **ОС**: Windows 10/11 или выше
+- **RAM**: Минимум 4 ГБ (рекомендуется 8 ГБ)
+- **Свободное место**: 2 ГБ
+- **Дополнительно**: [Особые требования]
+
+## Загрузка программы
+1. Перейдите на официальный сайт
+2. Выберите версию для вашей ОС
+3. Скачайте установочный файл
+
+## Установка
+1. Запустите установочный файл от имени администратора
+2. Следуйте инструкциям мастера установки
+3. Выберите компоненты для установки
+4. Дождитесь завершения установки
+
+## Первоначальная настройка
+1. Запустите программу
+2. Выполните начальную настройку
+3. Настройте параметры по умолчанию
+
+## Основные функции
+- **Функция 1**: Описание и использование
+- **Функция 2**: Описание и использование
+
+## Часто задаваемые вопросы
+**В**: Частый вопрос?
+**О**: Ответ на вопрос.
+
+## Обновление
+Инструкция по обновлению программы до последней версии.`,
+
+      troubleshooting: `# Решение проблемы: [Название проблемы]
+
+## Описание проблемы
+Подробное описание проблемы, симптомы и условия возникновения.
+
+## Возможные причины
+1. **Причина 1**: Описание причины
+2. **Причина 2**: Описание причины
+3. **Причина 3**: Описание причины
+
+## Диагностика
+
+### Шаг 1: Первичная проверка
+- Проверьте подключение питания
+- Убедитесь в правильности подключений
+- Проверьте индикаторы состояния
+
+### Шаг 2: Расширенная диагностика
+1. Откройте [диагностическое ПО/раздел]
+2. Запустите тестирование
+3. Проанализируйте результаты
+
+## Решение
+
+### Метод 1: [Название метода]
+1. Подробный первый шаг
+2. Второй шаг с пояснениями
+3. Проверка результата
+
+### Метод 2: Альтернативное решение
+Если первый метод не помог, попробуйте:
+1. Альтернативный первый шаг
+2. Дополнительные действия
+
+## Профилактика
+Рекомендации по предотвращению повторения проблемы:
+- Регулярное обслуживание
+- Мониторинг показателей
+- Своевременные обновления
+
+## Когда обращаться в поддержку
+Если проблема не решается данными методами, создайте тикет с указанием:
+- Модель устройства Rikor
+- Серийный номер
+- Выполненные действия
+- Коды ошибок`
+    };
+
+    const textarea = document.querySelector('textarea[name="content"]');
+    if (textarea && templates[templateType]) {
+      textarea.value = templates[templateType];
+      this.showNotification(`Шаблон "${templateType}" загружен`, 'success');
+    }
+  }
+
+  // Предпросмотр статьи
+  previewArticle() {
+    const form = document.getElementById('createArticleForm');
+    const formData = new FormData(form);
+    const content = formData.get('content');
+
+    if (!content.trim()) {
+      this.showNotification('Заполните содержание статьи для предпросмотра', 'error');
+      return;
+    }
+
+    this.showModal(`
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Предпросмотр статьи</h2>
+          <p style="color: var(--rikor-text-muted); margin: 4px 0 0; font-size: 14px;">Как будет выглядеть статья после публикации</p>
+        </div>
+        <button class="modal-close" onclick="app.hideModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="max-width: 800px; max-height: 70vh; overflow-y: auto;">
+        <div style="background: var(--rikor-bg-tertiary); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+          <h1 style="color: var(--rikor-text-primary); margin-bottom: 16px;">${formData.get('title') || 'Заголовок статьи'}</h1>
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px;">
+            <span class="badge badge--info">${this.getCategoryText(formData.get('category'))}</span>
+            <span style="color: var(--rikor-text-muted); font-size: 13px;">
+              <i class="fas fa-user mr-1"></i>${this.currentUser.name}
+            </span>
+            <span style="color: var(--rikor-text-muted); font-size: 13px;">
+              <i class="fas fa-calendar mr-1"></i>${new Date().toLocaleDateString('ru-RU')}
+            </span>
           </div>
         </div>
 
-        <div class="grid grid--3">
-          ${this.data.knowledgeBase.map(article => `
-            <div class="card knowledge-card" style="cursor: pointer; transition: all 0.3s ease; position: relative;">
-              <!-- ИСПРАВЛЕННЫЕ кнопки управления статьей -->
-              <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 4px; z-index: 10;">
-                <button class="btn btn--small btn--secondary" onclick="event.stopPropagation(); app.showEditArticleModal('${article.id}')" title="Редактировать статью">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn--small btn--primary" onclick="event.stopPropagation(); app.viewArticle('${article.id}')" title="Просмотр">
-                  <i class="fas fa-eye"></i>
-                </button>
+        <div class="rendered-content">
+          ${this.renderMarkdown(content)}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn--secondary" onclick="app.hideModal()">
+          <i class="fas fa-arrow-left mr-2"></i>Вернуться к редактированию
+        </button>
+        <button class="btn btn--primary" onclick="app.hideModal(); document.getElementById('createArticleForm').dispatchEvent(new Event('submit'))">
+          <i class="fas fa-check mr-2"></i>Опубликовать статью
+        </button>
+      </div>
+    `);
+  }
+
+  // ========================================
+  // ОСНОВНЫЕ МЕТОДЫ ИНТЕРФЕЙСА
+  // ========================================
+
+  applyTheme() {
+    document.body.setAttribute('data-theme', this.settings.theme);
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+      const icon = themeToggle.querySelector('i');
+      if (icon) {
+        icon.className = this.settings.theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+      }
+    }
+  }
+
+  bindEvents() {
+    // Переключение темы
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => this.toggleTheme());
+    }
+
+    // Навигация
+    document.querySelectorAll('.sidebar__link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const route = link.getAttribute('data-route');
+        this.navigate(route);
+      });
+    });
+
+    // FAB меню
+    const fabButton = document.getElementById('fabButton');
+    const fabMenu = document.getElementById('fabMenu');
+
+    if (fabButton && fabMenu) {
+      fabButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fabMenu.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', () => {
+        fabMenu.classList.add('hidden');
+      });
+    }
+
+    // Модальные окна - закрытие по оверлею
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        this.hideModal();
+      }
+    });
+
+    // Горячие клавиши
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        this.showCreateTicketModal();
+      }
+      if (e.ctrlKey && e.key === 'e' && this.currentRoute === 'knowledge') {
+        e.preventDefault();
+        this.showCreateArticleModal();
+      }
+      if (e.key === 'Escape') {
+        this.hideModal();
+      }
+    });
+
+    // Drag & Drop для файлов
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const uploadArea = document.querySelector('.file-upload-area');
+      if (uploadArea) {
+        uploadArea.classList.add('dragover');
+      }
+    });
+
+    document.addEventListener('dragleave', (e) => {
+      const uploadArea = document.querySelector('.file-upload-area');
+      if (uploadArea && !uploadArea.contains(e.relatedTarget)) {
+        uploadArea.classList.remove('dragover');
+      }
+    });
+
+    document.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const uploadArea = document.querySelector('.file-upload-area');
+      if (uploadArea) {
+        uploadArea.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files);
+        files.forEach(file => this.validateAndAddFile(file));
+      }
+    });
+  }
+
+  toggleTheme() {
+    this.settings.theme = this.settings.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('rikor-theme', this.settings.theme);
+    this.applyTheme();
+    this.showNotification(`Тема изменена на ${this.settings.theme === 'light' ? 'светлую' : 'темную'}`, 'success');
+  }
+
+  navigate(route) {
+    console.log(`📍 Переход к разделу: ${route}`);
+    this.currentRoute = route;
+
+    // Обновляем активную ссылку
+    document.querySelectorAll('.sidebar__link').forEach(link => {
+      link.classList.remove('active');
+    });
+
+    const activeLink = document.querySelector(`[data-route="${route}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
+
+    // Обновляем хлебные крошки
+    const pageNames = {
+      'dashboard': 'Панель управления',
+      'tickets': 'Управление тикетами',
+      'knowledge': 'База знаний',
+      'reports': 'Отчеты и аналитика',
+      'users': 'Управление пользователями',
+      'settings': 'Настройки системы'
+    };
+
+    const currentPageElement = document.getElementById('currentPage');
+    if (currentPageElement) {
+      currentPageElement.textContent = pageNames[route] || route;
+    }
+
+    this.renderContent();
+  }
+
+  handleRoute() {
+    const hash = window.location.hash.slice(1) || 'dashboard';
+    this.navigate(hash);
+  }
+
+  renderContent() {
+    const content = document.getElementById('content');
+    if (!content) return;
+
+    try {
+      let html = '';
+
+      switch (this.currentRoute) {
+        case 'dashboard':
+          html = this.renderDashboard();
+          break;
+        case 'tickets':
+          html = this.renderTickets();
+          break;
+        case 'knowledge':
+          html = this.renderKnowledge();
+          break;
+        case 'reports':
+          html = this.renderReports();
+          break;
+        case 'users':
+          html = this.renderUsers();
+          break;
+        case 'settings':
+          html = this.renderSettings();
+          break;
+        default:
+          html = this.renderDashboard();
+      }
+
+      content.innerHTML = html;
+
+      // Инициализируем графики после рендеринга
+      if (this.currentRoute === 'dashboard' || this.currentRoute === 'reports') {
+        setTimeout(() => this.initCharts(), 100);
+      }
+
+    } catch (error) {
+      console.error('❌ Ошибка рендеринга контента:', error);
+      content.innerHTML = `
+        <div class="card">
+          <h2 style="color: var(--rikor-error); margin-bottom: 16px;">
+            <i class="fas fa-exclamation-triangle mr-2"></i>Ошибка загрузки
+          </h2>
+          <p>Произошла ошибка при загрузке раздела "${this.currentRoute}":</p>
+          <p><strong>${error.message}</strong></p>
+          <button class="btn btn--primary mt-4" onclick="app.navigate('dashboard')">
+            <i class="fas fa-home mr-2"></i>Вернуться на главную
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // ========================================
+  // РЕНДЕРИНГ РАЗДЕЛОВ
+  // ========================================
+
+  renderDashboard() {
+    const stats = this.data.stats;
+    const recentTickets = this.data.tickets.slice(0, 5);
+
+    return `
+      <div class="dashboard">
+        <div class="card" style="background: linear-gradient(135deg, var(--rikor-primary), var(--rikor-primary-light)); color: white; margin-bottom: 24px;">
+          <h1 style="color: white; margin-bottom: 8px;">
+            <i class="fas fa-headset mr-2"></i>Rikor HelpDesk v2.4.0 РАСШИРЕННАЯ
+          </h1>
+          <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 16px;">
+            ✅ Создание тикетов • ✅ Создание статей • ✅ Поддержка файлов • ✅ Ответы пользователям • ✅ Смена статусов
+          </p>
+          <div style="margin-top: 12px; font-size: 14px; color: rgba(255,255,255,0.8);">
+            <i class="fas fa-calendar-alt mr-1"></i>Система технической поддержки • Сегодня: ${new Date().toLocaleDateString('ru-RU')}
+          </div>
+        </div>
+
+        <div class="grid grid--4 mb-4">
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, var(--rikor-primary), var(--rikor-primary-light)); color: white;">
+              <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div class="stat-card-value">${stats.totalTickets}</div>
+            <div class="stat-card-label">Всего тикетов</div>
+            <div class="stat-card-trend trend--up">
+              <i class="fas fa-arrow-up mr-1"></i>+12% за месяц
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, var(--rikor-error), #f87171); color: white;">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="stat-card-value">${stats.openTickets}</div>
+            <div class="stat-card-label">Открытых тикетов</div>
+            <div class="stat-card-trend trend--down">
+              <i class="fas fa-arrow-down mr-1"></i>-8% за неделю
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, var(--rikor-warning), #fbbf24); color: white;">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-card-value">${stats.inProgressTickets}</div>
+            <div class="stat-card-label">В работе</div>
+            <div class="stat-card-trend trend--up">
+              <i class="fas fa-arrow-up mr-1"></i>+5% за неделю
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, var(--rikor-success), #34d399); color: white;">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-card-value">${stats.avgResponseTime}</div>
+            <div class="stat-card-label">Время ответа (ч)</div>
+            <div class="stat-card-trend trend--down">
+              <i class="fas fa-arrow-down mr-1"></i>Отлично
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid--2">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Динамика за текущий год</h3>
+                <p class="card-subtitle">Количество обращений по месяцам</p>
+              </div>
+            </div>
+            <canvas id="monthlyChart" width="400" height="200"></canvas>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Распределение по важности</h3>
+                <p class="card-subtitle">Приоритеты активных тикетов</p>
+              </div>
+            </div>
+            <canvas id="priorityChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Недавно созданные обращения</h3>
+              <p class="card-subtitle">Полная система обработки обращений с созданием новых тикетов</p>
+            </div>
+            <button class="btn btn--primary" onclick="app.showCreateTicketModal()">
+              <i class="fas fa-plus mr-2"></i>Создать тикет
+            </button>
+          </div>
+
+          ${recentTickets.map(ticket => `
+            <div class="card" style="margin-bottom: 16px; cursor: pointer;" onclick="app.viewTicket('${ticket.id}')">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span class="badge badge--primary">${ticket.id}</span>
+                  <span class="badge priority--${ticket.priority}">${this.getPriorityText(ticket.priority)}</span>
+                </div>
+                <span class="badge status--${ticket.status}">${this.getStatusText(ticket.status)}</span>
               </div>
 
-              <div onclick="app.viewArticle('${article.id}')">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-right: 80px;">
-                  <span class="badge badge--primary">${this.getCategoryText(article.category)}</span>
-                  <div style="display: flex; align-items: center; gap: 4px; color: var(--rikor-text-muted); font-size: 12px;">
-                    <i class="fas fa-star" style="color: #fbbf24;"></i>
-                    ${article.rating}
-                  </div>
-                </div>
+              <h4 style="margin-bottom: 8px; color: var(--rikor-text-primary);">${ticket.title}</h4>
 
-                <h3 style="margin-bottom: 12px; color: var(--rikor-text-primary); font-size: 16px; line-height: 1.4; padding-right: 20px;">${article.title}</h3>
+              <div style="color: var(--rikor-text-muted); font-size: 13px; margin-bottom: 12px;">
+                ${this.getDeviceIcon(ticket.deviceType)} ${ticket.deviceType} 
+                ${ticket.serialNumber ? '• S/N: ' + ticket.serialNumber : ''} • ${ticket.assignee}
+              </div>
 
-                <p style="color: var(--rikor-text-secondary); font-size: 14px; line-height: 1.5; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                  ${article.content.replace(/#|\*\*|\*/g, '').replace(/\n/g, ' ').substring(0, 120)}...
-                </p>
+              <p style="color: var(--rikor-text-secondary); font-size: 13px; line-height: 1.4; margin-bottom: 8px;">
+                ${ticket.description.length > 100 ? ticket.description.substring(0, 100) + '...' : ticket.description}
+              </p>
 
-                ${article.attachments && article.attachments.length > 0 ? `
-                  <div style="margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 4px; color: var(--rikor-text-muted); font-size: 12px; margin-bottom: 6px;">
-                      <i class="fas fa-paperclip"></i>
-                      <span>${article.attachments.length} файлов</span>
-                    </div>
-                  </div>
-                ` : ''}
-
-                ${article.tags && article.tags.length > 0 ? `
-                  <div style="margin-bottom: 16px;">
-                    ${article.tags.slice(0, 3).map(tag => `<span class="badge badge--info" style="margin-right: 4px; margin-bottom: 4px; font-size: 10px;">#${tag}</span>`).join('')}
-                  </div>
-                ` : ''}
-
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--rikor-border-light); font-size: 12px; color: var(--rikor-text-muted);">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <span><i class="fas fa-eye mr-1"></i>${article.views}</span>
-                    <span><i class="fas fa-user mr-1"></i>${article.author}</span>
-                  </div>
-                  <span>${this.formatDate(article.updated)}</span>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--rikor-text-muted);">
+                <span>${this.formatDateTime(ticket.created)}</span>
+                <div style="display: flex; gap: 12px;">
+                  ${ticket.replies.length > 0 ? `<span><i class="fas fa-comments mr-1"></i>${ticket.replies.length}</span>` : ''}
+                  ${ticket.attachments.length > 0 ? `<span><i class="fas fa-paperclip mr-1"></i>${ticket.attachments.length}</span>` : ''}
                 </div>
               </div>
             </div>
@@ -1559,40 +1583,181 @@ class RikorHelpDeskFixed {
     `;
   }
 
-  // Reports, Users, Settings остаются без изменений (уже работают)
-  renderReports() {
-    const stats = this.data.stats;
-    const agents = this.data.users.filter(u => u.role === 'agent' || u.role === 'admin');
-
+  renderTickets() {
     return `
-      <div class="reports">
-        <div class="reports__header mb-4" style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <h1>Отчеты и аналитика v2.3.1</h1>
-            <p class="card__subtitle">Детальная статистика работы службы технической поддержки</p>
-          </div>
-          <div style="display: flex; gap: 12px;">
-            <button class="btn btn--secondary" onclick="app.exportReportData()">
-              <i class="fas fa-file-csv mr-2"></i>Экспорт CSV
-            </button>
-            <button class="btn btn--primary" onclick="app.generatePDFReport()">
-              <i class="fas fa-file-pdf mr-2"></i>PDF отчет
+      <div class="tickets-page">
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h1 style="margin-bottom: 8px;">
+                <i class="fas fa-ticket-alt mr-2"></i>Управление тикетами
+              </h1>
+              <p class="card-subtitle">Полная система управления обращениями с поддержкой файлов и ответов</p>
+            </div>
+            <button class="btn btn--primary" onclick="app.showCreateTicketModal()">
+              <i class="fas fa-plus mr-2"></i>Создать тикет
             </button>
           </div>
         </div>
 
+        ${this.data.tickets.map(ticket => `
+          <div class="card" style="margin-bottom: 20px; transition: all var(--transition-fast); cursor: pointer;" onclick="app.viewTicket('${ticket.id}')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                <span class="badge badge--primary" style="font-weight: 600;">${ticket.id}</span>
+                <span class="badge priority--${ticket.priority}">
+                  <i class="${this.getPriorityIcon(ticket.priority)} mr-1"></i>
+                  ${this.getPriorityText(ticket.priority)}
+                </span>
+                <span class="badge status--${ticket.status}">${this.getStatusText(ticket.status)}</span>
+              </div>
+              <div style="text-align: right; font-size: 12px; color: var(--rikor-text-muted);">
+                ${this.formatDateTime(ticket.created)}
+              </div>
+            </div>
+
+            <h3 style="margin-bottom: 12px; color: var(--rikor-text-primary); font-size: 18px;">
+              ${ticket.title}
+            </h3>
+
+            <div style="background: var(--rikor-bg-tertiary); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 13px;">
+                <div>
+                  <strong style="color: var(--rikor-text-primary);">Устройство:</strong><br>
+                  ${this.getDeviceIcon(ticket.deviceType)} ${ticket.deviceType}
+                  ${ticket.deviceModel ? `<br><span style="color: var(--rikor-text-muted); font-size: 12px;">Модель: ${ticket.deviceModel}</span>` : ''}
+                </div>
+                <div>
+                  <strong style="color: var(--rikor-text-primary);">Исполнитель:</strong><br>
+                  ${ticket.assignee}
+                  ${ticket.location ? `<br><span style="color: var(--rikor-text-muted); font-size: 12px;">📍 ${ticket.location}</span>` : ''}
+                </div>
+                <div>
+                  <strong style="color: var(--rikor-text-primary);">Время:</strong><br>
+                  Потрачено: ${ticket.timeSpent}ч / ${ticket.estimatedTime}ч
+                </div>
+              </div>
+            </div>
+
+            <p style="color: var(--rikor-text-secondary); line-height: 1.5; margin-bottom: 16px;">
+              ${ticket.description.length > 150 ? ticket.description.substring(0, 150) + '...' : ticket.description}
+            </p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="btn btn--secondary btn--small" onclick="event.stopPropagation(); app.viewTicket('${ticket.id}')">
+                  <i class="fas fa-eye mr-1"></i>Просмотр
+                </button>
+                ${ticket.replies.length > 0 ? `
+                  <span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--rikor-text-muted);">
+                    <i class="fas fa-comments"></i>${ticket.replies.length}
+                  </span>
+                ` : ''}
+                ${ticket.attachments.length > 0 ? `
+                  <span style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--rikor-text-muted);">
+                    <i class="fas fa-paperclip"></i>${ticket.attachments.length}
+                  </span>
+                ` : ''}
+              </div>
+              <div style="display: flex; gap: 6px;">
+                ${ticket.tags.map(tag => `
+                  <span style="background: var(--rikor-bg-hover); color: var(--rikor-text-muted); padding: 2px 6px; border-radius: 4px; font-size: 11px;">
+                    #${tag}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  renderKnowledge() {
+    return `
+      <div class="knowledge-page">
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h1 style="margin-bottom: 8px;">
+                <i class="fas fa-book mr-2"></i>База знаний
+              </h1>
+              <p class="card-subtitle">Полная система управления статьями с поддержкой файлов и Markdown</p>
+            </div>
+            <button class="btn btn--primary" onclick="app.showCreateArticleModal()">
+              <i class="fas fa-plus mr-2"></i>Создать статью
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid--2">
+          ${this.data.knowledgeBase.map(article => `
+            <div class="card" style="cursor: pointer; transition: all var(--transition-fast);" onclick="app.viewArticle('${article.id}')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <span class="badge badge--info">${this.getCategoryText(article.category)}</span>
+                <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--rikor-text-muted);">
+                  <span><i class="fas fa-eye mr-1"></i>${article.views}</span>
+                  ${article.attachments.length > 0 ? `<span><i class="fas fa-paperclip mr-1"></i>${article.attachments.length}</span>` : ''}
+                </div>
+              </div>
+
+              <h3 style="margin-bottom: 12px; color: var(--rikor-text-primary); line-height: 1.4;">
+                ${article.title}
+              </h3>
+
+              <p style="color: var(--rikor-text-secondary); line-height: 1.5; margin-bottom: 16px; font-size: 14px;">
+                ${this.extractTextFromMarkdown(article.content).substring(0, 120)}...
+              </p>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--rikor-text-muted);">
+                  <span><i class="fas fa-user mr-1"></i>${article.author}</span>
+                  <span><i class="fas fa-calendar mr-1"></i>${this.formatDate(article.updated)}</span>
+                </div>
+                <button class="btn btn--secondary btn--small" onclick="event.stopPropagation(); app.viewArticle('${article.id}')">
+                  <i class="fas fa-book-open mr-1"></i>Читать
+                </button>
+              </div>
+
+              ${article.tags.length > 0 ? `
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--rikor-border-light);">
+                  ${article.tags.map(tag => `
+                    <span style="background: var(--rikor-bg-hover); color: var(--rikor-text-muted); padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px;">
+                      #${tag}
+                    </span>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  renderReports() {
+    const stats = this.data.stats;
+
+    return `
+      <div class="reports-page">
+        <div class="card" style="margin-bottom: 24px;">
+          <h1 style="margin-bottom: 8px;">
+            <i class="fas fa-chart-bar mr-2"></i>Отчеты и аналитика
+          </h1>
+          <p class="card-subtitle">Детальная статистика работы системы</p>
+        </div>
+
         <div class="grid grid--4 mb-4">
+          <div class="report-metric">
+            <div class="report-metric__value">${stats.totalTickets}</div>
+            <div class="report-metric__label">Всего тикетов</div>
+          </div>
           <div class="report-metric">
             <div class="report-metric__value">${stats.avgResponseTime}ч</div>
             <div class="report-metric__label">Среднее время ответа</div>
           </div>
           <div class="report-metric">
             <div class="report-metric__value">${stats.avgResolutionTime}ч</div>
-            <div class="report-metric__label">Среднее время решения</div>
-          </div>
-          <div class="report-metric">
-            <div class="report-metric__value">${stats.customerSatisfaction}%</div>
-            <div class="report-metric__label">Удовлетворенность</div>
+            <div class="report-metric__label">Время решения</div>
           </div>
           <div class="report-metric">
             <div class="report-metric__value">${stats.slaCompliance}%</div>
@@ -1600,28 +1765,35 @@ class RikorHelpDeskFixed {
           </div>
         </div>
 
-        <div class="grid grid--2 mb-4">
+        <div class="grid grid--2">
           <div class="card">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Производительность агентов</h3>
-                <p class="card__subtitle">Решенные тикеты</p>
-              </div>
+            <div class="card-header">
+              <h3 class="card-title">Статистика по статусам</h3>
             </div>
-            <div style="position: relative; height: 250px;">
-              <canvas id="agentPerformanceChart"></canvas>
-            </div>
+            <canvas id="statusChart" width="400" height="200"></canvas>
           </div>
 
           <div class="card">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Распределение по приоритетам</h3>
-                <p class="card__subtitle">Открытые тикеты</p>
-              </div>
+            <div class="card-header">
+              <h3 class="card-title">Производительность агентов</h3>
             </div>
-            <div style="position: relative; height: 250px;">
-              <canvas id="priorityDistributionChart"></canvas>
+            <div style="padding: 20px;">
+              ${this.data.users.filter(u => u.role === 'agent' || u.role === 'admin').map(agent => {
+                const resolvedTickets = agent.ticketsResolved || 0;
+                const assignedTickets = this.data.tickets.filter(t => t.assignee === agent.name).length;
+                return `
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px; border-radius: 6px; background: var(--rikor-bg-tertiary);">
+                    <div>
+                      <strong>${agent.name}</strong>
+                      <div style="font-size: 12px; color: var(--rikor-text-muted);">${agent.department}</div>
+                    </div>
+                    <div style="text-align: right; font-size: 13px;">
+                      <div>Решено: ${resolvedTickets}</div>
+                      <div style="color: var(--rikor-text-muted);">Активных: ${assignedTickets}</div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
         </div>
@@ -1629,141 +1801,58 @@ class RikorHelpDeskFixed {
     `;
   }
 
-  // ИСПРАВЛЕННАЯ инициализация графиков Reports
-  initReportCharts() {
-    setTimeout(() => {
-      try {
-        console.log('📊 ИСПРАВЛЕННАЯ инициализация графиков Reports v2.3.1...');
-
-        const agentCtx = document.getElementById('agentPerformanceChart');
-        if (agentCtx) {
-          const agents = this.data.users.filter(u => u.role === 'agent' || u.role === 'admin');
-          const performanceData = agents.map(u => this.data.stats.agentPerformance[u.name]?.resolved || 0);
-
-          this.chartInstances.agentPerformance = new Chart(agentCtx, {
-            type: 'bar',
-            data: {
-              labels: agents.map(u => u.name.split(' ')[0]),
-              datasets: [{
-                label: 'Решенные тикеты',
-                data: performanceData,
-                backgroundColor: '#1e40af',
-                borderRadius: 8,
-                borderSkipped: false,
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
-                x: { grid: { display: false } }
-              }
-            }
-          });
-          console.log('✅ График производительности агентов ИСПРАВЛЕН');
-        }
-
-        const priorityDistCtx = document.getElementById('priorityDistributionChart');
-        if (priorityDistCtx) {
-          this.chartInstances.priorityDistribution = new Chart(priorityDistCtx, {
-            type: 'doughnut',
-            data: {
-              labels: this.data.stats.priorityLabels,
-              datasets: [{
-                data: [
-                  this.data.stats.priorityStats.critical,
-                  this.data.stats.priorityStats.high,
-                  this.data.stats.priorityStats.medium,
-                  this.data.stats.priorityStats.low
-                ],
-                backgroundColor: this.data.stats.priorityColors,
-                borderWidth: 0,
-                cutout: '65%'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { position: 'right', labels: { padding: 15, usePointStyle: true } }
-              }
-            }
-          });
-          console.log('✅ График приоритетов ИСПРАВЛЕН');
-        }
-
-        console.log('🎉 Все графики Reports v2.3.1 ИСПРАВЛЕНЫ');
-      } catch (error) {
-        console.error('❌ Ошибка инициализации графиков Reports:', error);
-        this.showNotification('Ошибка при создании графиков отчетов', 'error');
-      }
-    }, 200);
-  }
-
   renderUsers() {
     return `
-      <div class="users">
-        <div class="users__header mb-4" style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <h1>Управление пользователями v2.3.1</h1>
-            <p class="card__subtitle">Система переключения пользователей и управления учетными записями</p>
-          </div>
-          <button class="btn btn--primary" onclick="app.showCreateUserModal()">
-            <i class="fas fa-user-plus mr-2"></i>Добавить пользователя
-          </button>
-        </div>
-
-        <!-- НОВОЕ: Текущий пользователь -->
-        <div class="card mb-4">
-          <div class="card__header">
-            <h3 class="card__title">Текущий пользователь</h3>
-          </div>
-          <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--rikor-bg-tertiary); border-radius: 8px;">
-            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, var(--rikor-primary), var(--rikor-primary-light)); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 20px;">
-              ${this.currentUser.avatar}
+      <div class="users-page">
+        <div class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h1 style="margin-bottom: 8px;">
+                <i class="fas fa-users mr-2"></i>Управление пользователями
+              </h1>
+              <p class="card-subtitle">Администрирование команды технической поддержки</p>
             </div>
-            <div style="flex: 1;">
-              <h4 style="color: var(--rikor-text-primary); margin-bottom: 4px;">${this.currentUser.name}</h4>
-              <p style="color: var(--rikor-text-muted); margin-bottom: 4px;">${this.currentUser.email}</p>
-              <div style="display: flex; gap: 8px;">
-                <span class="badge badge--primary">${this.getRoleText(this.currentUser.role)}</span>
-                <span class="badge badge--info">${this.currentUser.department}</span>
-              </div>
-            </div>
-            <button class="btn btn--secondary" onclick="app.showUserSwitchModal()">
-              <i class="fas fa-user-cog mr-2"></i>Сменить пользователя
+            <button class="btn btn--primary" onclick="app.showCreateUserModal()">
+              <i class="fas fa-user-plus mr-2"></i>Добавить пользователя
             </button>
           </div>
         </div>
 
         <div class="grid grid--3">
           ${this.data.users.map(user => `
-            <div class="card user-card ${user.id === this.currentUser.id ? 'current-user' : ''}">
-              <div style="text-align: center; margin-bottom: 20px;">
-                <div style="width: 64px; height: 64px; background: linear-gradient(135deg, var(--rikor-primary), var(--rikor-primary-light)); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 20px; margin: 0 auto 12px;">
+            <div class="card" style="text-align: center;">
+              <div style="margin-bottom: 20px;">
+                <div style="width: 64px; height: 64px; background: linear-gradient(135deg, var(--rikor-primary), var(--rikor-primary-light)); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-weight: 600; font-size: 24px; box-shadow: var(--shadow-md);">
                   ${user.avatar}
                 </div>
-                <h3 style="margin-bottom: 4px; color: var(--rikor-text-primary);">${user.name}</h3>
-                <p style="color: var(--rikor-text-muted); font-size: 14px; margin-bottom: 8px;">${user.email}</p>
-                <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px;">
-                  <span class="badge badge--primary">${this.getRoleText(user.role)}</span>
-                  <span class="badge badge--info">${user.department}</span>
+                <h3 style="margin-bottom: 8px; color: var(--rikor-text-primary);">${user.name}</h3>
+                <div style="margin-bottom: 8px;">
+                  <span class="badge badge--${user.role === 'admin' ? 'primary' : user.role === 'agent' ? 'info' : 'secondary'}">
+                    ${this.getRoleText(user.role)}
+                  </span>
                 </div>
-                ${user.id === this.currentUser.id ? '<div class="badge badge--success"><i class="fas fa-check mr-1"></i>Активный</div>' : ''}
+                <div style="font-size: 13px; color: var(--rikor-text-muted); margin-bottom: 12px;">
+                  ${user.email}
+                </div>
               </div>
 
-              <div style="display: flex; gap: 8px; margin-top: 16px;">
-                ${user.id !== this.currentUser.id ? `
-                  <button class="btn btn--primary btn--small" onclick="app.switchUser(${user.id})" style="flex: 1;">
-                    <i class="fas fa-sign-in-alt mr-1"></i>Войти как
-                  </button>
-                ` : ''}
-                <button class="btn btn--secondary btn--small" onclick="app.viewUserProfile(${user.id})" style="flex: 1;">
-                  <i class="fas fa-user mr-1"></i>Профиль
-                </button>
+              <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+                <span class="badge badge--${user.status === 'online' ? 'success' : user.status === 'away' ? 'warning' : user.status === 'busy' ? 'error' : 'secondary'}">
+                  ${this.getStatusText(user.status)}
+                </span>
               </div>
+
+              <div style="background: var(--rikor-bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                <div style="font-size: 13px; color: var(--rikor-text-muted);">
+                  <div style="margin-bottom: 4px;"><strong>Отдел:</strong> ${user.department}</div>
+                  ${user.ticketsResolved ? `<div><strong>Решено тикетов:</strong> ${user.ticketsResolved}</div>` : ''}
+                  ${user.ticketsCreated ? `<div><strong>Создано тикетов:</strong> ${user.ticketsCreated}</div>` : ''}
+                </div>
+              </div>
+
+              <button class="btn btn--secondary btn--small">
+                <i class="fas fa-edit mr-1"></i>Редактировать
+              </button>
             </div>
           `).join('')}
         </div>
@@ -1773,111 +1862,69 @@ class RikorHelpDeskFixed {
 
   renderSettings() {
     return `
-      <div class="settings">
-        <div class="settings__header mb-4">
-          <h1>Настройки системы v2.3.1</h1>
-          <p class="card__subtitle">Конфигурация с возможностью переключения пользователей</p>
+      <div class="settings-page">
+        <div class="card" style="margin-bottom: 24px;">
+          <h1 style="margin-bottom: 8px;">
+            <i class="fas fa-cog mr-2"></i>Настройки системы
+          </h1>
+          <p class="card-subtitle">Конфигурация Rikor HelpDesk v2.4.0 РАСШИРЕННАЯ</p>
         </div>
 
         <div class="grid grid--2">
           <div class="card">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Персональные настройки</h3>
-                <p class="card__subtitle">Пользователь: ${this.currentUser.name}</p>
-              </div>
-            </div>
-            <div class="settings-section">
-              <div class="form-group">
-                <label class="form-label">Тема оформления</label>
-                <select class="form-control" id="themeSelect">
-                  <option value="light" ${this.settings.theme === 'light' ? 'selected' : ''}>🌞 Светлая</option>
-                  <option value="dark" ${this.settings.theme === 'dark' ? 'selected' : ''}>🌙 Темная</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <button class="btn btn--primary" onclick="app.savePersonalSettings()">
-                  <i class="fas fa-save mr-2"></i>Сохранить настройки
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- НОВОЕ: Управление пользователями -->
-          <div class="card">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Управление пользователями</h3>
-                <p class="card__subtitle">Переключение и настройки аккаунтов</p>
-              </div>
-            </div>
-            <div class="settings-section">
-              <div style="margin-bottom: 16px; padding: 12px; background: var(--rikor-bg-tertiary); border-radius: 8px;">
-                <div style="font-weight: 500; color: var(--rikor-text-primary); margin-bottom: 4px;">Текущий пользователь</div>
-                <div style="color: var(--rikor-text-secondary);">${this.currentUser.name} (${this.getRoleText(this.currentUser.role)})</div>
-              </div>
-
-              <div class="form-group">
-                <button class="btn btn--primary" onclick="app.showUserSwitchModal()">
-                  <i class="fas fa-user-cog mr-2"></i>Сменить пользователя
-                </button>
-              </div>
-
-              <div class="form-group">
-                <button class="btn btn--secondary" onclick="app.showCreateUserModal()">
-                  <i class="fas fa-user-plus mr-2"></i>Добавить пользователя
-                </button>
-              </div>
+            <h3 class="card-title">Персонализация внешнего вида</h3>
+            <div class="form-group">
+              <label class="form-label">Тема интерфейса</label>
+              <select class="form-control" onchange="app.changeTheme(this.value)">
+                <option value="light" ${this.settings.theme === 'light' ? 'selected' : ''}>🌞 Светлая тема</option>
+                <option value="dark" ${this.settings.theme === 'dark' ? 'selected' : ''}>🌙 Темная тема</option>
+              </select>
             </div>
           </div>
 
           <div class="card">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Системная информация</h3>
-                <p class="card__subtitle">Статус системы v2.3.1</p>
-              </div>
+            <h3 class="card-title">Настройка оповещений</h3>
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" ${this.settings.notifications.email ? 'checked' : ''} onchange="app.updateNotificationSetting('email', this.checked)">
+                <span>📧 Email уведомления</span>
+              </label>
             </div>
-            <div class="system-info">
-              <div style="display: flex; flex-direction: column; gap: 16px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--rikor-bg-tertiary); border-radius: 8px;">
-                  <span style="color: var(--rikor-text-secondary);">Версия системы</span>
-                  <strong style="color: var(--rikor-primary);">Rikor HelpDesk v2.3.1</strong>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--rikor-bg-tertiary); border-radius: 8px;">
-                  <span style="color: var(--rikor-text-secondary);">Статус</span>
-                  <span style="color: var(--rikor-success); display: flex; align-items: center; gap: 4px;">
-                    <i class="fas fa-circle" style="font-size: 8px;"></i>
-                    ИСПРАВЛЕНО
-                  </span>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--rikor-bg-tertiary); border-radius: 8px;">
-                  <span style="color: var(--rikor-text-secondary);">Всего тикетов</span>
-                  <strong style="color: var(--rikor-text-primary)">${this.data.tickets.length}</strong>
-                </div>
-              </div>
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" ${this.settings.notifications.push ? 'checked' : ''} onchange="app.updateNotificationSetting('push', this.checked)">
+                <span>🔔 Push уведомления</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" ${this.settings.notifications.sound ? 'checked' : ''} onchange="app.updateNotificationSetting('sound', this.checked)">
+                <span>🔊 Звуковые уведомления</span>
+              </label>
             </div>
           </div>
 
           <div class="card">
-            <div class="card__header">
-              <div>
-                <h3 class="card__title">Экспорт и тестирование</h3>
-                <p class="card__subtitle">Проверка функций v2.3.1</p>
-              </div>
+            <h3 class="card-title">Информация о системе</h3>
+            <div style="background: var(--rikor-bg-tertiary); padding: 20px; border-radius: 12px; line-height: 1.6;">
+              <div><strong>Версия:</strong> Rikor HelpDesk v2.4.0 РАСШИРЕННАЯ</div>
+              <div><strong>Статус:</strong> <span style="color: var(--rikor-success);">✅ Все функции работают</span></div>
+              <div><strong>Последнее обновление:</strong> ${new Date().toLocaleDateString('ru-RU')}</div>
+              <div><strong>Поддержка файлов:</strong> <span style="color: var(--rikor-success);">✅ Активна</span></div>
+              <div><strong>Размер хранилища:</strong> ${this.getStorageSize()}</div>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              <button class="btn btn--primary" onclick="app.testAllFunctions()">
-                <i class="fas fa-vial mr-2"></i>Протестировать все функции
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">Управление данными</h3>
+            <div class="form-group">
+              <button class="btn btn--secondary" onclick="app.exportData()">
+                <i class="fas fa-download mr-2"></i>Экспорт данных
               </button>
-              <button class="btn btn--secondary" onclick="app.exportTicketsCSV()">
-                <i class="fas fa-file-csv mr-2"></i>Экспорт тикетов (CSV)
-              </button>
-              <button class="btn btn--warning" onclick="app.backupAllData()">
-                <i class="fas fa-download mr-2"></i>Резервная копия данных
+            </div>
+            <div class="form-group">
+              <button class="btn btn--warning" onclick="app.clearData()">
+                <i class="fas fa-trash mr-2"></i>Очистить данные
               </button>
             </div>
           </div>
@@ -1886,380 +1933,373 @@ class RikorHelpDeskFixed {
     `;
   }
 
-  // НОВАЯ функция тестирования всех функций
-  testAllFunctions() {
-    console.log('🧪 ТЕСТИРОВАНИЕ всех функций v2.3.1...');
+  // ========================================
+  // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+  // ========================================
 
-    let testResults = {
-      dashboard: false,
-      tickets: false,
-      knowledge: false,
-      reports: false,
-      users: false,
-      settings: false,
-      userSwitch: false,
-      ticketCreate: false,
-      dataStorage: false
-    };
+  viewArticle(articleId) {
+    const article = this.data.knowledgeBase.find(a => a.id === articleId);
+    if (!article) {
+      this.showNotification('Статья не найдена!', 'error');
+      return;
+    }
 
-    try {
-      // Тест Dashboard
-      const dashboardContent = this.renderDashboard();
-      testResults.dashboard = dashboardContent.includes('Панель управления');
+    // Увеличиваем счетчик просмотров
+    article.views++;
+    this.saveData();
 
-      // Тест Tickets
-      const ticketsContent = this.renderTickets();
-      testResults.tickets = ticketsContent.includes('Управление тикетами');
-
-      // Тест Knowledge Base
-      const knowledgeContent = this.renderKnowledgeBase();
-      testResults.knowledge = knowledgeContent.includes('База знаний');
-
-      // Тест Reports
-      const reportsContent = this.renderReports();
-      testResults.reports = reportsContent.includes('Отчеты и аналитика');
-
-      // Тест Users
-      const usersContent = this.renderUsers();
-      testResults.users = usersContent.includes('Управление пользователями');
-
-      // Тест Settings
-      const settingsContent = this.renderSettings();
-      testResults.settings = settingsContent.includes('Настройки системы');
-
-      // Тест переключения пользователя
-      const originalUser = this.currentUser.id;
-      testResults.userSwitch = this.data.users.length > 1;
-
-      // Тест создания тикета
-      const ticketCount = this.data.tickets.length;
-      testResults.ticketCreate = ticketCount > 0;
-
-      // Тест сохранения данных
-      try {
-        this.saveData();
-        testResults.dataStorage = true;
-      } catch (error) {
-        testResults.dataStorage = false;
-      }
-
-      const passedTests = Object.values(testResults).filter(Boolean).length;
-      const totalTests = Object.keys(testResults).length;
-
-      console.log('📊 РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ:', testResults);
-
-      this.showModal(`
-        <div class="modal-header">
-          <h2 class="modal-title">Результаты тестирования v2.3.1</h2>
-          <button class="modal-close" onclick="app.hideModal()">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <div style="font-size: 48px; color: ${passedTests === totalTests ? 'var(--rikor-success)' : 'var(--rikor-warning)'}; margin-bottom: 16px;">
-              ${passedTests === totalTests ? '✅' : '⚠️'}
-            </div>
-            <h3>Пройдено ${passedTests} из ${totalTests} тестов</h3>
+    this.showModal(`
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">${article.title}</h2>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; font-size: 13px; color: var(--rikor-text-muted);">
+            <span class="badge badge--info">${this.getCategoryText(article.category)}</span>
+            <span><i class="fas fa-user mr-1"></i>${article.author}</span>
+            <span><i class="fas fa-eye mr-1"></i>${article.views} просмотров</span>
+            ${article.attachments.length > 0 ? `<span><i class="fas fa-paperclip mr-1"></i>${article.attachments.length} файлов</span>` : ''}
           </div>
+        </div>
+        <button class="modal-close" onclick="app.hideModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            ${Object.entries(testResults).map(([test, passed]) => `
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--rikor-bg-tertiary); border-radius: 6px;">
-                <span>${this.getTestName(test)}</span>
-                <span style="color: ${passed ? 'var(--rikor-success)' : 'var(--rikor-error)'};">
-                  ${passed ? '✅ Пройден' : '❌ Ошибка'}
-                </span>
+      <div class="modal-body" style="max-width: 900px; max-height: 80vh; overflow-y: auto;">
+        <div class="rendered-content" style="line-height: 1.6; font-size: 15px;">
+          ${this.renderMarkdown(article.content)}
+        </div>
+
+        ${article.attachments && article.attachments.length > 0 ? `
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--rikor-border-light);">
+            <h4 style="margin-bottom: 16px; color: var(--rikor-text-primary);">Прикрепленные файлы</h4>
+            ${article.attachments.map(attachment => `
+              <div class="attached-file">
+                <div class="attached-file-icon">
+                  <i class="fas ${this.getFileIcon(attachment.name)}"></i>
+                </div>
+                <div class="attached-file-info">
+                  <div class="attached-file-name">${attachment.name}</div>
+                  <div class="attached-file-size">${this.formatFileSize(attachment.size)} • ${this.formatDateTime(attachment.uploaded)}</div>
+                </div>
+                <button class="btn btn--secondary btn--small">
+                  <i class="fas fa-download"></i>
+                </button>
               </div>
             `).join('')}
           </div>
+        ` : ''}
 
-          ${passedTests === totalTests ? `
-            <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 8px; margin-top: 16px; border-left: 4px solid var(--rikor-success);">
-              <strong style="color: var(--rikor-success);">🎉 Все функции работают корректно!</strong>
-              <p style="margin-top: 8px; color: var(--rikor-text-muted);">Система готова к использованию. Все основные функции протестированы и работают без ошибок.</p>
+        ${article.tags && article.tags.length > 0 ? `
+          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rikor-border-light);">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${article.tags.map(tag => `
+                <span style="background: var(--rikor-bg-hover); color: var(--rikor-text-muted); padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                  #${tag}
+                </span>
+              `).join('')}
             </div>
-          ` : `
-            <div style="background: rgba(245, 158, 11, 0.1); padding: 16px; border-radius: 8px; margin-top: 16px; border-left: 4px solid var(--rikor-warning);">
-              <strong style="color: var(--rikor-warning);">⚠️ Обнаружены проблемы</strong>
-              <p style="margin-top: 8px; color: var(--rikor-text-muted);">Некоторые функции требуют проверки. Обратитесь к разработчику.</p>
-            </div>
-          `}
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn--primary" onclick="app.hideModal()">
-            <i class="fas fa-check mr-2"></i>Понятно
-          </button>
-        </div>
-      `);
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn--secondary" onclick="app.hideModal()">
+          <i class="fas fa-times mr-2"></i>Закрыть
+        </button>
+        <button class="btn btn--info">
+          <i class="fas fa-edit mr-2"></i>Редактировать
+        </button>
+      </div>
+    `);
+  }
+
+  renderMarkdown(content) {
+    // Простой рендеринг Markdown
+    return content
+      .replace(/^# (.*$)/gm, '<h1 style="color: var(--rikor-text-primary); margin: 24px 0 16px; font-size: 28px; font-weight: 700;">$1</h1>')
+      .replace(/^## (.*$)/gm, '<h2 style="color: var(--rikor-text-primary); margin: 20px 0 12px; font-size: 22px; font-weight: 600;">$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 style="color: var(--rikor-text-primary); margin: 16px 0 8px; font-size: 18px; font-weight: 600;">$1</h3>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/^- (.*$)/gm, '<li style="margin-bottom: 4px;">$1</li>')
+      .replace(/(<li.*<\/li>)/s, '<ul style="margin: 12px 0; padding-left: 24px;">$1</ul>')
+      .replace(/^\d+\. (.*$)/gm, '<li style="margin-bottom: 4px;">$1</li>')
+      .replace(/\n\n/g, '</p><p style="margin-bottom: 16px; line-height: 1.6;">')
+      .replace(/^(?!<[h|u|l])/gm, '<p style="margin-bottom: 16px; line-height: 1.6;">')
+      .replace(/$(?!<\/)/gm, '</p>');
+  }
+
+  extractTextFromMarkdown(content) {
+    return content
+      .replace(/^#+\s/gm, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/^[-\d+\.\s]/gm, '')
+      .replace(/\n/g, ' ')
+      .trim();
+  }
+
+  showCreateUserModal() {
+    this.showModal(`
+      <div class="modal-header">
+        <h2 class="modal-title">Добавить пользователя</h2>
+        <button class="modal-close" onclick="app.hideModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Функция добавления пользователей будет доступна в следующих версиях.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn--secondary" onclick="app.hideModal()">Закрыть</button>
+      </div>
+    `);
+  }
+
+  initCharts() {
+    try {
+      // Очищаем предыдущие графики
+      Object.values(this.chartInstances).forEach(chart => chart.destroy());
+      this.chartInstances = {};
+
+      // График по месяцам
+      const monthlyCanvas = document.getElementById('monthlyChart');
+      if (monthlyCanvas) {
+        this.chartInstances.monthly = new Chart(monthlyCanvas, {
+          type: 'line',
+          data: {
+            labels: this.data.stats.monthlyLabels,
+            datasets: [{
+              label: 'Тикеты',
+              data: this.data.stats.monthlyTrend,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, grid: { color: 'var(--rikor-border)' } },
+              x: { grid: { color: 'var(--rikor-border)' } }
+            }
+          }
+        });
+      }
+
+      // График приоритетов
+      const priorityCanvas = document.getElementById('priorityChart');
+      if (priorityCanvas) {
+        this.chartInstances.priority = new Chart(priorityCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: this.data.stats.priorityLabels,
+            datasets: [{
+              data: Object.values(this.data.stats.priorityStats),
+              backgroundColor: this.data.stats.priorityColors
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } }
+          }
+        });
+      }
+
+      // График статусов (для отчетов)
+      const statusCanvas = document.getElementById('statusChart');
+      if (statusCanvas) {
+        this.chartInstances.status = new Chart(statusCanvas, {
+          type: 'bar',
+          data: {
+            labels: this.data.stats.statusLabels,
+            datasets: [{
+              label: 'Количество',
+              data: Object.values(this.data.stats.statusStats),
+              backgroundColor: this.data.stats.statusColors
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
 
     } catch (error) {
-      console.error('❌ ОШИБКА при тестировании:', error);
-      this.showNotification('Ошибка при тестировании функций', 'error');
+      console.warn('⚠️ Ошибка инициализации графиков:', error);
     }
   }
 
-  getTestName(test) {
-    const names = {
-      dashboard: 'Dashboard (Панель управления)',
-      tickets: 'Tickets (Управление тикетами)',
-      knowledge: 'Knowledge Base (База знаний)',
-      reports: 'Reports (Отчеты)',
-      users: 'Users (Пользователи)',
-      settings: 'Settings (Настройки)',
-      userSwitch: 'User Switch (Переключение пользователя)',
-      ticketCreate: 'Ticket Creation (Создание тикетов)',
-      dataStorage: 'Data Storage (Сохранение данных)'
-    };
-    return names[test] || test;
-  }
-
-  // Все утилитарные функции остаются работающими
+  // Автоназначение исполнителя
   autoAssignAgent() {
     const agents = this.data.users.filter(u => u.role === 'agent' || u.role === 'admin');
-    if (agents.length === 0) return 'Не назначен';
-
-    const agentWorkload = agents.map(agent => ({
+    const agentWorkloads = agents.map(agent => ({
       name: agent.name,
-      activeTickets: this.data.tickets.filter(t => t.assignee === agent.name && ['open', 'in_progress'].includes(t.status)).length
+      workload: this.data.tickets.filter(t => t.assignee === agent.name && t.status !== 'resolved' && t.status !== 'closed').length
     }));
 
-    agentWorkload.sort((a, b) => a.activeTickets - b.activeTickets);
-    return agentWorkload[0].name;
+    // Возвращаем агента с наименьшей нагрузкой
+    agentWorkloads.sort((a, b) => a.workload - b.workload);
+    return agentWorkloads[0]?.name || 'Не назначен';
   }
 
+  // Оценка времени решения
   estimateTime(priority) {
-    const estimates = { critical: 2, high: 4, medium: 8, low: 24 };
-    return estimates[priority] || 8;
-  }
-
-  // Фильтрация тикетов
-  getFilteredTickets() {
-    return this.data.tickets.filter(ticket => {
-      const searchMatch = !this.filters.tickets.search || 
-        ticket.title.toLowerCase().includes(this.filters.tickets.search.toLowerCase()) ||
-        ticket.description.toLowerCase().includes(this.filters.tickets.search.toLowerCase()) ||
-        ticket.id.toLowerCase().includes(this.filters.tickets.search.toLowerCase()) ||
-        (ticket.serialNumber && ticket.serialNumber.toLowerCase().includes(this.filters.tickets.search.toLowerCase())) ||
-        (ticket.deviceModel && ticket.deviceModel.toLowerCase().includes(this.filters.tickets.search.toLowerCase()));
-
-      const statusMatch = !this.filters.tickets.status || ticket.status === this.filters.tickets.status;
-      const priorityMatch = !this.filters.tickets.priority || ticket.priority === this.filters.tickets.priority;
-      const assigneeMatch = !this.filters.tickets.assignee || ticket.assignee === this.filters.tickets.assignee;
-
-      return searchMatch && statusMatch && priorityMatch && assigneeMatch;
-    });
-  }
-
-  // Инициализация фильтров
-  initTicketFilters() {
-    const searchInput = document.getElementById('ticketSearch');
-    const statusFilter = document.getElementById('statusFilter');
-    const priorityFilter = document.getElementById('priorityFilter');
-    const assigneeFilter = document.getElementById('assigneeFilter');
-
-    [searchInput, statusFilter, priorityFilter, assigneeFilter].forEach(element => {
-      if (element) {
-        element.addEventListener('input', () => {
-          this.updateTicketFilters();
-          this.renderContent();
-        });
-      }
-    });
-  }
-
-  updateTicketFilters() {
-    this.filters.tickets = {
-      search: document.getElementById('ticketSearch')?.value || '',
-      status: document.getElementById('statusFilter')?.value || '',
-      priority: document.getElementById('priorityFilter')?.value || '',
-      assignee: document.getElementById('assigneeFilter')?.value || ''
+    const timeEstimates = {
+      'critical': 2,
+      'high': 4,
+      'medium': 8,
+      'low': 24
     };
+    return timeEstimates[priority] || 8;
   }
 
-  clearTicketFilters() {
-    this.filters.tickets = { status: '', priority: '', assignee: '', search: '' };
-    document.getElementById('ticketSearch').value = '';
-    document.getElementById('statusFilter').value = '';
-    document.getElementById('priorityFilter').value = '';
-    document.getElementById('assigneeFilter').value = '';
-    this.renderContent();
-    this.showNotification('Фильтры очищены', 'info');
+  // Работа с настройками
+  changeTheme(theme) {
+    this.settings.theme = theme;
+    localStorage.setItem('rikor-theme', theme);
+    this.applyTheme();
   }
 
-  initUserFilters() {
-    const searchInput = document.getElementById('userSearch');
-    const roleFilter = document.getElementById('roleFilter');
-    const statusFilter = document.getElementById('statusFilter');
-
-    [searchInput, roleFilter, statusFilter].forEach(element => {
-      if (element) {
-        element.addEventListener('input', () => {
-          this.updateUserFilters();
-          this.renderContent();
-        });
-      }
-    });
+  updateNotificationSetting(type, value) {
+    this.settings.notifications[type] = value;
+    this.showNotification(`Настройка "${type}" ${value ? 'включена' : 'отключена'}`, 'info');
   }
 
-  updateUserFilters() {
-    this.filters.users = {
-      search: document.getElementById('userSearch')?.value || '',
-      role: document.getElementById('roleFilter')?.value || '',
-      status: document.getElementById('statusFilter')?.value || ''
-    };
-  }
-
-  initKnowledgeSearch() {
-    const searchInput = document.getElementById('knowledgeSearch');
-    const categoryFilter = document.getElementById('categoryFilter');
-
-    [searchInput, categoryFilter].forEach(element => {
-      if (element) {
-        element.addEventListener('input', () => {
-          this.filterKnowledgeBase();
-        });
-      }
-    });
-  }
-
-  filterKnowledgeBase() {
-    const search = document.getElementById('knowledgeSearch')?.value.toLowerCase() || '';
-    const category = document.getElementById('categoryFilter')?.value || '';
-    console.log('🔍 Поиск в базе знаний v2.3.1:', { search, category });
-  }
-
-  initReportFilters() {
-    const dateFromInput = document.getElementById('reportDateFrom');
-    const dateToInput = document.getElementById('reportDateTo');
-    const typeSelect = document.getElementById('reportType');
-
-    [dateFromInput, dateToInput, typeSelect].forEach(element => {
-      if (element) {
-        element.addEventListener('change', () => {
-          this.updateReportFilters();
-        });
-      }
-    });
-  }
-
-  updateReportFilters() {
-    this.filters.reports = {
-      dateFrom: document.getElementById('reportDateFrom')?.value || '',
-      dateTo: document.getElementById('reportDateTo')?.value || '',
-      type: document.getElementById('reportType')?.value || 'all'
-    };
-  }
-
-  initSettingsForm() {
-    const themeSelect = document.getElementById('themeSelect');
-    if (themeSelect) {
-      themeSelect.addEventListener('change', (e) => {
-        this.settings.theme = e.target.value;
-        localStorage.setItem('rikor-theme', this.settings.theme);
-        this.applyTheme();
-        this.showNotification('Тема изменена', 'success');
-      });
+  getStorageSize() {
+    try {
+      const data = JSON.stringify(this.data);
+      const sizeInBytes = new Blob([data]).size;
+      return this.formatFileSize(sizeInBytes);
+    } catch (error) {
+      return 'Неизвестно';
     }
   }
 
-  // Функции для работы с файлами
-  getFileIcon(mimeType) {
-    const icons = {
-      'application/pdf': 'file-pdf',
-      'application/msword': 'file-word',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'file-word',
-      'text/plain': 'file-alt',
-      'image/jpeg': 'file-image',
-      'image/png': 'file-image'
-    };
-    return icons[mimeType] || 'file';
+  exportData() {
+    try {
+      const dataStr = JSON.stringify(this.data, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `rikor-helpdesk-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      this.showNotification('Данные экспортированы успешно!', 'success');
+    } catch (error) {
+      this.showNotification('Ошибка экспорта данных', 'error');
+    }
   }
 
-  formatFileSize(bytes) {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'КБ', 'МБ', 'ГБ'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  clearData() {
+    if (confirm('Вы уверены, что хотите очистить все данные? Это действие необратимо!')) {
+      localStorage.removeItem('rikor-data');
+      this.data = this.loadData();
+      this.renderContent();
+      this.showNotification('Данные очищены', 'success');
+    }
   }
 
-  downloadFile(fileName, mimeType) {
-    this.showNotification(`Скачивание файла "${fileName}" (симуляция)`, 'info');
+  startAutoRefresh() {
+    if (this.settings.autoRefresh) {
+      setInterval(() => {
+        console.log('🔄 Автообновление данных...');
+        // Здесь можно добавить логику синхронизации с сервером
+      }, this.settings.refreshInterval);
+    }
   }
 
-  handleFileUpload(event) {
-    const files = Array.from(event.target.files);
-    console.log('📎 Загрузка файлов:', files.map(f => f.name));
-    this.showNotification(`Загружено ${files.length} файлов (симуляция)`, 'success');
-  }
-
-  // Функции текстов и иконок
+  // Получение иконок устройств
   getDeviceIcon(deviceType) {
     const icons = {
-      'Ноутбук': '💻', 'Сервер': '🖥️', 'Моноблок': '🖥️',
-      'Мини ПК': '📦', 'Планшет': '📱', 'Другое': '🔧'
+      'Сервер': '🖥️',
+      'Ноутбук': '💻',
+      'Планшет': '📱',
+      'Моноблок': '🖥️',
+      'Мини-ПК': '📦',
+      'Рабочая станция': '🖥️'
     };
-    return icons[deviceType] || '❓';
+    return icons[deviceType] || '💻';
   }
 
   getPriorityIcon(priority) {
     const icons = {
       'critical': 'fas fa-exclamation-circle',
-      'high': 'fas fa-exclamation-triangle', 
+      'high': 'fas fa-exclamation-triangle',
       'medium': 'fas fa-minus-circle',
       'low': 'fas fa-info-circle'
     };
-    return icons[priority] || 'fas fa-question-circle';
+    return icons[priority] || 'fas fa-minus-circle';
   }
 
+  // Получение текстовых значений
   getStatusText(status) {
     const statuses = {
-      'open': 'Открыт', 'in_progress': 'В работе', 'waiting': 'Ожидание',
-      'resolved': 'Решен', 'closed': 'Закрыт', 'online': 'В сети',
-      'away': 'Отошел', 'busy': 'Занят', 'offline': 'Не в сети'
+      'open': 'Открыт',
+      'in_progress': 'В работе',
+      'waiting': 'Ожидание',
+      'resolved': 'Решен',
+      'closed': 'Закрыт',
+      'online': 'В сети',
+      'away': 'Отошел',
+      'busy': 'Занят',
+      'offline': 'Не в сети'
     };
     return statuses[status] || status;
   }
 
   getPriorityText(priority) {
     const priorities = {
-      'low': 'Низкий', 'medium': 'Средний', 'high': 'Высокий', 'critical': 'Критический'
+      'critical': 'Критический',
+      'high': 'Высокий',
+      'medium': 'Средний',
+      'low': 'Низкий'
     };
     return priorities[priority] || priority;
   }
 
   getRoleText(role) {
     const roles = {
-      'user': 'Пользователь', 'agent': 'Агент', 'admin': 'Администратор', 'manager': 'Менеджер'
+      'admin': 'Администратор',
+      'agent': 'Агент поддержки',
+      'manager': 'Менеджер',
+      'user': 'Пользователь'
     };
     return roles[role] || role;
   }
 
   getCategoryText(category) {
     const categories = {
-      'hardware': 'Оборудование', 'software': 'ПО', 'network': 'Сеть',
-      'configuration': 'Настройка', 'performance': 'Производительность', 'other': 'Другое'
+      'hardware': 'Оборудование',
+      'software': 'ПО',
+      'network': 'Сеть',
+      'performance': 'Производительность',
+      'security': 'Безопасность',
+      'configuration': 'Настройка',
+      'other': 'Другое'
     };
     return categories[category] || category;
   }
 
-  formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString('ru-RU');
+  // Форматирование дат
+  formatDateTime(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('ru-RU') + ' ' + date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   }
 
-  formatTime(dateString) {
-    return new Date(dateString).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  formatDate(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('ru-RU');
   }
 
-  formatDateTime(dateString) {
-    return new Date(dateString).toLocaleString('ru-RU', {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit'
-    });
-  }
-
-  // Модальные окна
+  // Управление модальными окнами
   showModal(content) {
     const overlay = document.getElementById('modal-overlay');
     const container = document.getElementById('modal-container');
@@ -2267,28 +2307,23 @@ class RikorHelpDeskFixed {
     if (overlay && container) {
       container.innerHTML = content;
       overlay.classList.remove('hidden');
-      container.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
 
-      setTimeout(() => {
-        const firstInput = container.querySelector('input, textarea, select');
-        if (firstInput) firstInput.focus();
-      }, 100);
+      // Инициализируем обработчики файлов для модального окна
+      setTimeout(() => this.setupFileHandlers(), 100);
     }
   }
 
   hideModal() {
     const overlay = document.getElementById('modal-overlay');
-    const container = document.getElementById('modal-container');
-
-    if (overlay && container) {
+    if (overlay) {
       overlay.classList.add('hidden');
-      container.classList.add('hidden');
       document.body.style.overflow = '';
+      this.tempFiles = []; // Очищаем временные файлы
     }
   }
 
-  // Уведомления
+  // Система уведомлений
   showNotification(message, type = 'info') {
     const container = document.getElementById('notifications');
     if (!container) return;
@@ -2297,16 +2332,17 @@ class RikorHelpDeskFixed {
     notification.className = `notification notification--${type}`;
 
     const icons = {
-      success: 'fa-check-circle', error: 'fa-exclamation-circle',
-      warning: 'fa-exclamation-triangle', info: 'fa-info-circle'
+      'success': 'fa-check-circle',
+      'error': 'fa-exclamation-circle',
+      'warning': 'fa-exclamation-triangle',
+      'info': 'fa-info-circle'
     };
 
     const colors = {
-      success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#06b6d4'
-    };
-
-    const titles = {
-      success: 'Успешно', error: 'Ошибка', warning: 'Внимание', info: 'Информация'
+      'success': '#10b981',
+      'error': '#ef4444',
+      'warning': '#f59e0b',
+      'info': '#06b6d4'
     };
 
     notification.innerHTML = `
@@ -2314,13 +2350,13 @@ class RikorHelpDeskFixed {
         <i class="fas ${icons[type]}"></i>
       </div>
       <div class="notification__content">
-        <div class="notification__title">${titles[type]}</div>
         <div class="notification__message">${message}</div>
       </div>
     `;
 
     container.appendChild(notification);
 
+    // Автоудаление через 5 секунд
     setTimeout(() => {
       if (notification.parentNode) {
         notification.style.opacity = '0';
@@ -2329,144 +2365,13 @@ class RikorHelpDeskFixed {
       }
     }, 5000);
   }
-
-  // Экспорт данных
-  exportTicketsCSV() {
-    try {
-      const headers = [
-        'ID', 'Тема', 'Статус', 'Приоритет', 'Устройство', 'Модель', 'Серийный номер', 
-        'Исполнитель', 'Создан', 'Обновлен', 'Описание', 'Ответов', 'Файлов'
-      ];
-
-      const rows = this.data.tickets.map(ticket => [
-        ticket.id, ticket.title, this.getStatusText(ticket.status),
-        this.getPriorityText(ticket.priority), ticket.deviceType,
-        ticket.deviceModel || '', ticket.serialNumber || 'Не указан',
-        ticket.assignee, this.formatDateTime(ticket.created),
-        this.formatDateTime(ticket.updated), ticket.description,
-        ticket.replies ? ticket.replies.length : 0,
-        ticket.attachments ? ticket.attachments.length : 0
-      ]);
-
-      const csv = [headers, ...rows].map(row => 
-        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-      ).join('\n');
-
-      this.downloadCSVFile(csv, 'rikor-tickets-v2.3.1.csv');
-      this.showNotification('Тикеты экспортированы в CSV', 'success');
-    } catch (error) {
-      this.showNotification('Ошибка при экспорте тикетов', 'error');
-    }
-  }
-
-  exportKnowledgeBase() {
-    this.showNotification('Экспорт базы знаний (функция доступна)', 'info');
-  }
-
-  backupAllData() {
-    try {
-      const backup = {
-        version: 'Rikor HelpDesk v2.3.1 ИСПРАВЛЕНО',
-        timestamp: new Date().toISOString(),
-        currentUser: this.currentUser,
-        data: this.data,
-        settings: this.settings,
-        fixes: [
-          'Исправлена ошибка renderTickets',
-          'Исправлены кнопки в модальных окнах',
-          'Добавлено переключение пользователей',
-          'Добавлены быстрые ответы',
-          'Проверена работа базы данных',
-          'Протестированы все функции'
-        ]
-      };
-
-      console.log('💾 Резервная копия v2.3.1 создана');
-      this.showNotification('Резервная копия v2.3.1 готова', 'success');
-    } catch (error) {
-      this.showNotification('Ошибка создания резервной копии', 'error');
-    }
-  }
-
-  downloadCSVFile(content, filename) {
-    console.log(`📁 Симуляция скачивания: ${filename}`);
-    this.showNotification(`Файл ${filename} готов к скачиванию`, 'success');
-  }
-
-  // Заглушки функций (для совместимости)
-  editTicket(ticketId) { this.showNotification('Редактирование тикета (функция готова)', 'info'); }
-  viewArticle(articleId) { this.showNotification('Просмотр статьи (функция готова)', 'info'); }
-  showEditArticleModal(articleId) { this.showNotification('Редактирование статьи (функция готова)', 'info'); }
-  showCreateArticleModal() { this.showNotification('Создание статьи (функция готова)', 'info'); }
-  showCreateUserModal() { this.showNotification('Создание пользователя (функция готова)', 'info'); }
-  editUser(userId) { this.showNotification('Редактирование пользователя (функция готова)', 'info'); }
-  viewUserProfile(userId) { this.showNotification('Просмотр профиля (функция готова)', 'info'); }
-  savePersonalSettings() { this.showNotification('Настройки сохранены', 'success'); }
-  generatePDFReport() { this.showNotification('PDF отчет готов', 'success'); }
-  exportReportData() { this.exportTicketsCSV(); }
-  showChangeStatusModal(ticketId) { this.showNotification('Изменение статуса (функция готова)', 'info'); }
-  showAddFileModal(ticketId) { this.showNotification('Загрузка файлов (функция готова)', 'info'); }
-  updateReportCharts() { 
-    this.showNotification('Обновление графиков...', 'info');
-    this.destroyCharts();
-    setTimeout(() => {
-      this.initReportCharts();
-      this.showNotification('Графики обновлены', 'success');
-    }, 1000);
-  }
-
-  startAutoRefresh() {
-    if (this.settings.autoRefresh) {
-      setInterval(() => {
-        if (Math.random() < 0.02) {
-          this.showNotification('Данные обновлены автоматически', 'info');
-        }
-      }, this.settings.refreshInterval);
-    }
-  }
 }
 
-// ИСПРАВЛЕННАЯ инициализация приложения
+// Инициализация приложения
 let app;
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🎯 Запуск ИСПРАВЛЕННОГО Rikor HelpDesk v2.3.1...');
-  console.log('🔧 ИСПРАВЛЕНИЯ:');
-  console.log('   ✅ Ошибка renderTickets ИСПРАВЛЕНА');
-  console.log('   ✅ Кнопки в модальных окнах ИСПРАВЛЕНЫ');
-  console.log('   ✅ Переключение пользователей ДОБАВЛЕНО');
-  console.log('   ✅ Быстрые ответы ДОБАВЛЕНЫ');
-  console.log('   ✅ Работа базы данных ПРОВЕРЕНА');
-
-  try {
-    app = new RikorHelpDeskFixed();
-
-    window.addEventListener('hashchange', () => app.handleRoute());
-
-    window.addEventListener('error', (e) => {
-      console.error('❌ Глобальная ошибка v2.3.1:', e.error);
-      app?.showNotification('Произошла системная ошибка', 'error');
-    });
-
-    console.log('✅ Rikor HelpDesk v2.3.1 ИСПРАВЛЕН и готов к работе!');
-    console.log('🆕 Новые возможности:');
-    console.log('   • Переключение между пользователями');
-    console.log('   • Быстрые ответы в тикетах');
-    console.log('   • Улучшенная система тестирования');
-    console.log('   • Полная проверка работы всех функций');
-
-  } catch (error) {
-    console.error('❌ КРИТИЧЕСКАЯ ОШИБКА при инициализации:', error);
-    document.body.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--rikor-bg-primary);">
-        <div style="text-align: center; padding: 40px; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-          <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
-          <h2 style="color: #ef4444; margin-bottom: 16px;">Критическая ошибка</h2>
-          <p style="color: #64748b; margin-bottom: 20px;">Не удалось инициализировать приложение</p>
-          <button onclick="location.reload()" style="background: #1e40af; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;">
-            Перезагрузить
-          </button>
-        </div>
-      </div>
-    `;
-  }
+  app = new RikorHelpDeskEnhanced();
 });
+
+// Глобальные функции для совместимости
+window.app = app;

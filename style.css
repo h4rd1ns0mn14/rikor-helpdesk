@@ -1,4 +1,4 @@
-/* Rikor HelpDesk v2.3.1 - ИСПРАВЛЕННАЯ версия с переключением пользователей и быстрыми ответами */
+/* Rikor HelpDesk v2.4.0 - РАСШИРЕННАЯ ВЕРСИЯ с поддержкой файлов */
 
 :root {
   /* Корпоративная палитра Rikor */
@@ -7,7 +7,6 @@
   --rikor-primary-dark: #1e3a8a;
   --rikor-secondary: #64748b;
   --rikor-accent: #0ea5e9;
-
   --rikor-success: #10b981;
   --rikor-warning: #f59e0b;
   --rikor-error: #ef4444;
@@ -19,16 +18,15 @@
   --rikor-bg-tertiary: #f1f5f9;
   --rikor-bg-hover: #e2e8f0;
   --rikor-bg-active: #cbd5e1;
-
   --rikor-text-primary: #1e293b;
   --rikor-text-secondary: #475569;
   --rikor-text-muted: #64748b;
   --rikor-text-light: #94a3b8;
-
   --rikor-border: #e2e8f0;
   --rikor-border-light: #f1f5f9;
   --rikor-border-dark: #cbd5e1;
 
+  /* Цвета меню для светлой темы */
   --menu-active-bg: linear-gradient(135deg, #dbeafe, #f0f9ff);
   --menu-active-text: #1e40af;
   --menu-active-border: #3b82f6;
@@ -36,33 +34,34 @@
   --menu-hover-text: #1e3a8a;
   --menu-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 
+  /* Тени */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
+  /* Переходы */
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ИСПРАВЛЕННАЯ ТЕМНАЯ ТЕМА */
+/* ИСПРАВЛЕННАЯ ТЕМНАЯ ТЕМА с улучшенными цветами меню */
 [data-theme="dark"] {
   --rikor-bg-primary: #0f172a;
   --rikor-bg-secondary: #1e293b;
   --rikor-bg-tertiary: #334155;
   --rikor-bg-hover: #475569;
   --rikor-bg-active: #64748b;
-
   --rikor-text-primary: #f1f5f9;
   --rikor-text-secondary: #cbd5e1;
   --rikor-text-muted: #94a3b8;
   --rikor-text-light: #64748b;
-
   --rikor-border: #334155;
   --rikor-border-light: #475569;
   --rikor-border-dark: #64748b;
 
+  /* УЛУЧШЕННЫЕ цвета меню для темной темы - более читаемые и контрастные */
   --menu-active-bg: linear-gradient(135deg, #1e40af, #3b82f6);
   --menu-active-text: #ffffff;
   --menu-active-border: #60a5fa;
@@ -70,6 +69,7 @@
   --menu-hover-text: #dbeafe;
   --menu-focus-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 
+  /* Улучшенные тени для темной темы */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
@@ -98,7 +98,7 @@ body {
   min-height: 100vh;
 }
 
-/* Боковая панель остается без изменений */
+/* Улучшенная боковая панель */
 .sidebar {
   width: 280px;
   background: var(--rikor-bg-secondary);
@@ -174,6 +174,12 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: var(--menu-focus-shadow);
+}
+
+/* ИСПРАВЛЕННАЯ навигация с улучшенными цветами для темной темы */
 .sidebar__nav {
   flex: 1;
   padding: 20px 0;
@@ -194,6 +200,7 @@ body {
   font-size: 14px;
 }
 
+/* Улучшенное состояние hover - работает в обеих темах */
 .sidebar__link:hover {
   background: var(--menu-hover-bg);
   color: var(--menu-hover-text);
@@ -201,6 +208,7 @@ body {
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
 }
 
+/* ИСПРАВЛЕННОЕ активное состояние - отлично читается в темной теме */
 .sidebar__link.active {
   background: var(--menu-active-bg);
   color: var(--menu-active-text);
@@ -210,19 +218,6 @@ body {
     0 2px 8px rgba(59, 130, 246, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transform: translateX(4px);
-}
-
-.sidebar__link.active::before {
-  content: '';
-  position: absolute;
-  left: -12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 24px;
-  background: var(--menu-active-text);
-  border-radius: 0 2px 2px 0;
-  opacity: 0.8;
 }
 
 .sidebar__badge {
@@ -236,51 +231,6 @@ body {
   min-width: 20px;
   text-align: center;
   line-height: 1.2;
-  animation: pulse 2s infinite;
-}
-
-/* НОВЫЕ: Стили для переключения пользователей */
-.sidebar__user-switcher {
-  padding: 16px 20px;
-  border-top: 1px solid var(--rikor-border-light);
-  border-bottom: 1px solid var(--rikor-border-light);
-  margin: 8px 12px;
-  border-radius: 8px;
-  background: var(--rikor-bg-tertiary);
-}
-
-.user-switcher-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--rikor-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.user-switcher-select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--rikor-border);
-  border-radius: 6px;
-  background: var(--rikor-bg-secondary);
-  color: var(--rikor-text-primary);
-  font-size: 12px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.user-switcher-select:hover {
-  border-color: var(--rikor-primary);
-}
-
-.user-switcher-select:focus {
-  outline: none;
-  border-color: var(--rikor-primary);
-  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
 }
 
 .sidebar__profile {
@@ -378,7 +328,7 @@ body {
   transform: translateY(-1px);
 }
 
-.card__header {
+.card-header, .card__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -387,213 +337,79 @@ body {
   border-bottom: 1px solid var(--rikor-border-light);
 }
 
-.card__title {
+.card-title, .card__title {
   font-size: 20px;
   font-weight: 600;
   color: var(--rikor-text-primary);
   margin-bottom: 4px;
 }
 
-.card__subtitle {
+.card-subtitle, .card__subtitle {
   font-size: 14px;
   color: var(--rikor-text-muted);
   line-height: 1.5;
 }
 
-/* НОВЫЕ: Стили для быстрых ответов */
-.quick-replies-panel {
-  position: fixed;
-  top: 50%;
-  right: 24px;
-  transform: translateY(-50%);
-  width: 320px;
-  max-height: 500px;
+/* Статистические карточки */
+.stat-card {
   background: var(--rikor-bg-secondary);
-  border: 1px solid var(--rikor-border);
   border-radius: 16px;
-  box-shadow: var(--shadow-xl);
-  z-index: 1000;
-  overflow: hidden;
-  transition: all var(--transition-normal);
-}
-
-.quick-replies-header {
-  padding: 16px 20px;
-  background: var(--rikor-primary);
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.quick-replies-header h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.quick-replies-header .close-btn {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all var(--transition-fast);
-}
-
-.quick-replies-header .close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.quick-replies-list {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.quick-reply {
-  padding: 12px 16px;
-  margin-bottom: 4px;
-  border-radius: 8px;
-  background: var(--rikor-bg-tertiary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-}
-
-.quick-reply:hover {
-  background: var(--rikor-primary);
-  color: white;
-  transform: translateX(4px);
-}
-
-.quick-reply i {
-  width: 16px;
-  text-align: center;
-  opacity: 0.7;
-}
-
-/* Стили для переключения пользователей в модальном окне */
-.user-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.user-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  border-radius: 12px;
-  background: var(--rikor-bg-tertiary);
-  cursor: pointer;
+  padding: 24px;
+  border: 1px solid var(--rikor-border);
   transition: all var(--transition-fast);
   position: relative;
-  border: 2px solid transparent;
+  overflow: hidden;
 }
 
-.user-item:hover {
-  background: var(--rikor-bg-hover);
-  transform: scale(1.02);
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-.user-item.active {
-  border-color: var(--rikor-primary);
-  background: rgba(30, 64, 175, 0.05);
-}
-
-.user-avatar {
+.stat-card-icon {
   width: 48px;
   height: 48px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: 18px;
+  font-size: 20px;
+  margin-bottom: 16px;
   box-shadow: var(--shadow-sm);
 }
 
-.user-info {
-  flex: 1;
-}
-
-.user-name {
-  font-weight: 600;
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 700;
   color: var(--rikor-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  line-height: 1;
 }
 
-.user-details {
-  font-size: 13px;
-  color: var(--rikor-text-secondary);
-  margin-bottom: 4px;
-}
-
-.user-email {
-  font-size: 12px;
+.stat-card-label {
+  font-size: 14px;
   color: var(--rikor-text-muted);
+  margin-bottom: 12px;
+  font-weight: 500;
 }
 
-.user-status {
+.stat-card-trend {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   font-size: 12px;
-  color: var(--rikor-text-muted);
-}
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-indicator.online { background: var(--rikor-success); }
-.status-indicator.away { background: var(--rikor-warning); }
-.status-indicator.busy { background: var(--rikor-error); }
-.status-indicator.offline { background: var(--rikor-text-light); }
-
-.current-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: var(--rikor-success);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 11px;
   font-weight: 600;
 }
 
-/* Улучшенные стили для текущего пользователя */
-.user-card.current-user {
-  border: 2px solid var(--rikor-success);
-  background: rgba(16, 185, 129, 0.05);
-  position: relative;
+.stat-card-trend.trend--up {
+  color: var(--rikor-success);
 }
 
-.user-card.current-user::before {
-  content: '👑 Активный';
-  position: absolute;
-  top: -8px;
-  left: 16px;
-  background: var(--rikor-success);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
+.stat-card-trend.trend--down {
+  color: var(--rikor-error);
 }
 
-/* Остальные стили остаются без изменений */
+/* Кнопки */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -651,6 +467,11 @@ body {
   color: white;
 }
 
+.btn--info {
+  background: linear-gradient(135deg, var(--rikor-info), #22d3ee);
+  color: white;
+}
+
 .btn--small {
   padding: 8px 14px;
   font-size: 13px;
@@ -665,95 +486,6 @@ body {
 .grid--2 { grid-template-columns: repeat(2, 1fr); }
 .grid--3 { grid-template-columns: repeat(3, 1fr); }
 .grid--4 { grid-template-columns: repeat(4, 1fr); }
-.grid--5 { grid-template-columns: repeat(5, 1fr); }
-
-@media (max-width: 1200px) {
-  .grid--4, .grid--5 { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (max-width: 768px) {
-  .grid--3, .grid--4, .grid--5 { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 480px) {
-  .grid--2, .grid--3, .grid--4, .grid--5 { grid-template-columns: 1fr; }
-}
-
-/* Статистические виджеты */
-.stat-card {
-  background: var(--rikor-bg-secondary);
-  border-radius: 16px;
-  padding: 24px;
-  border: 1px solid var(--rikor-border);
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: var(--shadow-xl);
-}
-
-.stat-card__icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  margin-bottom: 16px;
-  transition: transform var(--transition-fast);
-}
-
-.stat-card:hover .stat-card__icon {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.stat-card__value {
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--rikor-text-primary);
-  margin-bottom: 6px;
-  line-height: 1;
-}
-
-.stat-card__label {
-  font-size: 14px;
-  color: var(--rikor-text-muted);
-  margin-bottom: 12px;
-  font-weight: 500;
-}
-
-/* Мини-статистики */
-.stat-mini {
-  text-align: center;
-  padding: 16px;
-  background: var(--rikor-bg-secondary);
-  border-radius: 12px;
-  border: 1px solid var(--rikor-border);
-  transition: all var(--transition-fast);
-}
-
-.stat-mini:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.stat-mini__value {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--rikor-text-primary);
-  margin-bottom: 4px;
-}
-
-.stat-mini__label {
-  font-size: 12px;
-  color: var(--rikor-text-muted);
-  font-weight: 500;
-}
 
 /* Badges */
 .badge {
@@ -770,32 +502,32 @@ body {
   transition: all var(--transition-fast);
 }
 
-.badge--primary { 
-  background: rgba(30, 64, 175, 0.12); 
-  color: var(--rikor-primary); 
+.badge--primary {
+  background: rgba(30, 64, 175, 0.12);
+  color: var(--rikor-primary);
   border-color: rgba(30, 64, 175, 0.2);
 }
 
-.badge--success { 
-  background: rgba(16, 185, 129, 0.12); 
+.badge--success {
+  background: rgba(16, 185, 129, 0.12);
   color: var(--rikor-success);
   border-color: rgba(16, 185, 129, 0.2);
 }
 
-.badge--warning { 
-  background: rgba(245, 158, 11, 0.12); 
+.badge--warning {
+  background: rgba(245, 158, 11, 0.12);
   color: var(--rikor-warning);
   border-color: rgba(245, 158, 11, 0.2);
 }
 
-.badge--error { 
-  background: rgba(239, 68, 68, 0.12); 
+.badge--error {
+  background: rgba(239, 68, 68, 0.12);
   color: var(--rikor-error);
   border-color: rgba(239, 68, 68, 0.2);
 }
 
-.badge--info { 
-  background: rgba(6, 182, 212, 0.12); 
+.badge--info {
+  background: rgba(6, 182, 212, 0.12);
   color: var(--rikor-info);
   border-color: rgba(6, 182, 212, 0.2);
 }
@@ -806,59 +538,55 @@ body {
   border-color: rgba(100, 116, 139, 0.2);
 }
 
-/* Статусы и приоритеты */
-.priority--critical { 
-  background: rgba(239, 68, 68, 0.15); 
-  color: #dc2626;
-  border-color: rgba(239, 68, 68, 0.3);
+/* Статусы тикетов */
+.status--open {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--rikor-error);
 }
 
-.priority--high { 
-  background: rgba(245, 158, 11, 0.15); 
-  color: #d97706;
-  border-color: rgba(245, 158, 11, 0.3);
+.status--in_progress {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--rikor-warning);
 }
 
-.priority--medium { 
-  background: rgba(6, 182, 212, 0.15); 
-  color: #0891b2;
-  border-color: rgba(6, 182, 212, 0.3);
+.status--waiting {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--rikor-info);
 }
 
-.priority--low { 
-  background: rgba(16, 185, 129, 0.15); 
-  color: #059669;
-  border-color: rgba(16, 185, 129, 0.3);
+.status--resolved {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--rikor-success);
 }
 
-.status--open { 
-  background: rgba(6, 182, 212, 0.15); 
-  color: #0891b2;
-  border-color: rgba(6, 182, 212, 0.3);
+.status--closed {
+  background: rgba(100, 116, 139, 0.12);
+  color: var(--rikor-secondary);
 }
 
-.status--in_progress { 
-  background: rgba(245, 158, 11, 0.15); 
-  color: #d97706;
-  border-color: rgba(245, 158, 11, 0.3);
+/* Приоритеты */
+.priority--critical {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--rikor-error);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
-.status--waiting { 
-  background: rgba(148, 163, 184, 0.15); 
-  color: #64748b;
-  border-color: rgba(148, 163, 184, 0.3);
+.priority--high {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--rikor-warning);
+  border-color: rgba(245, 158, 11, 0.2);
 }
 
-.status--resolved { 
-  background: rgba(16, 185, 129, 0.15); 
-  color: #059669;
-  border-color: rgba(16, 185, 129, 0.3);
+.priority--medium {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--rikor-info);
+  border-color: rgba(6, 182, 212, 0.2);
 }
 
-.status--closed { 
-  background: rgba(100, 116, 139, 0.15); 
-  color: #475569;
-  border-color: rgba(100, 116, 139, 0.3);
+.priority--low {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--rikor-success);
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
 /* Формы */
@@ -890,40 +618,208 @@ body {
   outline: none;
   border-color: var(--rikor-primary);
   box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
-  background: var(--rikor-bg-secondary);
 }
 
-/* Таблицы */
-.table-container {
-  overflow-x: auto;
+.form-control::placeholder {
+  color: var(--rikor-text-muted);
+}
+
+/* Новые стили для файлов */
+.file-upload-area {
+  border: 2px dashed var(--rikor-border);
   border-radius: 12px;
-  border: 1px solid var(--rikor-border);
-  background: var(--rikor-bg-secondary);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 16px 20px;
-  text-align: left;
-  border-bottom: 1px solid var(--rikor-border-light);
-}
-
-.table th {
+  padding: 32px;
+  text-align: center;
+  transition: all var(--transition-fast);
+  cursor: pointer;
   background: var(--rikor-bg-tertiary);
+}
+
+.file-upload-area:hover {
+  border-color: var(--rikor-primary);
+  background: var(--rikor-bg-hover);
+}
+
+.file-upload-area.dragover {
+  border-color: var(--rikor-primary);
+  background: rgba(30, 64, 175, 0.05);
+}
+
+.file-upload-icon {
+  font-size: 48px;
+  color: var(--rikor-primary);
+  margin-bottom: 16px;
+}
+
+.file-upload-text {
+  font-size: 16px;
+  color: var(--rikor-text-primary);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.file-upload-hint {
+  font-size: 13px;
+  color: var(--rikor-text-muted);
+}
+
+.attached-files {
+  margin-top: 16px;
+}
+
+.attached-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--rikor-bg-secondary);
+  border: 1px solid var(--rikor-border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all var(--transition-fast);
+}
+
+.attached-file:hover {
+  background: var(--rikor-bg-hover);
+}
+
+.attached-file-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--rikor-primary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.attached-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.attached-file-name {
+  font-weight: 500;
+  color: var(--rikor-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attached-file-size {
+  font-size: 12px;
+  color: var(--rikor-text-muted);
+}
+
+.attached-file-remove {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: var(--rikor-error);
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.attached-file-remove:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+/* Ответы в тикетах */
+.ticket-replies {
+  border-top: 1px solid var(--rikor-border-light);
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.reply {
+  background: var(--rikor-bg-tertiary);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--rikor-primary);
+  transition: all var(--transition-fast);
+}
+
+.reply:hover {
+  transform: translateX(2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.reply.reply--solution {
+  border-left-color: var(--rikor-success);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.reply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.reply-author {
   font-weight: 600;
   color: var(--rikor-text-primary);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-.table tbody tr:hover {
-  background: var(--rikor-bg-tertiary);
+.reply-date {
+  font-size: 12px;
+  color: var(--rikor-text-muted);
+}
+
+.reply-message {
+  color: var(--rikor-text-secondary);
+  line-height: 1.5;
+}
+
+.reply-form {
+  background: var(--rikor-bg-secondary);
+  border: 1px solid var(--rikor-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+/* Статусы изменения */
+.status-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.status-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--rikor-border);
+  border-radius: 20px;
+  background: var(--rikor-bg-secondary);
+  color: var(--rikor-text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.status-btn:hover {
+  border-color: var(--rikor-primary);
+  background: var(--rikor-primary);
+  color: white;
+}
+
+.status-btn.active {
+  border-color: var(--rikor-primary);
+  background: var(--rikor-primary);
+  color: white;
 }
 
 /* Модальные окна */
@@ -1022,11 +918,24 @@ body {
   align-items: flex-start;
   gap: 12px;
   border: 1px solid var(--rikor-border);
+  transition: all var(--transition-normal);
 }
 
-.notification--success { border-left-color: var(--rikor-success); }
-.notification--warning { border-left-color: var(--rikor-warning); }
-.notification--error { border-left-color: var(--rikor-error); }
+.notification--success {
+  border-left-color: var(--rikor-success);
+}
+
+.notification--warning {
+  border-left-color: var(--rikor-warning);
+}
+
+.notification--error {
+  border-left-color: var(--rikor-error);
+}
+
+.notification--info {
+  border-left-color: var(--rikor-info);
+}
 
 .notification__icon {
   width: 20px;
@@ -1045,16 +954,9 @@ body {
   flex: 1;
 }
 
-.notification__title {
-  font-weight: 600;
-  color: var(--rikor-text-primary);
-  margin-bottom: 4px;
-  font-size: 14px;
-}
-
 .notification__message {
-  color: var(--rikor-text-secondary);
-  font-size: 13px;
+  color: var(--rikor-text-primary);
+  font-size: 14px;
   line-height: 1.4;
 }
 
@@ -1105,6 +1007,9 @@ body {
   animation: slideInRight 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
+.fab-menu__item:nth-child(2) { animation-delay: 0.1s; }
+.fab-menu__item:nth-child(3) { animation-delay: 0.2s; }
+
 .fab-menu__item:hover {
   background: var(--rikor-primary);
   color: white;
@@ -1115,6 +1020,7 @@ body {
 /* Утилиты */
 .hidden { display: none !important; }
 .text-center { text-align: center; }
+.text-right { text-align: right; }
 .mt-4 { margin-top: 16px; }
 .mb-4 { margin-bottom: 16px; }
 .mr-2 { margin-right: 8px; }
@@ -1127,30 +1033,50 @@ body {
 }
 
 @keyframes slideUp {
-  from { 
-    transform: translate(-50%, -45%) scale(0.9); 
-    opacity: 0; 
+  from {
+    transform: translate(-50%, -45%) scale(0.9);
+    opacity: 0;
   }
-  to { 
-    transform: translate(-50%, -50%) scale(1); 
-    opacity: 1; 
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
   }
 }
 
 @keyframes slideInRight {
-  from { 
-    transform: translateX(100%) scale(0.9); 
-    opacity: 0; 
+  from {
+    transform: translateX(100%) scale(0.9);
+    opacity: 0;
   }
-  to { 
-    transform: translateX(0) scale(1); 
-    opacity: 1; 
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
   }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+/* Состояния загрузки */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--rikor-border);
+  border-top: 3px solid var(--rikor-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 /* Адаптивность */
@@ -1175,25 +1101,76 @@ body {
     padding: 16px;
   }
 
-  .quick-replies-panel {
-    position: fixed;
+  .card {
+    padding: 20px;
+  }
+
+  .fab {
     bottom: 20px;
-    left: 20px;
     right: 20px;
-    top: auto;
-    transform: none;
-    width: auto;
+    width: 52px;
+    height: 52px;
+  }
+
+  .fab-menu {
+    bottom: 80px;
+    right: 20px;
+  }
+
+  .grid {
+    gap: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .sidebar__user-switcher {
-    margin: 4px 8px;
-    padding: 12px 16px;
+  .content {
+    padding: 12px;
   }
 
-  .user-switcher-select {
-    font-size: 11px;
-    padding: 6px 8px;
+  .card {
+    padding: 16px;
+  }
+
+  .sidebar__brand {
+    padding: 20px 16px;
+  }
+
+  .sidebar__nav {
+    padding: 16px 0;
+  }
+
+  .sidebar__link {
+    margin: 0 8px 2px;
+    padding: 12px 16px;
+  }
+}
+
+/* Фокус и accessibility */
+*:focus {
+  outline: none;
+}
+
+.btn:focus-visible,
+.form-control:focus-visible,
+.sidebar__link:focus-visible {
+  box-shadow: var(--menu-focus-shadow);
+}
+
+/* Print styles */
+@media print {
+  .sidebar,
+  .fab,
+  .fab-menu,
+  .notifications {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ccc;
   }
 }
