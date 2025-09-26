@@ -1,0 +1,9 @@
+{
+  "name": "rikor-helpdesk-v2.7.0-enhanced",
+  "version": "2.7.0",
+  "description": "Система управления IT-поддержкой с созданием тикетов и просмотром статей",
+  "main": "index.html",
+  "keywords": ["helpdesk", "support", "tickets", "knowledge-base", "rikor"],
+  "author": "RIKOR Development Team",
+  "license": "MIT"
+}

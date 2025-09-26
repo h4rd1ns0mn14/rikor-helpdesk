@@ -1,0 +1,22 @@
+# Логи
+*.log
+npm-debug.log*
+
+# Зависимости  
+node_modules/
+
+# IDE файлы
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Временные файлы
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Бекапы
+*.bak
+*.backup
