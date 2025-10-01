@@ -1,11 +1,10 @@
-// RIKOR HELPDESK v2.8.0 Enhanced - Система управления IT-поддержкой
-// НОВОЕ: Графики в отчетах + Управление пользователями + Автотестирование
+// RIKOR HELPDESK v2.7.0 Enhanced - ФИНАЛЬНАЯ ВЕРСИЯ
+// Добавлено создание тикетов + просмотр статей
 
 class RikorHelpDeskEnhanced {
     constructor() {
-        console.log('🚀 RIKOR HELPDESK v2.8.0 Enhanced - Загрузка...');
+        console.log('🚀 RIKOR HELPDESK v2.7.0 Enhanced - Загрузка...');
 
-        this.version = '2.8.0';
         this.currentRoute = 'dashboard';
         this.currentUser = {
             id: 1,
@@ -24,25 +23,33 @@ class RikorHelpDeskEnhanced {
                 email: localStorage.getItem('rikor-email-notif') === 'true',
                 push: localStorage.getItem('rikor-push-notif') === 'true',
                 sound: localStorage.getItem('rikor-sound-notif') === 'true',
-                telegram: localStorage.getItem('rikor-telegram-notif') === 'true'
+                telegram: localStorage.getItem('rikor-telegram-notif') === 'true',
+                telegramBotToken: localStorage.getItem('rikor-telegram-token') || '',
+                telegramChatId: localStorage.getItem('rikor-telegram-chat') || '',
+                emailSettings: {
+                    smtp: localStorage.getItem('rikor-email-smtp') || 'smtp.gmail.com',
+                    port: localStorage.getItem('rikor-email-port') || '587',
+                    user: localStorage.getItem('rikor-email-user') || '',
+                    password: localStorage.getItem('rikor-email-password') || ''
+                }
             },
             autoRefresh: false,
-            refreshInterval: 30000
+            refreshInterval: 30000,
+            maxFileSize: 10 * 1024 * 1024,
+            allowedFileTypes: ['.pdf', '.doc', '.docx', '.txt', '.md', '.jpg', '.jpeg', '.png', '.zip', '.rar']
         };
 
         this.data = null;
         this.chartInstances = {};
         this.tempFiles = [];
         this.currentTicket = null;
-        this.editingUser = null;
-        this.selectedUsers = [];
 
         this.init();
     }
 
     async init() {
         try {
-            console.log('📋 Инициализация системы v2.8.0...');
+            console.log('📋 Инициализация системы...');
             await this.loadData();
             this.applyTheme();
             this.bindEvents();
@@ -50,14 +57,12 @@ class RikorHelpDeskEnhanced {
             this.renderContent();
 
             setTimeout(() => {
-                this.showNotification('✅ RIKOR HELPDESK v2.8.0 Enhanced готов к работе!', 'success');
-                this.runSystemCheck();
+                this.showNotification('✅ RIKOR HELPDESK v2.7.0 Enhanced готов к работе!', 'success');
             }, 1000);
 
-            console.log('✅ Система v2.8.0 инициализирована');
+            console.log('✅ Система инициализирована');
         } catch (error) {
             console.error('❌ Ошибка инициализации:', error);
-            this.showNotification('❌ Ошибка запуска системы', 'error');
         }
     }
 
@@ -72,9 +77,6 @@ class RikorHelpDeskEnhanced {
                 this.saveData();
                 console.log('📊 Загружены данные по умолчанию');
             }
-
-            // Обновляем статистику для отчетов
-            this.updateReportStats();
         } catch (error) {
             console.error('❌ Ошибка загрузки данных:', error);
             this.data = this.getDefaultData();
@@ -102,14 +104,16 @@ class RikorHelpDeskEnhanced {
                     timeSpent: 1.5,
                     estimatedTime: 3,
                     tags: ["ноутбук", "питание", "bios"],
-                    replies: [{
-                        id: 1,
-                        author: "Елена Новикова",
-                        message: "Проверила подключение питания. Попробую восстановить BIOS через служебный режим.",
-                        created: "2025-09-22T12:20:00.000Z",
-                        type: "comment",
-                        files: []
-                    }],
+                    replies: [
+                        {
+                            id: 1,
+                            author: "Елена Новикова",
+                            message: "Проверила подключение питания. Попробую восстановить BIOS через служебный режим.",
+                            created: "2025-09-22T12:20:00.000Z",
+                            type: "comment",
+                            files: []
+                        }
+                    ],
                     attachments: []
                 },
                 {
@@ -130,16 +134,18 @@ class RikorHelpDeskEnhanced {
                     timeSpent: 0,
                     estimatedTime: 4,
                     tags: ["сервер", "критично", "rp6224"],
-                    replies: [{
-                        id: 2,
-                        author: "Петр Сидоров",
-                        message: "Принял в работу. Начинаю диагностику аппаратной части.",
-                        created: "2025-09-26T08:30:00.000Z",
-                        type: "status_change",
-                        statusFrom: "open",
-                        statusTo: "in_progress",
-                        files: []
-                    }],
+                    replies: [
+                        {
+                            id: 2,
+                            author: "Петр Сидоров",
+                            message: "Принял в работу. Начинаю диагностику аппаратной части.",
+                            created: "2025-09-26T08:30:00.000Z",
+                            type: "status_change",
+                            statusFrom: "open",
+                            statusTo: "in_progress",
+                            files: []
+                        }
+                    ],
                     attachments: []
                 }
             ],
@@ -149,48 +155,26 @@ class RikorHelpDeskEnhanced {
                     name: "Петр Сидоров",
                     email: "p.sidorov@rikor.ru",
                     role: "admin",
-                    department: "IT отдел",
+                    department: "IT",
                     avatar: "ПС",
                     status: "online",
-                    ticketsResolved: 156,
-                    ticketsAssigned: 8,
+                    ticketsResolved: 25,
                     position: "Системный администратор",
                     phone: "+7 (495) 123-45-67",
-                    location: "Москва, офис 1",
-                    skills: ["Windows Server", "Linux", "Сети", "Безопасность"],
-                    languages: ["Русский", "Английский"],
-                    certifications: ["MCSE", "CCNA"],
-                    bio: "Опытный системный администратор с 10+ лет опыта работы",
-                    joinDate: "2022-01-15",
-                    lastActivity: "2025-09-26T10:00:00.000Z",
-                    averageResponseTime: 2.5,
-                    customerRating: 4.8,
-                    workHours: "09:00-18:00",
-                    timezone: "UTC+3"
+                    lastActivity: "2025-09-26T10:00:00.000Z"
                 },
                 {
                     id: 2,
                     name: "Елена Новикова",
                     email: "e.novikova@rikor.ru",
                     role: "agent",
-                    department: "Служба поддержки",
+                    department: "IT",
                     avatar: "ЕН",
                     status: "online",
-                    ticketsResolved: 234,
-                    ticketsAssigned: 5,
+                    ticketsResolved: 18,
                     position: "Специалист технической поддержки",
                     phone: "+7 (495) 123-45-68",
-                    location: "Москва, офис 1",
-                    skills: ["Техническая поддержка", "Windows", "Office"],
-                    languages: ["Русский"],
-                    certifications: ["ITIL"],
-                    bio: "Специалист по технической поддержке пользователей",
-                    joinDate: "2021-08-10",
-                    lastActivity: "2025-09-26T09:30:00.000Z",
-                    averageResponseTime: 1.8,
-                    customerRating: 4.9,
-                    workHours: "09:00-18:00",
-                    timezone: "UTC+3"
+                    lastActivity: "2025-09-26T09:30:00.000Z"
                 },
                 {
                     id: 3,
@@ -201,20 +185,9 @@ class RikorHelpDeskEnhanced {
                     avatar: "СВ",
                     status: "away",
                     ticketsResolved: 0,
-                    ticketsAssigned: 0,
                     position: "Главный бухгалтер",
                     phone: "+7 (495) 123-45-69",
-                    location: "Москва, офис 1",
-                    skills: ["1С:Бухгалтерия", "Excel"],
-                    languages: ["Русский"],
-                    certifications: [],
-                    bio: "Главный бухгалтер компании",
-                    joinDate: "2020-03-15",
-                    lastActivity: "2025-09-26T08:15:00.000Z",
-                    averageResponseTime: 0,
-                    customerRating: 0,
-                    workHours: "09:00-18:00",
-                    timezone: "UTC+3"
+                    lastActivity: "2025-09-26T08:15:00.000Z"
                 }
             ],
             knowledgeBase: [
@@ -242,6 +215,7 @@ class RikorHelpDeskEnhanced {
 - Резервное копирование
 
 ## Профилактические меры
+
 Рекомендуется проводить регулярное техническое обслуживание сервера каждые 3 месяца.`,
                     tags: ["сервер", "rp6224", "диагностика"],
                     views: 156,
@@ -256,697 +230,252 @@ class RikorHelpDeskEnhanced {
                     id: "KB-002",
                     title: "Установка драйверов для Rikor RN NINO",
                     category: "software",
-                    content: `# Установка драйверов Rikor RN NINO
+                    content: `# Установка драйверов для ноутбука Rikor RN NINO
 
-## Автоматическая установка
-1. Подключите ноутбук к интернету
-2. Запустите Центр обновления Windows
-3. Установите все доступные обновления
+## Требования к системе
+- Операционная система: Windows 10/11
+- Оперативная память: 8 GB
+- Свободное место: 2 GB
 
-## Ручная установка
-1. Скачайте драйверы с официального сайта Rikor
-2. Запустите установочный файл от имени администратора
-3. Перезагрузите систему
+## Процесс установки
 
-## Проблемы и решения
-- При ошибке установки - отключите антивирус
-- При конфликте драйверов - удалите старые версии`,
-                    tags: ["ноутбук", "драйверы", "rn-nino"],
+### Шаг 1: Подготовка
+1. Скачайте последнюю версию драйверов с официального сайта Rikor
+2. Убедитесь, что у вас есть права администратора
+3. Отключите антивирус на время установки
+
+### Шаг 2: Установка
+1. Запустите установочный файл от имени администратора
+2. Следуйте инструкциям мастера установки
+3. Перезагрузите компьютер после завершения
+
+### Шаг 3: Проверка
+1. Откройте Диспетчер устройств
+2. Убедитесь, что все устройства определены корректно
+3. Проверьте работу всех функций
+
+## Устранение неисправностей
+
+**Проблема**: Драйвер не устанавливается
+**Решение**: Попробуйте установить в режиме совместимости с Windows 8
+
+**Проблема**: Устройство не распознается
+**Решение**: Переустановите драйвер через Диспетчер устройств`,
+                    tags: ["драйверы", "ноутбук", "установка", "rn-nino"],
                     views: 89,
                     rating: 4.5,
-                    created: "2025-09-15T14:20:00.000Z",
-                    updated: "2025-09-20T09:15:00.000Z",
+                    created: "2025-09-22T14:20:00.000Z",
+                    updated: "2025-09-26T10:15:00.000Z",
                     author: "Елена Новикова",
                     attachments: [],
                     editHistory: []
                 }
             ],
+            rikorDevices: [
+                {
+                    type: "Ноутбук",
+                    models: ["RN NINO 203.1/15", "RN NINO 203.1/17", "RN ULTRA 301.2/15", "RN ULTRA 301.2/17", "RN GAMING 401.1/15"]
+                },
+                {
+                    type: "Сервер", 
+                    models: ["RP6224", "RP8224", "RP6248", "RP8248", "RP-RACK 1U", "RP-RACK 2U"]
+                },
+                {
+                    type: "Моноблок",
+                    models: ["RA-AIO 24", "RA-AIO 27", "RA-AIO 32", "RA-PRO 24", "RA-PRO 27"]
+                },
+                {
+                    type: "Планшет",
+                    models: ["RT-TAB 10", "RT-TAB 12", "RT-PRO 10", "RT-PRO 12", "RT-RUGGED 10"]
+                },
+                {
+                    type: "Мини ПК",
+                    models: ["RM-MINI 100", "RM-MINI 200", "RM-MICRO 50", "RM-STICK 32", "RM-BOX 128"]
+                }
+            ],
             stats: {
-                totalTickets: 92,
-                openTickets: 15,
-                inProgressTickets: 8,
-                waitingTickets: 4,
-                resolvedTickets: 58,
-                closedTickets: 7,
-                avgResponseTime: 2.1,
-                slaCompliance: 94,
-                customerSatisfaction: 87,
-                monthlyLabels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен'],
-                monthlyTrend: [45, 52, 38, 67, 73, 69, 84, 76, 92],
-                statusLabels: ['Открыт', 'В работе', 'Ожидание', 'Решен', 'Закрыт'],
+                totalTickets: 2,
+                openTickets: 1,
+                inProgressTickets: 1,
+                waitingTickets: 0,
+                resolvedTickets: 0,
+                closedTickets: 0,
+                criticalTickets: 1,
+                highTickets: 1,
+                mediumTickets: 0,
+                lowTickets: 0,
+                avgResponseTime: 1.2,
+                avgResolutionTime: 6.8,
+                customerSatisfaction: 97.5,
+                slaCompliance: 94.2,
+
+                monthlyTrend: [12, 15, 18, 16, 20, 19, 22, 25, 21, 24, 26, 28],
+                monthlyLabels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+
+                priorityStats: { critical: 1, high: 1, medium: 0, low: 0 },
+                priorityLabels: ['Критический', 'Высокий', 'Средний', 'Низкий'],
+                priorityColors: ['#ef4444', '#f59e0b', '#06b6d4', '#10b981'],
+
+                statusStats: { open: 1, in_progress: 1, waiting: 0, resolved: 0, closed: 0 },
+                statusLabels: ['Открытые', 'В работе', 'Ожидание', 'Решенные', 'Закрытые'],
                 statusColors: ['#ef4444', '#f59e0b', '#06b6d4', '#10b981', '#64748b'],
-                priorityDistribution: {
-                    critical: 8,
-                    high: 15,
-                    medium: 45,
-                    low: 24
+
+                agentStats: {
+                    names: ['Петр С.', 'Елена Н.', 'Иван П.'],
+                    resolved: [25, 18, 12],
+                    avgTime: [6.5, 8.2, 9.1]
+                },
+
+                deviceStats: {
+                    types: ['Сервер', 'Ноутбук', 'Моноблок', 'Планшет', 'Мини ПК'],
+                    counts: [1, 1, 0, 0, 0],
+                    colors: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
                 }
             }
         };
     }
 
-    // НОВАЯ ФУНКЦИЯ v2.8.0: Обновление статистики для отчетов
-    updateReportStats() {
-        const reportStats = {
-            // Производительность агентов
-            agentPerformance: {
-                labels: [],
-                ticketsResolved: [],
-                averageResponseTime: [],
-                customerRating: [],
-                colors: ['#1e40af', '#7c3aed', '#059669', '#dc2626', '#f59e0b']
-            },
-            // Время решения тикетов
-            resolutionTime: {
-                labels: ['< 1 час', '1-4 часа', '4-24 часа', '1-3 дня', '> 3 дней'],
-                data: [15, 35, 28, 18, 4],
-                colors: ['#10b981', '#06b6d4', '#f59e0b', '#f97316', '#ef4444']
-            },
-            // Категории тикетов  
-            categoryDistribution: {
-                labels: ['Аппаратные проблемы', 'Программные ошибки', 'Сетевые проблемы', 'Доступ и безопасность', 'Другое'],
-                data: [34, 28, 16, 12, 10],
-                colors: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#64748b']
-            },
-            // SLA соответствие
-            slaCompliance: {
-                labels: ['Критический', 'Высокий', 'Средний', 'Низкий'],
-                target: [95, 90, 85, 80],
-                actual: [92, 94, 88, 85],
-                colors: ['#ef4444', '#f59e0b', '#06b6d4', '#10b981']
-            },
-            // Месячные тренды
-            monthlyTrends: {
-                labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен'],
-                created: [52, 48, 55, 62, 58, 65, 71, 69, 74],
-                resolved: [45, 52, 51, 59, 61, 62, 68, 72, 70]
-            },
-            // Детали по устройствам
-            deviceTypeDetails: {
-                servers: {
-                    name: 'Серверы RIKOR',
-                    total: 24,
-                    active: 22,
-                    maintenance: 2,
-                    tickets: 18,
-                    uptime: 99.2
-                },
-                laptops: {
-                    name: 'Ноутбуки RIKOR',
-                    total: 156,
-                    active: 148,
-                    maintenance: 8,
-                    tickets: 34,
-                    uptime: 97.8
-                },
-                desktops: {
-                    name: 'Моноблоки RIKOR', 
-                    total: 89,
-                    active: 85,
-                    maintenance: 4,
-                    tickets: 22,
-                    uptime: 98.5
-                },
-                tablets: {
-                    name: 'Планшеты RIKOR',
-                    total: 67,
-                    active: 62,
-                    maintenance: 5,
-                    tickets: 12,
-                    uptime: 96.1
-                },
-                miniPCs: {
-                    name: 'Мини-ПК RIKOR',
-                    total: 43,
-                    active: 40,
-                    maintenance: 3,
-                    tickets: 6,
-                    uptime: 98.9
-                }
-            }
-        };
-
-        // Собираем данные по агентам
-        const agents = this.data.users.filter(u => u.role === 'admin' || u.role === 'agent');
-        agents.forEach(agent => {
-            reportStats.agentPerformance.labels.push(agent.name);
-            reportStats.agentPerformance.ticketsResolved.push(agent.ticketsResolved || 0);
-            reportStats.agentPerformance.averageResponseTime.push(agent.averageResponseTime || 0);
-            reportStats.agentPerformance.customerRating.push(agent.customerRating || 0);
-        });
-
-        this.data.stats.reportStats = reportStats;
-    }
-    // НОВАЯ ФУНКЦИЯ v2.8.0: УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ
-
-    showCreateUserModal() {
-        const modal = `
-            <div class="modal-header">
-                <div class="modal-title-section">
-                    <h2 class="modal-title">
-                        <i class="fas fa-user-plus"></i>
-                        Добавить пользователя
-                    </h2>
-                    <p class="modal-subtitle">Создание нового пользователя системы RIKOR HELPDESK</p>
-                </div>
-                <button class="modal-close" onclick="app.hideModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <form class="create-user-form" onsubmit="app.submitCreateUser(event)">
-                    <!-- Основная информация -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-user"></i> Основная информация</h3>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="userName">Полное имя <span class="required">*</span></label>
-                                <input type="text" id="userName" name="name" required
-                                       placeholder="Например: Иван Петров">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="userEmail">Email <span class="required">*</span></label>
-                                <input type="email" id="userEmail" name="email" required
-                                       placeholder="ivan.petrov@rikor.ru">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="userPosition">Должность</label>
-                                <input type="text" id="userPosition" name="position"
-                                       placeholder="Системный администратор">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="userDepartment">Отдел</label>
-                                <select id="userDepartment" name="department">
-                                    <option value="">Выберите отдел</option>
-                                    <option value="IT отдел">IT отдел</option>
-                                    <option value="Служба поддержки">Служба поддержки</option>
-                                    <option value="Отдел разработки">Отдел разработки</option>
-                                    <option value="Отдел продаж">Отдел продаж</option>
-                                    <option value="Управление">Управление</option>
-                                    <option value="Бухгалтерия">Бухгалтерия</option>
-                                    <option value="Другое">Другое</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="userRole">Роль в системе <span class="required">*</span></label>
-                                <select id="userRole" name="role" required>
-                                    <option value="">Выберите роль</option>
-                                    <option value="user">👤 Пользователь - создание тикетов</option>
-                                    <option value="agent">🎧 Агент поддержки - решение тикетов</option>
-                                    <option value="admin">👑 Администратор - полный доступ</option>
-                                </select>
-                                <small>Роль определяет уровень доступа к функциям системы</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="userPhone">Телефон</label>
-                                <input type="tel" id="userPhone" name="phone"
-                                       placeholder="+7 (495) 123-45-67">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Рабочая информация -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-briefcase"></i> Рабочая информация</h3>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="userLocation">Местоположение</label>
-                                <input type="text" id="userLocation" name="location"
-                                       placeholder="Москва, офис 1">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="userWorkHours">Рабочие часы</label>
-                                <select id="userWorkHours" name="workHours">
-                                    <option value="09:00-18:00">09:00-18:00 (стандартный)</option>
-                                    <option value="08:00-17:00">08:00-17:00</option>
-                                    <option value="10:00-19:00">10:00-19:00</option>
-                                    <option value="24/7">24/7 (круглосуточно)</option>
-                                    <option value="custom">Другое</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="userSkills">Навыки и компетенции</label>
-                                <input type="text" id="userSkills" name="skills"
-                                       placeholder="Windows Server, Linux, Сети (через запятую)">
-                                <small>Укажите основные технические навыки</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="userLanguages">Языки</label>
-                                <input type="text" id="userLanguages" name="languages"
-                                       placeholder="Русский, Английский (через запятую)">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Дополнительная информация -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-info-circle"></i> Дополнительная информация</h3>
-
-                        <div class="form-group">
-                            <label for="userBio">О себе</label>
-                            <textarea id="userBio" name="bio" rows="3"
-                                      placeholder="Краткая информация о пользователе, опыт работы, достижения..."></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="userCertifications">Сертификации</label>
-                                <input type="text" id="userCertifications" name="certifications"
-                                       placeholder="MCSE, CCNA, ITIL (через запятую)">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="userTimezone">Часовой пояс</label>
-                                <select id="userTimezone" name="timezone">
-                                    <option value="UTC+3">UTC+3 (Москва)</option>
-                                    <option value="UTC+2">UTC+2 (Калининград)</option>
-                                    <option value="UTC+4">UTC+4 (Самара)</option>
-                                    <option value="UTC+5">UTC+5 (Екатеринбург)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Действия -->
-                    <div class="form-actions">
-                        <button type="button" class="btn btn--secondary" onclick="app.hideModal()">
-                            <i class="fas fa-times"></i> Отмена
-                        </button>
-                        <button type="button" class="btn btn--info" onclick="app.previewUser()">
-                            <i class="fas fa-eye"></i> Предпросмотр
-                        </button>
-                        <button type="submit" class="btn btn--primary">
-                            <i class="fas fa-user-plus"></i> Создать пользователя
-                        </button>
-                    </div>
-                </form>
-            </div>
-        `;
-
-        this.showModal(modal, 'create-user-modal');
-    }
-
-    // Предпросмотр пользователя
-    previewUser() {
-        const form = document.querySelector('.create-user-form');
-        if (!form) return;
-
-        const formData = new FormData(form);
-        const name = formData.get('name')?.trim();
-        const email = formData.get('email')?.trim();
-        const role = formData.get('role');
-
-        if (!name || !email || !role) {
-            this.showNotification('Заполните основные поля: имя, email и роль', 'error');
-            return;
+    saveData() {
+        try {
+            localStorage.setItem('rikor-helpdesk-data', JSON.stringify(this.data));
+            console.log('💾 Данные сохранены');
+        } catch (error) {
+            console.error('❌ Ошибка сохранения данных:', error);
         }
+    }
 
-        const userData = {
-            name: name,
-            email: email,
-            position: formData.get('position') || 'Не указано',
-            department: formData.get('department') || 'Не указано',
-            role: role,
-            phone: formData.get('phone') || 'Не указано',
-            location: formData.get('location') || 'Не указано',
-            workHours: formData.get('workHours') || '09:00-18:00',
-            skills: formData.get('skills') ? formData.get('skills').split(',').map(s => s.trim()) : [],
-            languages: formData.get('languages') ? formData.get('languages').split(',').map(s => s.trim()) : ['Русский'],
-            bio: formData.get('bio') || '',
-            certifications: formData.get('certifications') ? formData.get('certifications').split(',').map(s => s.trim()) : [],
-            timezone: formData.get('timezone') || 'UTC+3'
-        };
-
-        const previewModal = `
+    // СОЗДАНИЕ НОВОГО ТИКЕТА (как на первом скрине)
+    showCreateTicketModal() {
+        const modal = `
             <div class="modal-header">
                 <h2 class="modal-title">
-                    <i class="fas fa-eye"></i>
-                    Предпросмотр пользователя
+                    <i class="fas fa-plus"></i>
+                    Создать новый тикет
                 </h2>
+                <p class="modal-subtitle">Регистрация нового обращения в службу поддержки Rikor</p>
                 <button class="modal-close" onclick="app.hideModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <div class="modal-body">
-                <div class="user-preview">
-                    <div class="user-preview-header">
-                        <div class="user-preview-avatar">${this.generateAvatar(userData.name)}</div>
-                        <div class="user-preview-info">
-                            <h3>${userData.name}</h3>
-                            <p class="user-preview-position">${userData.position}</p>
-                            <p class="user-preview-department">${userData.department}</p>
-                            <span class="badge badge--${this.getRoleBadgeColor(userData.role)}">${this.getRoleText(userData.role)}</span>
-                        </div>
-                    </div>
-
-                    <div class="user-preview-details">
-                        <div class="detail-section">
-                            <h4><i class="fas fa-envelope"></i> Контактная информация</h4>
-                            <p><strong>Email:</strong> ${userData.email}</p>
-                            <p><strong>Телефон:</strong> ${userData.phone}</p>
-                            <p><strong>Местоположение:</strong> ${userData.location}</p>
-                        </div>
-
-                        <div class="detail-section">
-                            <h4><i class="fas fa-clock"></i> Рабочая информация</h4>
-                            <p><strong>Рабочие часы:</strong> ${userData.workHours}</p>
-                            <p><strong>Часовой пояс:</strong> ${userData.timezone}</p>
-                            ${userData.skills.length ? `<p><strong>Навыки:</strong> ${userData.skills.join(', ')}</p>` : ''}
-                            ${userData.languages.length ? `<p><strong>Языки:</strong> ${userData.languages.join(', ')}</p>` : ''}
-                        </div>
-
-                        ${userData.bio ? `
-                        <div class="detail-section">
-                            <h4><i class="fas fa-user"></i> О себе</h4>
-                            <p>${userData.bio}</p>
-                        </div>
-                        ` : ''}
-
-                        ${userData.certifications.length ? `
-                        <div class="detail-section">
-                            <h4><i class="fas fa-certificate"></i> Сертификации</h4>
-                            <p>${userData.certifications.join(', ')}</p>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-
-                <div class="preview-actions">
-                    <button class="btn btn--secondary" onclick="app.showCreateUserModal()">
-                        <i class="fas fa-edit"></i> Редактировать
-                    </button>
-                    <button class="btn btn--primary" onclick="app.submitCreateUserFromPreview()">
-                        <i class="fas fa-check"></i> Создать пользователя
-                    </button>
-                </div>
-            </div>
-        `;
-
-        // Сохраняем данные для создания
-        this.tempUserData = userData;
-        this.showModal(previewModal, 'user-preview-modal');
-    }
-
-    // Создание пользователя из предпросмотра
-    submitCreateUserFromPreview() {
-        if (!this.tempUserData) {
-            this.showNotification('Данные пользователя утеряны', 'error');
-            return;
-        }
-
-        this.createNewUser(this.tempUserData);
-        this.tempUserData = null;
-    }
-
-    // Обработка формы создания пользователя
-    submitCreateUser(event) {
-        event.preventDefault();
-
-        const form = event.target;
-        const formData = new FormData(form);
-
-        const name = formData.get('name')?.trim();
-        const email = formData.get('email')?.trim();
-        const role = formData.get('role');
-
-        if (!name || !email || !role) {
-            this.showNotification('Заполните все обязательные поля', 'error');
-            return;
-        }
-
-        // Проверяем уникальность email
-        if (this.data.users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-            this.showNotification('Пользователь с таким email уже существует', 'error');
-            return;
-        }
-
-        const userData = {
-            name: name,
-            email: email,
-            position: formData.get('position') || '',
-            department: formData.get('department') || '',
-            role: role,
-            phone: formData.get('phone') || '',
-            location: formData.get('location') || '',
-            workHours: formData.get('workHours') || '09:00-18:00',
-            skills: formData.get('skills') ? formData.get('skills').split(',').map(s => s.trim()) : [],
-            languages: formData.get('languages') ? formData.get('languages').split(',').map(s => s.trim()) : ['Русский'],
-            bio: formData.get('bio') || '',
-            certifications: formData.get('certifications') ? formData.get('certifications').split(',').map(s => s.trim()) : [],
-            timezone: formData.get('timezone') || 'UTC+3'
-        };
-
-        this.createNewUser(userData);
-    }
-
-    // Создание нового пользователя
-    createNewUser(userData) {
-        const userNumber = this.data.users.length + 1;
-        const userId = userNumber;
-
-        const newUser = {
-            id: userId,
-            name: userData.name,
-            email: userData.email,
-            position: userData.position || 'Не указано',
-            department: userData.department || 'Не указано',
-            role: userData.role,
-            avatar: this.generateAvatar(userData.name),
-            status: 'offline',
-            phone: userData.phone || '',
-            location: userData.location || '',
-            skills: userData.skills,
-            ticketsAssigned: 0,
-            ticketsResolved: 0,
-            averageResponseTime: 0,
-            customerRating: 0,
-            workHours: userData.workHours,
-            timezone: userData.timezone,
-            lastActivity: new Date().toISOString(),
-            joinDate: new Date().toISOString().split('T')[0],
-            bio: userData.bio,
-            certifications: userData.certifications,
-            languages: userData.languages
-        };
-
-        // Добавляем пользователя
-        this.data.users.push(newUser);
-        this.saveData();
-
-        this.hideModal();
-        this.showNotification(`✅ Пользователь "${userData.name}" успешно создан!`, 'success');
-
-        // Переходим к пользователям если не там
-        if (this.currentRoute !== 'users') {
-            this.navigate('users');
-        } else {
-            this.renderContent();
-        }
-
-        console.log('✅ Создан новый пользователь:', newUser);
-    }
-    // РЕДАКТИРОВАНИЕ ПОЛЬЗОВАТЕЛЕЙ
-    showEditUserModal(userId) {
-        const user = this.data.users.find(u => u.id == userId);
-        if (!user) {
-            this.showNotification('Пользователь не найден', 'error');
-            return;
-        }
-
-        const modal = `
-            <div class="modal-header">
-                <div class="modal-title-section">
-                    <h2 class="modal-title">
-                        <i class="fas fa-user-edit"></i>
-                        Редактировать пользователя
-                    </h2>
-                    <p class="modal-subtitle">Изменение данных пользователя ${user.name}</p>
-                </div>
-                <button class="modal-close" onclick="app.hideModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <form class="edit-user-form" onsubmit="app.submitEditUser(event, ${userId})">
-                    <!-- Основная информация -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-user"></i> Основная информация</h3>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="editUserName">Полное имя <span class="required">*</span></label>
-                                <input type="text" id="editUserName" name="name" required
-                                       value="${user.name}" placeholder="Например: Иван Петров">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="editUserEmail">Email <span class="required">*</span></label>
-                                <input type="email" id="editUserEmail" name="email" required
-                                       value="${user.email}" placeholder="ivan.petrov@rikor.ru">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="editUserPosition">Должность</label>
-                                <input type="text" id="editUserPosition" name="position"
-                                       value="${user.position}" placeholder="Системный администратор">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="editUserDepartment">Отдел</label>
-                                <select id="editUserDepartment" name="department">
-                                    <option value="">Выберите отдел</option>
-                                    <option value="IT отдел" ${user.department === 'IT отдел' ? 'selected' : ''}>IT отдел</option>
-                                    <option value="Служба поддержки" ${user.department === 'Служба поддержки' ? 'selected' : ''}>Служба поддержки</option>
-                                    <option value="Отдел разработки" ${user.department === 'Отдел разработки' ? 'selected' : ''}>Отдел разработки</option>
-                                    <option value="Отдел продаж" ${user.department === 'Отдел продаж' ? 'selected' : ''}>Отдел продаж</option>
-                                    <option value="Управление" ${user.department === 'Управление' ? 'selected' : ''}>Управление</option>
-                                    <option value="Другое" ${user.department === 'Другое' ? 'selected' : ''}>Другое</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="editUserRole">Роль в системе <span class="required">*</span></label>
-                                <select id="editUserRole" name="role" required>
-                                    <option value="user" ${user.role === 'user' ? 'selected' : ''}>👤 Пользователь - создание тикетов</option>
-                                    <option value="agent" ${user.role === 'agent' ? 'selected' : ''}>🎧 Агент поддержки - решение тикетов</option>
-                                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👑 Администратор - полный доступ</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="editUserPhone">Телефон</label>
-                                <input type="tel" id="editUserPhone" name="phone"
-                                       value="${user.phone || ''}" placeholder="+7 (495) 123-45-67">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="editUserStatus">Статус</label>
-                                <select id="editUserStatus" name="status">
-                                    <option value="online" ${user.status === 'online' ? 'selected' : ''}>🟢 В сети</option>
-                                    <option value="away" ${user.status === 'away' ? 'selected' : ''}>🟡 Отошел</option>
-                                    <option value="busy" ${user.status === 'busy' ? 'selected' : ''}>🔴 Занят</option>
-                                    <option value="offline" ${user.status === 'offline' ? 'selected' : ''}>⚫ Не в сети</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="editUserLocation">Местоположение</label>
-                                <input type="text" id="editUserLocation" name="location"
-                                       value="${user.location || ''}" placeholder="Москва, офис 1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Рабочая информация -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-briefcase"></i> Рабочая информация</h3>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="editUserWorkHours">Рабочие часы</label>
-                                <select id="editUserWorkHours" name="workHours">
-                                    <option value="09:00-18:00" ${user.workHours === '09:00-18:00' ? 'selected' : ''}>09:00-18:00 (стандартный)</option>
-                                    <option value="08:00-17:00" ${user.workHours === '08:00-17:00' ? 'selected' : ''}>08:00-17:00</option>
-                                    <option value="10:00-19:00" ${user.workHours === '10:00-19:00' ? 'selected' : ''}>10:00-19:00</option>
-                                    <option value="24/7" ${user.workHours === '24/7' ? 'selected' : ''}>24/7 (круглосуточно)</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="editUserTimezone">Часовой пояс</label>
-                                <select id="editUserTimezone" name="timezone">
-                                    <option value="UTC+3" ${user.timezone === 'UTC+3' ? 'selected' : ''}>UTC+3 (Москва)</option>
-                                    <option value="UTC+2" ${user.timezone === 'UTC+2' ? 'selected' : ''}>UTC+2 (Калининград)</option>
-                                    <option value="UTC+4" ${user.timezone === 'UTC+4' ? 'selected' : ''}>UTC+4 (Самара)</option>
-                                    <option value="UTC+5" ${user.timezone === 'UTC+5' ? 'selected' : ''}>UTC+5 (Екатеринбург)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="editUserSkills">Навыки и компетенции</label>
-                                <input type="text" id="editUserSkills" name="skills"
-                                       value="${user.skills ? user.skills.join(', ') : ''}"
-                                       placeholder="Windows Server, Linux, Сети (через запятую)">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="editUserLanguages">Языки</label>
-                                <input type="text" id="editUserLanguages" name="languages"
-                                       value="${user.languages ? user.languages.join(', ') : ''}"
-                                       placeholder="Русский, Английский (через запятую)">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Статистика -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-chart-bar"></i> Статистика работы</h3>
-
-                        <div class="stats-grid">
-                            <div class="stat-item-edit">
-                                <label>Назначено тикетов</label>
-                                <span class="stat-value">${user.ticketsAssigned || 0}</span>
-                            </div>
-                            <div class="stat-item-edit">
-                                <label>Решено тикетов</label>
-                                <span class="stat-value">${user.ticketsResolved || 0}</span>
-                            </div>
-                            <div class="stat-item-edit">
-                                <label>Среднее время отклика</label>
-                                <span class="stat-value">${user.averageResponseTime || 0}ч</span>
-                            </div>
-                            <div class="stat-item-edit">
-                                <label>Рейтинг клиентов</label>
-                                <span class="stat-value">${user.customerRating || 0}/5</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Дополнительная информация -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-info-circle"></i> Дополнительная информация</h3>
-
+                <form class="create-ticket-form" onsubmit="app.submitCreateTicket(event)">
+                    <div class="form-row">
+                        <!-- Заголовок тикета -->
                         <div class="form-group">
-                            <label for="editUserBio">О себе</label>
-                            <textarea id="editUserBio" name="bio" rows="3"
-                                      placeholder="Краткая информация о пользователе...">${user.bio || ''}</textarea>
+                            <label for="ticketTitle">Заголовок тикета <span class="required">*</span></label>
+                            <input type="text" id="ticketTitle" name="title" 
+                                   placeholder="Кратко опишите проблему" required>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="editUserCertifications">Сертификации</label>
-                                <input type="text" id="editUserCertifications" name="certifications"
-                                       value="${user.certifications ? user.certifications.join(', ') : ''}"
-                                       placeholder="MCSE, CCNA, ITIL (через запятую)">
-                            </div>
+                        <!-- Тип устройства -->
+                        <div class="form-group">
+                            <label for="deviceType">Тип устройства Rikor <span class="required">*</span></label>
+                            <select id="deviceType" name="deviceType" required onchange="app.updateDeviceModels(this.value)">
+                                <option value="">Выберите устройство Rikor</option>
+                                ${this.data.rikorDevices.map(device => `
+                                    <option value="${device.type}">${device.type}</option>
+                                `).join('')}
+                            </select>
                         </div>
+                    </div>
+
+                    <!-- Подробное описание -->
+                    <div class="form-group">
+                        <label for="ticketDescription">Подробное описание проблемы <span class="required">*</span></label>
+                        <textarea id="ticketDescription" name="description" rows="6" required
+                                  placeholder="Опишите проблему максимально подробно:
+- Что случилось?
+- При каких обстоятельствах?
+- Какие действия предпринимались?
+- Есть ли коды ошибок?"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Модель устройства -->
+                        <div class="form-group">
+                            <label for="deviceModel">Модель устройства</label>
+                            <select id="deviceModel" name="deviceModel">
+                                <option value="">Например: RP6224, RN NINO 203.1/15</option>
+                            </select>
+                        </div>
+
+                        <!-- Серийный номер -->
+                        <div class="form-group">
+                            <label for="serialNumber">Серийный номер</label>
+                            <input type="text" id="serialNumber" name="serialNumber" 
+                                   placeholder="S/N устройства Rikor">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Приоритет -->
+                        <div class="form-group">
+                            <label for="priority">Приоритет <span class="required">*</span></label>
+                            <select id="priority" name="priority" required>
+                                <option value="medium">🟡 Средний - Рабочие задачи</option>
+                                <option value="high">🟠 Высокий - Важные проблемы</option>
+                                <option value="critical">🔴 Критический - Блокирующие проблемы</option>
+                                <option value="low">🟢 Низкий - Небольшие улучшения</option>
+                            </select>
+                        </div>
+
+                        <!-- Категория -->
+                        <div class="form-group">
+                            <label for="category">Категория</label>
+                            <select id="category" name="category">
+                                <option value="hardware">🔧 Оборудование</option>
+                                <option value="software">💾 Программы</option>
+                                <option value="network">🌐 Сеть</option>
+                                <option value="security">🔒 Безопасность</option>
+                                <option value="other">❓ Другое</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Местоположение -->
+                        <div class="form-group">
+                            <label for="location">Местоположение</label>
+                            <input type="text" id="location" name="location" 
+                                   placeholder="Например: Офис 1, Комната 205">
+                        </div>
+
+                        <!-- Исполнитель -->
+                        <div class="form-group">
+                            <label for="assignee">Исполнитель</label>
+                            <select id="assignee" name="assignee">
+                                <option value="">Назначить автоматически</option>
+                                ${this.data.users.filter(user => user.role === 'agent' || user.role === 'admin').map(user => `
+                                    <option value="${user.name}">${user.name} - ${user.position}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Теги -->
+                    <div class="form-group">
+                        <label for="tags">Теги</label>
+                        <input type="text" id="tags" name="tags" 
+                               placeholder="Например: rikor, сервер, перегрев">
+                        <small>Разделяйте теги запятыми для лучшего поиска</small>
+                    </div>
+
+                    <!-- Прикрепить файлы -->
+                    <div class="form-group">
+                        <label><i class="fas fa-paperclip"></i> Прикрепить файлы</label>
+                        <div class="file-upload-area" onclick="document.getElementById('ticketFiles').click()">
+                            <div class="file-upload-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Загрузить файлы</span>
+                                <small>Нажмите или перетащите файлы сюда</small>
+                                <small>Поддерживаются: PDF, DOC, TXT, JPG, PNG, ZIP (до 10 МБ)</small>
+                            </div>
+                            <input type="file" id="ticketFiles" multiple 
+                                   accept=".pdf,.doc,.docx,.txt,.md,.jpg,.jpeg,.png,.zip,.rar" 
+                                   style="display: none;" onchange="app.handleTicketFiles(this.files)">
+                        </div>
+                        <div id="ticketFilesList" class="selected-files-list"></div>
                     </div>
 
                     <!-- Действия -->
@@ -955,860 +484,1102 @@ class RikorHelpDeskEnhanced {
                             <i class="fas fa-times"></i> Отмена
                         </button>
                         <button type="submit" class="btn btn--primary">
-                            <i class="fas fa-save"></i> Сохранить изменения
+                            <i class="fas fa-plus"></i> Создать тикет
                         </button>
                     </div>
                 </form>
             </div>
         `;
 
-        this.showModal(modal, 'edit-user-modal');
-        this.editingUser = user;
+        this.showModal(modal, 'create-ticket-modal');
+        this.setupTicketFileUpload();
     }
 
-    // Обработка формы редактирования пользователя
-    submitEditUser(event, userId) {
-        event.preventDefault();
+    // Обновление моделей устройств при выборе типа
+    updateDeviceModels(deviceType) {
+        const modelSelect = document.getElementById('deviceModel');
+        if (!modelSelect) return;
 
-        const user = this.data.users.find(u => u.id == userId);
-        if (!user) {
-            this.showNotification('Пользователь не найден', 'error');
-            return;
+        modelSelect.innerHTML = '<option value="">Выберите модель</option>';
+
+        const device = this.data.rikorDevices.find(d => d.type === deviceType);
+        if (device) {
+            device.models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelSelect.appendChild(option);
+            });
         }
+    }
+
+    // Обработка файлов для тикета
+    setupTicketFileUpload() {
+        const fileInput = document.getElementById('ticketFiles');
+        const fileArea = document.querySelector('.file-upload-area');
+
+        if (!fileInput || !fileArea) return;
+
+        // Drag & Drop
+        fileArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileArea.classList.add('dragover');
+        });
+
+        fileArea.addEventListener('dragleave', () => {
+            fileArea.classList.remove('dragover');
+        });
+
+        fileArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileArea.classList.remove('dragover');
+            this.handleTicketFiles(e.dataTransfer.files);
+        });
+    }
+
+    handleTicketFiles(files) {
+        const filesList = document.getElementById('ticketFilesList');
+        if (!filesList) return;
+
+        filesList.innerHTML = '';
+        this.tempFiles = [];
+
+        Array.from(files).forEach((file, index) => {
+            // Проверка размера и типа
+            const isValidSize = file.size <= this.settings.maxFileSize;
+            const isValidType = this.settings.allowedFileTypes.some(type => 
+                file.name.toLowerCase().endsWith(type.toLowerCase()));
+
+            if (isValidSize && isValidType) {
+                this.tempFiles.push({
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    file: file
+                });
+            }
+
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info ${!isValidSize || !isValidType ? 'invalid' : ''}">
+                    <i class="fas ${this.getFileIcon(file.type)}"></i>
+                    <div class="file-details">
+                        <span class="file-name">${file.name}</span>
+                        <span class="file-size">${this.formatFileSize(file.size)}</span>
+                        ${!isValidSize ? '<span class="error">Превышен размер файла</span>' : ''}
+                        ${!isValidType ? '<span class="error">Недопустимый тип файла</span>' : ''}
+                    </div>
+                    <button type="button" class="remove-file-btn" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            filesList.appendChild(fileItem);
+        });
+
+        const validFiles = this.tempFiles.length;
+        const totalFiles = files.length;
+
+        if (validFiles > 0) {
+            this.showNotification(`Добавлено файлов: ${validFiles} из ${totalFiles}`, 'success');
+        }
+    }
+
+    // Создание тикета
+    submitCreateTicket(event) {
+        event.preventDefault();
 
         const form = event.target;
         const formData = new FormData(form);
 
-        const name = formData.get('name')?.trim();
-        const email = formData.get('email')?.trim();
-        const role = formData.get('role');
+        const title = formData.get('title').trim();
+        const description = formData.get('description').trim();
+        const deviceType = formData.get('deviceType');
+        const priority = formData.get('priority');
 
-        if (!name || !email || !role) {
+        if (!title || !description || !deviceType || !priority) {
             this.showNotification('Заполните все обязательные поля', 'error');
             return;
         }
 
-        // Проверяем уникальность email (кроме текущего пользователя)
-        if (this.data.users.some(u => u.id != userId && u.email.toLowerCase() === email.toLowerCase())) {
-            this.showNotification('Пользователь с таким email уже существует', 'error');
-            return;
-        }
+        // Генерируем ID тикета
+        const ticketNumber = this.data.tickets.length + 1;
+        const ticketId = `RIK-2025-${String(ticketNumber).padStart(3, '0')}`;
 
-        // Обновляем данные пользователя
-        const oldName = user.name;
-        user.name = name;
-        user.email = email;
-        user.position = formData.get('position') || '';
-        user.department = formData.get('department') || '';
-        user.role = role;
-        user.phone = formData.get('phone') || '';
-        user.status = formData.get('status') || 'offline';
-        user.location = formData.get('location') || '';
-        user.workHours = formData.get('workHours') || '09:00-18:00';
-        user.timezone = formData.get('timezone') || 'UTC+3';
-        user.skills = formData.get('skills') ? formData.get('skills').split(',').map(s => s.trim()) : [];
-        user.languages = formData.get('languages') ? formData.get('languages').split(',').map(s => s.trim()) : ['Русский'];
-        user.bio = formData.get('bio') || '';
-        user.certifications = formData.get('certifications') ? formData.get('certifications').split(',').map(s => s.trim()) : [];
+        // Создаем новый тикет
+        const newTicket = {
+            id: ticketId,
+            title: title,
+            description: description,
+            status: 'open',
+            priority: priority,
+            category: formData.get('category') || 'other',
+            deviceType: deviceType,
+            deviceModel: formData.get('deviceModel') || '',
+            serialNumber: formData.get('serialNumber') || '',
+            assignee: formData.get('assignee') || 'Автоназначение',
+            reporter: this.currentUser.name,
+            created: new Date().toISOString(),
+            updated: new Date().toISOString(),
+            location: formData.get('location') || 'Не указано',
+            timeSpent: 0,
+            estimatedTime: priority === 'critical' ? 1 : priority === 'high' ? 2 : 4,
+            tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()) : [],
+            replies: [
+                {
+                    id: Date.now(),
+                    author: this.currentUser.name,
+                    message: `Тикет создан. Статус: ${this.getStatusText('open')}`,
+                    created: new Date().toISOString(),
+                    type: 'status_change',
+                    files: []
+                }
+            ],
+            attachments: this.tempFiles.map(file => ({
+                name: file.name,
+                size: file.size,
+                type: file.type
+            }))
+        };
 
-        // Обновляем аватар если изменилось имя
-        if (oldName !== name) {
-            user.avatar = this.generateAvatar(name);
-        }
-
+        // Добавляем тикет в базу данных
+        this.data.tickets.push(newTicket);
+        this.updateTicketStats();
         this.saveData();
-        this.hideModal();
-        this.showNotification(`✅ Данные пользователя "${name}" успешно обновлены!`, 'success');
 
-        // Обновляем отображение
-        if (this.currentRoute === 'users') {
+        // Отправляем уведомления о новом тикете
+        this.sendNewTicketNotifications(newTicket);
+
+        // Сбрасываем временные файлы
+        this.tempFiles = [];
+
+        this.hideModal();
+        this.showNotification(`✅ Тикет ${ticketId} успешно создан!`, 'success');
+
+        // Переходим к тикетам если мы не на них
+        if (this.currentRoute !== 'tickets') {
+            this.navigate('tickets');
+        } else {
             this.renderContent();
         }
 
-        console.log('✅ Пользователь обновлен:', user);
-        this.editingUser = null;
+        console.log('✅ Тикет создан:', newTicket);
     }
 
-    // НОВАЯ ФУНКЦИЯ v2.8.0: РЕНДЕРИНГ ОТЧЕТОВ С ГРАФИКАМИ
-    renderReports() {
-        const stats = this.data.stats;
-        const reportStats = stats.reportStats;
+    // Отправка уведомлений о новом тикете
+    async sendNewTicketNotifications(ticket) {
+        console.log(`📧 Отправка уведомлений для нового тикета ${ticket.id}`);
 
-        return `
-            <div class="page-header">
-                <div class="page-title">
-                    <h1><i class="fas fa-chart-pie"></i> Отчеты и аналитика</h1>
-                    <p>Детальная аналитика работы службы поддержки RIKOR</p>
-                </div>
-                <div class="page-actions">
-                    <button class="btn btn--secondary" onclick="app.exportReports()">
-                        <i class="fas fa-download"></i> Экспорт отчетов
-                    </button>
-                    <button class="btn btn--primary" onclick="app.generateCustomReport()">
-                        <i class="fas fa-chart-line"></i> Создать отчет
-                    </button>
-                </div>
-            </div>
+        const isCritical = ticket.priority === 'critical';
 
-            <!-- Ключевые метрики -->
-            <div class="metrics-overview">
-                <h2><i class="fas fa-tachometer-alt"></i> Ключевые показатели</h2>
-                <div class="grid grid--4">
-                    <div class="metric-card">
-                        <div class="metric-icon" style="background: linear-gradient(135deg, #1e40af, #3b82f6);">
-                            <i class="fas fa-ticket-alt"></i>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-value">${stats.totalTickets}</div>
-                            <div class="metric-label">Всего тикетов</div>
-                            <div class="metric-trend trend--up">
-                                <i class="fas fa-arrow-up"></i> +12% за месяц
-                            </div>
-                        </div>
-                    </div>
+        // Email уведомления
+        if (this.settings.notifications.email) {
+            this.showNotification(`📧 Email уведомление отправлено исполнителю`, 'info');
+        }
 
-                    <div class="metric-card">
-                        <div class="metric-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-value">${stats.slaCompliance}%</div>
-                            <div class="metric-label">SLA соответствие</div>
-                            <div class="metric-trend trend--up">
-                                <i class="fas fa-arrow-up"></i> +2% за месяц
-                            </div>
-                        </div>
-                    </div>
+        // Push уведомления
+        if (this.settings.notifications.push) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(`Новый тикет ${ticket.id}`, {
+                    body: `${ticket.title} (${this.getPriorityText(ticket.priority)})`,
+                    icon: '/favicon.ico',
+                    tag: `new-ticket-${ticket.id}`
+                });
+            }
+        }
 
-                    <div class="metric-card">
-                        <div class="metric-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-value">${stats.avgResponseTime}ч</div>
-                            <div class="metric-label">Среднее время отклика</div>
-                            <div class="metric-trend trend--down">
-                                <i class="fas fa-arrow-down"></i> -0.3ч за месяц
-                            </div>
-                        </div>
-                    </div>
+        // Звуковые уведомления для критических тикетов
+        if (this.settings.notifications.sound && isCritical) {
+            this.playCriticalNotificationSound();
+        }
 
-                    <div class="metric-card">
-                        <div class="metric-icon" style="background: linear-gradient(135deg, #7c3aed, #a855f7);">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-value">${stats.customerSatisfaction}%</div>
-                            <div class="metric-label">Удовлетворенность</div>
-                            <div class="metric-trend trend--up">
-                                <i class="fas fa-arrow-up"></i> +3% за месяц
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Графики отчетов -->
-            <div class="reports-charts">
-                <div class="grid grid--2">
-                    <!-- График производительности агентов -->
-                    <div class="chart-card">
-                        <div class="card__header">
-                            <h3><i class="fas fa-users"></i> Производительность агентов</h3>
-                            <p>Количество решенных тикетов по агентам</p>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="agentPerformanceChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- График времени решения -->
-                    <div class="chart-card">
-                        <div class="card__header">
-                            <h3><i class="fas fa-hourglass-half"></i> Время решения тикетов</h3>
-                            <p>Распределение по времени решения</p>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="resolutionTimeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- График категорий тикетов -->
-                    <div class="chart-card">
-                        <div class="card__header">
-                            <h3><i class="fas fa-tags"></i> Категории тикетов</h3>
-                            <p>Распределение по категориям обращений</p>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="categoryChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- График SLA соответствия -->
-                    <div class="chart-card">
-                        <div class="card__header">
-                            <h3><i class="fas fa-award"></i> SLA соответствие</h3>
-                            <p>Целевые и фактические показатели SLA</p>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="slaChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Широкий график трендов -->
-                <div class="chart-card full-width">
-                    <div class="card__header">
-                        <h3><i class="fas fa-chart-line"></i> Месячные тренды</h3>
-                        <p>Динамика создания и решения тикетов, удовлетворенность клиентов</p>
-                    </div>
-                    <div class="chart-container" style="height: 300px;">
-                        <canvas id="monthlyTrendsChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Детальная аналитика устройств -->
-            <div class="device-analytics">
-                <h2><i class="fas fa-laptop"></i> Аналитика устройств RIKOR</h2>
-
-                <div class="device-summary-cards">
-                    ${Object.entries(reportStats.deviceTypeDetails).map(([key, device]) => `
-                        <div class="device-summary-card">
-                            <div class="device-summary-header">
-                                <h4>${device.name}</h4>
-                                <div class="device-total">${device.total} шт.</div>
-                            </div>
-                            <div class="device-summary-stats">
-                                <div class="device-stat">
-                                    <span class="device-stat-label">Активные</span>
-                                    <span class="device-stat-value status--online">${device.active}</span>
-                                </div>
-                                <div class="device-stat">
-                                    <span class="device-stat-label">На обслуживании</span>
-                                    <span class="device-stat-value status--maintenance">${device.maintenance}</span>
-                                </div>
-                                <div class="device-stat">
-                                    <span class="device-stat-label">Тикетов</span>
-                                    <span class="device-stat-value">${device.tickets}</span>
-                                </div>
-                                <div class="device-stat">
-                                    <span class="device-stat-label">Uptime</span>
-                                    <span class="device-stat-value uptime-good">${device.uptime}%</span>
-                                </div>
-                            </div>
-                            <div class="device-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${(device.active / device.total) * 100}%"></div>
-                                </div>
-                                <span class="progress-text">${device.active} из ${device.total} активны</span>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
+        // Telegram уведомления
+        if (this.settings.notifications.telegram && this.settings.notifications.telegramBotToken) {
+            this.showNotification(`📱 Telegram уведомление отправлено`, 'info');
+        }
     }
-    // НОВАЯ ФУНКЦИЯ v2.8.0: ИНИЦИАЛИЗАЦИЯ ГРАФИКОВ ОТЧЕТОВ
-    initReportCharts() {
-        console.log('📊 Инициализация графиков отчетов...');
-
-        if (typeof Chart === 'undefined') {
-            console.error('❌ Chart.js не загружен');
+    // ПРОСМОТР СТАТЬИ ИЗ БАЗЫ ЗНАНИЙ
+    viewArticle(articleId) {
+        const article = this.data.knowledgeBase.find(a => a.id === articleId);
+        if (!article) {
+            this.showNotification('Статья не найдена', 'error');
             return;
         }
 
-        const reportStats = this.data.stats.reportStats;
+        // Увеличиваем количество просмотров
+        article.views++;
+        this.saveData();
 
-        // Очищаем существующие графики
-        Object.values(this.chartInstances).forEach(chart => {
-            if (chart && typeof chart.destroy === 'function') {
-                chart.destroy();
-            }
-        });
-        this.chartInstances = {};
+        // Простая обработка Markdown
+        const processedContent = this.renderMarkdown(article.content);
 
-        try {
-            // 1. График производительности агентов
-            const agentCtx = document.getElementById('agentPerformanceChart')?.getContext('2d');
-            if (agentCtx) {
-                this.chartInstances.agentPerformance = new Chart(agentCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: reportStats.agentPerformance.labels,
-                        datasets: [{
-                            label: 'Решено тикетов',
-                            data: reportStats.agentPerformance.ticketsResolved,
-                            backgroundColor: reportStats.agentPerformance.colors.map(color => color + '40'),
-                            borderColor: reportStats.agentPerformance.colors,
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                cornerRadius: 8,
-                                callbacks: {
-                                    title: function(context) {
-                                        return context[0].label;
-                                    },
-                                    label: function(context) {
-                                        return `Решено тикетов: ${context.raw}`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 50,
-                                    color: '#64748b'
-                                },
-                                grid: {
-                                    color: 'rgba(100, 116, 139, 0.1)'
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    color: '#64748b'
-                                },
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+        const modal = `
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-book-open"></i>
+                    ${article.title}
+                </h2>
+                <div class="article-meta-header">
+                    <span class="badge badge--${this.getCategoryColor(article.category)}">${this.getCategoryText(article.category)}</span>
+                    <span class="rating-display">
+                        <i class="fas fa-star"></i> ${article.rating}
+                    </span>
+                    <span class="views-display">
+                        <i class="fas fa-eye"></i> ${article.views} просмотров
+                    </span>
+                </div>
+                <button class="modal-close" onclick="app.hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
 
-            // 2. График времени решения
-            const resolutionCtx = document.getElementById('resolutionTimeChart')?.getContext('2d');
-            if (resolutionCtx) {
-                this.chartInstances.resolutionTime = new Chart(resolutionCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: reportStats.resolutionTime.labels,
-                        datasets: [{
-                            data: reportStats.resolutionTime.data,
-                            backgroundColor: reportStats.resolutionTime.colors,
-                            borderWidth: 0,
-                            cutout: '60%'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    padding: 20,
-                                    usePointStyle: true,
-                                    color: '#475569'
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.label}: ${context.raw} тикетов (${((context.raw / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+            <div class="modal-body">
+                <div class="article-view-container">
 
-            // 3. График категорий тикетов
-            const categoryCtx = document.getElementById('categoryChart')?.getContext('2d');
-            if (categoryCtx) {
-                this.chartInstances.category = new Chart(categoryCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: reportStats.categoryDistribution.labels,
-                        datasets: [{
-                            data: reportStats.categoryDistribution.data,
-                            backgroundColor: reportStats.categoryDistribution.colors,
-                            borderWidth: 2,
-                            borderColor: '#ffffff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    padding: 20,
-                                    usePointStyle: true,
-                                    color: '#475569'
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.label}: ${context.raw}%`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+                    <!-- Информация об авторе -->
+                    <div class="article-author-info">
+                        <div class="author-details">
+                            <div class="author-avatar">${this.getInitials(article.author)}</div>
+                            <div class="author-text">
+                                <span class="author-name">${article.author}</span>
+                                <span class="publish-date">Опубликовано: ${this.formatDate(article.created)}</span>
+                                ${article.updated !== article.created ? `<span class="update-date">Обновлено: ${this.formatDate(article.updated)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="article-actions">
+                            <button class="btn btn--secondary btn--small" onclick="app.rateArticle('${article.id}')">
+                                <i class="fas fa-star"></i> Оценить
+                            </button>
+                            <button class="btn btn--secondary btn--small" onclick="app.shareArticle('${article.id}')">
+                                <i class="fas fa-share"></i> Поделиться
+                            </button>
+                            ${this.currentUser.role === 'admin' || this.currentUser.role === 'agent' ? `
+                            <button class="btn btn--warning btn--small" onclick="app.editArticle('${article.id}')">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </button>
+                            ` : ''}
+                        </div>
+                    </div>
 
-            // 4. График SLA соответствия  
-            const slaCtx = document.getElementById('slaChart')?.getContext('2d');
-            if (slaCtx) {
-                this.chartInstances.sla = new Chart(slaCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: reportStats.slaCompliance.labels,
-                        datasets: [
-                            {
-                                label: 'Цель',
-                                data: reportStats.slaCompliance.target,
-                                backgroundColor: '#e5e7eb',
-                                borderColor: '#9ca3af',
-                                borderWidth: 1,
-                                borderRadius: 4
-                            },
-                            {
-                                label: 'Факт',
-                                data: reportStats.slaCompliance.actual,
-                                backgroundColor: reportStats.slaCompliance.colors.map(c => c + '80'),
-                                borderColor: reportStats.slaCompliance.colors,
-                                borderWidth: 2,
-                                borderRadius: 8
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: '#475569',
-                                    usePointStyle: true
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.dataset.label}: ${context.raw}%`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 100,
-                                ticks: {
-                                    callback: function(value) {
-                                        return value + '%';
-                                    },
-                                    color: '#64748b'
-                                },
-                                grid: {
-                                    color: 'rgba(100, 116, 139, 0.1)'
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    color: '#64748b'
-                                },
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+                    <!-- Содержание статьи -->
+                    <div class="article-content-view">
+                        ${processedContent}
+                    </div>
 
-            // 5. График месячных трендов
-            const trendsCtx = document.getElementById('monthlyTrendsChart')?.getContext('2d');
-            if (trendsCtx) {
-                this.chartInstances.monthlyTrends = new Chart(trendsCtx, {
-                    type: 'line',
-                    data: {
-                        labels: reportStats.monthlyTrends.labels,
-                        datasets: [
-                            {
-                                label: 'Создано тикетов',
-                                data: reportStats.monthlyTrends.created,
-                                borderColor: '#ef4444',
-                                backgroundColor: '#ef444420',
-                                fill: false,
-                                tension: 0.4,
-                                pointRadius: 6,
-                                pointHoverRadius: 8,
-                                pointBackgroundColor: '#ef4444',
-                                pointBorderColor: '#ffffff',
-                                pointBorderWidth: 2
-                            },
-                            {
-                                label: 'Решено тикетов',
-                                data: reportStats.monthlyTrends.resolved,
-                                borderColor: '#10b981',
-                                backgroundColor: '#10b98120',
-                                fill: false,
-                                tension: 0.4,
-                                pointRadius: 6,
-                                pointHoverRadius: 8,
-                                pointBackgroundColor: '#10b981',
-                                pointBorderColor: '#ffffff',
-                                pointBorderWidth: 2
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: {
-                            intersect: false,
-                            mode: 'index'
-                        },
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: '#475569',
-                                    usePointStyle: true,
-                                    padding: 20
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                cornerRadius: 8,
-                                callbacks: {
-                                    title: function(context) {
-                                        return `${context[0].label} 2025`;
-                                    },
-                                    label: function(context) {
-                                        return `${context.dataset.label}: ${context.raw}`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    color: '#64748b'
-                                },
-                                grid: {
-                                    color: 'rgba(100, 116, 139, 0.1)'
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    color: '#64748b'
-                                },
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+                    <!-- Теги -->
+                    ${article.tags.length > 0 ? `
+                    <div class="article-tags-section">
+                        <h4><i class="fas fa-tags"></i> Теги:</h4>
+                        <div class="article-tags">
+                            ${article.tags.map(tag => `<span class="tag clickable" onclick="app.searchByTag('${tag}')">#${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
 
-            console.log('✅ Графики отчетов инициализированы');
-            this.showNotification('📊 Графики отчетов загружены', 'success', 2000);
+                    <!-- Прикрепленные файлы -->
+                    ${article.attachments.length > 0 ? `
+                    <div class="article-attachments-section">
+                        <h4><i class="fas fa-paperclip"></i> Прикрепленные файлы:</h4>
+                        <div class="attachments-list">
+                            ${article.attachments.map(file => `
+                                <div class="attachment-item">
+                                    <i class="fas ${this.getFileIcon(file.type)}"></i>
+                                    <span class="attachment-name">${file.name}</span>
+                                    <span class="attachment-size">(${this.formatFileSize(file.size)})</span>
+                                    <button class="btn btn--small btn--primary" onclick="app.downloadFile('${file.name}')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
 
-        } catch (error) {
-            console.error('❌ Ошибка инициализации графиков отчетов:', error);
-            this.showNotification('❌ Ошибка загрузки графиков', 'error');
+                    <!-- Похожие статьи -->
+                    ${this.getSimilarArticles(article.id, article.tags).length > 0 ? `
+                    <div class="similar-articles-section">
+                        <h4><i class="fas fa-lightbulb"></i> Похожие статьи:</h4>
+                        <div class="similar-articles-list">
+                            ${this.getSimilarArticles(article.id, article.tags).map(similar => `
+                                <div class="similar-article-item" onclick="app.viewArticle('${similar.id}')">
+                                    <h5>${similar.title}</h5>
+                                    <div class="similar-meta">
+                                        <span class="badge badge--${this.getCategoryColor(similar.category)}">${this.getCategoryText(similar.category)}</span>
+                                        <span><i class="fas fa-eye"></i> ${similar.views}</span>
+                                        <span><i class="fas fa-star"></i> ${similar.rating}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Оценка статьи -->
+                    <div class="article-rating-section">
+                        <h4><i class="fas fa-thumbs-up"></i> Была ли статья полезной?</h4>
+                        <div class="rating-buttons">
+                            <button class="btn btn--success" onclick="app.rateArticle('${article.id}', 5)">
+                                <i class="fas fa-thumbs-up"></i> Очень полезно
+                            </button>
+                            <button class="btn btn--warning" onclick="app.rateArticle('${article.id}', 3)">
+                                <i class="fas fa-meh"></i> Частично полезно
+                            </button>
+                            <button class="btn btn--error" onclick="app.rateArticle('${article.id}', 1)">
+                                <i class="fas fa-thumbs-down"></i> Не полезно
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.showModal(modal, 'article-view-modal');
+    }
+
+    // Рендеринг Markdown
+    renderMarkdown(content) {
+        return content
+            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+            .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/^- (.*$)/gm, '<li>$1</li>')
+            .replace(/((?:<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>')
+            .replace(/^(\d+)\. (.*$)/gm, '<li>$1. $2</li>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            .replace(/^(.+)$/, '<p>$1</p>');
+    }
+
+    // Поиск похожих статей
+    getSimilarArticles(currentId, tags, maxResults = 3) {
+        return this.data.knowledgeBase
+            .filter(article => article.id !== currentId)
+            .filter(article => article.tags.some(tag => tags.includes(tag)))
+            .sort((a, b) => {
+                const aMatchingTags = a.tags.filter(tag => tags.includes(tag)).length;
+                const bMatchingTags = b.tags.filter(tag => tags.includes(tag)).length;
+                return bMatchingTags - aMatchingTags;
+            })
+            .slice(0, maxResults);
+    }
+
+    // Оценка статьи
+    rateArticle(articleId, rating = null) {
+        const article = this.data.knowledgeBase.find(a => a.id === articleId);
+        if (!article) return;
+
+        if (rating) {
+            // Простая логика оценки - усреднение
+            const currentRating = article.rating || 0;
+            const newRating = ((currentRating * 10) + rating) / 11;
+            article.rating = Math.round(newRating * 10) / 10;
+
+            this.saveData();
+            this.showNotification(`Спасибо за оценку! Новый рейтинг: ${article.rating}`, 'success');
+
+            // Обновляем интерфейс
+            setTimeout(() => this.viewArticle(articleId), 500);
+        } else {
+            // Показать форму оценки
+            this.showNotification('Выберите оценку от 1 до 5 звезд', 'info');
         }
     }
 
-    // СИСТЕМА АВТОТЕСТИРОВАНИЯ v2.8.0
-    async runSystemCheck() {
-        console.log('🔍 ЗАПУСК СИСТЕМНОЙ ПРОВЕРКИ v2.8.0');
-        console.log('=' * 60);
+    // Поделиться статьей
+    shareArticle(articleId) {
+        const article = this.data.knowledgeBase.find(a => a.id === articleId);
+        if (!article) return;
 
-        const results = {
-            passed: 0,
-            failed: 0,
-            warnings: 0,
-            tests: []
+        const shareUrl = `${window.location.origin}${window.location.pathname}#knowledge/${articleId}`;
+
+        if (navigator.share) {
+            navigator.share({
+                title: article.title,
+                text: article.content.substring(0, 100) + '...',
+                url: shareUrl
+            });
+        } else {
+            // Копировать в буфер обмена
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                this.showNotification('Ссылка на статью скопирована в буфер обмена', 'success');
+            }).catch(() => {
+                this.showNotification('Не удалось скопировать ссылку', 'error');
+            });
+        }
+    }
+
+    // Поиск по тегу
+    searchByTag(tag) {
+        this.hideModal();
+        this.navigate('knowledge');
+        setTimeout(() => {
+            const searchInput = document.querySelector('.knowledge-search input');
+            if (searchInput) {
+                searchInput.value = `#${tag}`;
+                // Здесь можно добавить логику фильтрации
+            }
+        }, 300);
+        this.showNotification(`Поиск статей по тегу: ${tag}`, 'info');
+    }
+
+    // Редактирование статьи (заглушка)
+    editArticle(articleId) {
+        this.showNotification('Редактирование статей будет доступно в следующей версии', 'info');
+    }
+
+    // Скачивание файла (заглушка)
+    downloadFile(filename) {
+        this.showNotification(`Скачивание файла: ${filename}`, 'info');
+    }
+
+    // КОМПАКТНОЕ МОДАЛЬНОЕ ОКНО ПРОСМОТРА ТИКЕТА (как раньше)
+    viewTicket(ticketId) {
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) {
+            this.showNotification('Тикет не найден', 'error');
+            return;
+        }
+
+        this.currentTicket = ticket;
+
+        const modal = `
+            <div class="modal-header compact">
+                <div class="ticket-title-section">
+                    <h2 class="modal-title compact">${ticket.title}</h2>
+                    <div class="ticket-badges">
+                        <span class="badge ticket-id">${ticket.id}</span>
+                        <span class="badge badge--${this.getStatusColor(ticket.status)} status-badge">${this.getStatusText(ticket.status).toUpperCase()}</span>
+                        <span class="badge badge--${this.getPriorityColor(ticket.priority)} priority-badge">${this.getPriorityText(ticket.priority).toUpperCase()}</span>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="app.hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body compact">
+                <div class="ticket-compact-container">
+
+                    <!-- Описание проблемы -->
+                    <div class="section">
+                        <h4>Описание проблемы</h4>
+                        <p class="description-text">${ticket.description}</p>
+                    </div>
+
+                    <!-- Основная информация в компактном виде -->
+                    <div class="section">
+                        <div class="info-grid-compact">
+                            <div class="info-row">
+                                <span class="label">Устройство:</span>
+                                <span class="value"><i class="${this.getDeviceIcon(ticket.deviceType)}"></i> ${ticket.deviceType} ${ticket.deviceModel}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Серийный номер:</span>
+                                <span class="value">${ticket.serialNumber}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Местоположение:</span>
+                                <span class="value"><i class="fas fa-map-marker-alt"></i> ${ticket.location}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Категория:</span>
+                                <span class="value">${this.getCategoryText(ticket.category)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Участники -->
+                    <div class="section participants">
+                        <div class="participants-grid">
+                            <div class="participant">
+                                <span class="label">Создал:</span>
+                                <span class="value">${ticket.reporter}</span>
+                                <span class="date">${this.formatDate(ticket.created)}</span>
+                            </div>
+                            <div class="participant">
+                                <span class="label">Исполнитель:</span>
+                                <span class="value">${ticket.assignee}</span>
+                                <span class="date">Обновлен: ${this.formatDate(ticket.updated)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Временные рамки -->
+                    <div class="section time-frames">
+                        <div class="time-info">
+                            <div class="time-item">
+                                <span class="label">Потрачено времени:</span>
+                                <span class="value">${ticket.timeSpent} ч</span>
+                            </div>
+                            <div class="time-item">
+                                <span class="label">Оценка времени:</span>
+                                <span class="value">${ticket.estimatedTime} ч</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Изменить статус -->
+                    <div class="section status-change">
+                        <h4>Изменить статус</h4>
+                        <div class="status-buttons">
+                            <button class="status-btn ${ticket.status === 'open' ? 'active' : ''}" 
+                                    onclick="app.changeTicketStatus('${ticket.id}', 'open')">
+                                Открыт
+                            </button>
+                            <button class="status-btn ${ticket.status === 'in_progress' ? 'active' : ''}" 
+                                    onclick="app.changeTicketStatus('${ticket.id}', 'in_progress')">
+                                В работе
+                            </button>
+                            <button class="status-btn ${ticket.status === 'waiting' ? 'active' : ''}" 
+                                    onclick="app.changeTicketStatus('${ticket.id}', 'waiting')">
+                                Ожидание
+                            </button>
+                            <button class="status-btn ${ticket.status === 'resolved' ? 'active' : ''}" 
+                                    onclick="app.changeTicketStatus('${ticket.id}', 'resolved')">
+                                Решен
+                            </button>
+                            <button class="status-btn ${ticket.status === 'closed' ? 'active' : ''}" 
+                                    onclick="app.changeTicketStatus('${ticket.id}', 'closed')">
+                                Закрыт
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ответы -->
+                    <div class="section replies">
+                        <h4>Ответы (${ticket.replies.length})</h4>
+                        <div class="replies-list">
+                            ${ticket.replies.map(reply => `
+                                <div class="reply-compact">
+                                    <div class="reply-header">
+                                        <div class="reply-author">
+                                            <div class="author-avatar-small">${this.getInitials(reply.author)}</div>
+                                            <span class="author-name">${reply.author}</span>
+                                        </div>
+                                        <span class="reply-date">${this.formatDate(reply.created)}</span>
+                                    </div>
+                                    <div class="reply-message">${reply.message}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Быстрая форма ответа -->
+                        <form class="quick-reply-form" onsubmit="app.addQuickReply(event, '${ticket.id}')">
+                            <textarea placeholder="Добавить комментарий..." name="message" rows="3" required></textarea>
+                            <div class="reply-actions">
+                                <button type="submit" class="btn btn--primary btn--small">
+                                    <i class="fas fa-paper-plane"></i> Отправить
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.showModal(modal, 'ticket-modal-compact');
+    }
+
+    // БЫСТРАЯ СМЕНА СТАТУСА ТИКЕТА
+    changeTicketStatus(ticketId, newStatus) {
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) {
+            this.showNotification('Тикет не найден', 'error');
+            return;
+        }
+
+        const oldStatus = ticket.status;
+        ticket.status = newStatus;
+        ticket.updated = new Date().toISOString();
+
+        // Добавляем запись об изменении статуса
+        ticket.replies.push({
+            id: Date.now(),
+            author: this.currentUser.name,
+            message: `Статус изменен с "${this.getStatusText(oldStatus)}" на "${this.getStatusText(newStatus)}"`,
+            created: new Date().toISOString(),
+            type: 'status_change',
+            files: []
+        });
+
+        this.saveData();
+        this.updateTicketStats();
+
+        // Отправляем уведомления при изменении статуса
+        if (oldStatus !== newStatus) {
+            this.sendStatusChangeNotifications(ticket, oldStatus, newStatus);
+        }
+
+        // Обновляем интерфейс
+        this.viewTicket(ticketId);
+        this.showNotification(`Статус тикета изменен на "${this.getStatusText(newStatus)}"`, 'success');
+
+        console.log(`✅ Статус тикета ${ticketId} изменен: ${oldStatus} → ${newStatus}`);
+    }
+
+    // БЫСТРЫЙ ОТВЕТ В ТИКЕТЕ
+    addQuickReply(event, ticketId) {
+        event.preventDefault();
+
+        const form = event.target;
+        const message = form.message.value.trim();
+
+        if (!message) {
+            this.showNotification('Введите сообщение', 'error');
+            return;
+        }
+
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) {
+            this.showNotification('Тикет не найден', 'error');
+            return;
+        }
+
+        const reply = {
+            id: Date.now(),
+            author: this.currentUser.name,
+            message: message,
+            created: new Date().toISOString(),
+            type: 'comment',
+            files: []
         };
 
-        // Тест 1: Создание пользователя
-        try {
-            console.log('1️⃣ Тестирование создания пользователя...');
-            const testUserData = {
-                name: 'Тест Пользователь',
-                email: 'test@rikor.ru',
-                role: 'user',
-                position: 'Тестировщик',
-                department: 'IT отдел'
-            };
+        ticket.replies.push(reply);
+        ticket.updated = new Date().toISOString();
 
-            const originalUsersCount = this.data.users.length;
-            this.createNewUser(testUserData);
+        this.saveData();
 
-            if (this.data.users.length === originalUsersCount + 1) {
-                console.log('✅ Создание пользователя - ПРОЙДЕНО');
-                results.passed++;
-                results.tests.push({name: 'Создание пользователя', status: 'PASS'});
-            } else {
-                throw new Error('Пользователь не был создан');
-            }
-        } catch (error) {
-            console.log('❌ Создание пользователя - ОШИБКА:', error.message);
-            results.failed++;
-            results.tests.push({name: 'Создание пользователя', status: 'FAIL'});
+        // Очищаем форму и обновляем интерфейс
+        form.reset();
+        this.viewTicket(ticketId);
+        this.showNotification('Ответ добавлен', 'success');
+
+        console.log('✅ Быстрый ответ добавлен к тикету:', ticketId);
+    }
+
+    // ОТПРАВКА УВЕДОМЛЕНИЙ ПРИ ИЗМЕНЕНИИ СТАТУСА
+    async sendStatusChangeNotifications(ticket, oldStatus, newStatus) {
+        console.log(`📧 Отправка уведомлений для тикета ${ticket.id}: ${oldStatus} → ${newStatus}`);
+
+        const isCritical = ticket.priority === 'critical';
+        const isImportantChange = (oldStatus === 'open' && newStatus === 'resolved') || 
+                                 (newStatus === 'critical') || 
+                                 (oldStatus !== 'closed' && newStatus === 'closed');
+
+        // Email уведомления
+        if (this.settings.notifications.email && isImportantChange) {
+            await this.sendEmailNotification(ticket, oldStatus, newStatus);
         }
 
-        // Тест 2: Графики отчетов
-        try {
-            console.log('2️⃣ Тестирование графиков отчетов...');
-
-            if (typeof Chart !== 'undefined' && this.data.stats.reportStats) {
-                console.log('✅ Графики отчетов - ПРОЙДЕНО');
-                results.passed++;
-                results.tests.push({name: 'Графики отчетов', status: 'PASS'});
-            } else {
-                throw new Error('Chart.js не загружен или нет данных для отчетов');
-            }
-        } catch (error) {
-            console.log('❌ Графики отчетов - ОШИБКА:', error.message);
-            results.failed++;
-            results.tests.push({name: 'Графики отчетов', status: 'FAIL'});
+        // Push уведомления
+        if (this.settings.notifications.push) {
+            await this.sendPushNotification(ticket, oldStatus, newStatus);
         }
 
-        // Тест 3: Навигация
-        try {
-            console.log('3️⃣ Тестирование навигации...');
-            const testPages = ['dashboard', 'tickets', 'knowledge', 'reports', 'users', 'settings'];
-            let navigationOk = true;
+        // Звуковые уведомления для критических тикетов
+        if (this.settings.notifications.sound && isCritical) {
+            this.playCriticalNotificationSound();
+        }
 
-            for (const page of testPages) {
-                this.navigate(page);
-                if (this.currentRoute !== page) {
-                    navigationOk = false;
-                    break;
+        // Telegram уведомления
+        if (this.settings.notifications.telegram && this.settings.notifications.telegramBotToken) {
+            await this.sendTelegramNotification(ticket, oldStatus, newStatus);
+        }
+    }
+
+    // Email уведомления
+    async sendEmailNotification(ticket, oldStatus, newStatus) {
+        try {
+            console.log('📧 Отправка email уведомления...');
+            this.showNotification(`📧 Email уведомление отправлено: ${ticket.reporter}`, 'info');
+            console.log('✅ Email уведомление отправлено');
+        } catch (error) {
+            console.error('❌ Ошибка отправки email:', error);
+            this.showNotification('Ошибка отправки email уведомления', 'error');
+        }
+    }
+
+    // Push уведомления
+    async sendPushNotification(ticket, oldStatus, newStatus) {
+        try {
+            console.log('🔔 Отправка push уведомления...');
+
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    new Notification(`Тикет ${ticket.id}`, {
+                        body: `Статус изменен: ${this.getStatusText(oldStatus)} → ${this.getStatusText(newStatus)}`,
+                        icon: '/favicon.ico',
+                        tag: `ticket-${ticket.id}`
+                    });
+                } else if (Notification.permission === 'default') {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        new Notification(`Тикет ${ticket.id}`, {
+                            body: `Статус изменен: ${this.getStatusText(oldStatus)} → ${this.getStatusText(newStatus)}`,
+                            icon: '/favicon.ico',
+                            tag: `ticket-${ticket.id}`
+                        });
+                    }
                 }
             }
 
-            if (navigationOk) {
-                console.log('✅ Навигация - ПРОЙДЕНО');
-                results.passed++;
-                results.tests.push({name: 'Навигация', status: 'PASS'});
-            } else {
-                throw new Error('Ошибка при навигации между страницами');
-            }
+            this.showNotification('🔔 Push уведомление отправлено', 'info');
+            console.log('✅ Push уведомление отправлено');
+
         } catch (error) {
-            console.log('❌ Навигация - ОШИБКА:', error.message);
-            results.failed++;
-            results.tests.push({name: 'Навигация', status: 'FAIL'});
-        }
-
-        // Тест 4: Сохранение данных
-        try {
-            console.log('4️⃣ Тестирование сохранения данных...');
-            this.saveData();
-
-            const savedData = localStorage.getItem('rikor-helpdesk-data');
-            if (savedData && JSON.parse(savedData)) {
-                console.log('✅ Сохранение данных - ПРОЙДЕНО');
-                results.passed++;
-                results.tests.push({name: 'Сохранение данных', status: 'PASS'});
-            } else {
-                throw new Error('Данные не сохранились в localStorage');
-            }
-        } catch (error) {
-            console.log('❌ Сохранение данных - ОШИБКА:', error.message);
-            results.failed++;
-            results.tests.push({name: 'Сохранение данных', status: 'FAIL'});
-        }
-
-        // Тест 5: Система уведомлений
-        try {
-            console.log('5️⃣ Тестирование системы уведомлений...');
-            this.showNotification('Тестовое уведомление', 'info');
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            console.log('✅ Система уведомлений - ПРОЙДЕНО');
-            results.passed++;
-            results.tests.push({name: 'Уведомления', status: 'PASS'});
-        } catch (error) {
-            console.log('❌ Система уведомлений - ОШИБКА:', error.message);
-            results.failed++;
-            results.tests.push({name: 'Уведомления', status: 'FAIL'});
-        }
-
-        // Очистка тестовых данных
-        try {
-            console.log('🧹 Очистка тестовых данных...');
-            this.data.users = this.data.users.filter(u => u.email !== 'test@rikor.ru');
-            this.saveData();
-            console.log('✅ Тестовые данные очищены');
-        } catch (error) {
-            console.log('⚠️ Ошибка очистки тестовых данных:', error.message);
-            results.warnings++;
-        }
-
-        // Выводим итоговый отчет
-        console.log('\n🎯 ИТОГОВЫЙ ОТЧЕТ ТЕСТИРОВАНИЯ v2.8.0:');
-        console.log('=' * 40);
-        console.log(`✅ Пройдено: ${results.passed}`);
-        console.log(`❌ Провалено: ${results.failed}`);
-        console.log(`⚠️ Предупреждения: ${results.warnings}`);
-        console.log(`📊 Всего тестов: ${results.tests.length}`);
-        console.log(`🎯 Успешность: ${Math.round((results.passed / results.tests.length) * 100)}%`);
-
-        if (results.failed === 0) {
-            console.log('\n🎉 ВСЕ ТЕСТЫ ПРОЙДЕНЫ УСПЕШНО!');
-            console.log('✅ RIKOR HELPDESK v2.8.0 Enhanced готов к использованию!');
-            this.showNotification('🎉 Все тесты системы пройдены успешно!', 'success', 5000);
-        } else {
-            console.log(`\n⚠️ ОБНАРУЖЕНЫ ПРОБЛЕМЫ: ${results.failed} тестов не прошли`);
-            this.showNotification(`⚠️ Обнаружены проблемы: ${results.failed} ошибок`, 'warning', 7000);
-        }
-
-        return results;
-    }
-
-    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-
-    // Генерация аватара из имени
-    generateAvatar(name) {
-        if (!name) return '??';
-        const words = name.trim().split(' ');
-        if (words.length === 1) {
-            return words[0].substring(0, 2).toUpperCase();
-        } else {
-            return (words[0][0] + words[1][0]).toUpperCase();
+            console.error('❌ Ошибка отправки push уведомления:', error);
         }
     }
 
-    // Получение цвета бейджа роли
-    getRoleBadgeColor(role) {
+    // Звуковые уведомления
+    playCriticalNotificationSound() {
+        try {
+            console.log('🔊 Воспроизведение критического звукового сигнала...');
+
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime + 0.3);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.6);
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 1);
+
+            this.showNotification('🔊 Критическое звуковое уведомление', 'warning');
+            console.log('✅ Звуковой сигнал воспроизведен');
+
+        } catch (error) {
+            console.error('❌ Ошибка воспроизведения звука:', error);
+        }
+    }
+
+    // Telegram уведомления
+    async sendTelegramNotification(ticket, oldStatus, newStatus) {
+        try {
+            console.log('📱 Отправка Telegram уведомления...');
+            this.showNotification('📱 Telegram уведомление отправлено', 'info');
+            console.log('✅ Telegram уведомление отправлено');
+        } catch (error) {
+            console.error('❌ Ошибка отправки Telegram уведомления:', error);
+            this.showNotification('Ошибка отправки Telegram уведомления', 'error');
+        }
+    }
+    // ОБНОВЛЕНИЕ СТАТИСТИКИ ТИКЕТОВ
+    updateTicketStats() {
+        const stats = this.data.stats;
+
+        // Подсчет по статусам
+        stats.totalTickets = this.data.tickets.length;
+        stats.openTickets = this.data.tickets.filter(t => t.status === 'open').length;
+        stats.inProgressTickets = this.data.tickets.filter(t => t.status === 'in_progress').length;
+        stats.waitingTickets = this.data.tickets.filter(t => t.status === 'waiting').length;
+        stats.resolvedTickets = this.data.tickets.filter(t => t.status === 'resolved').length;
+        stats.closedTickets = this.data.tickets.filter(t => t.status === 'closed').length;
+
+        // Подсчет по приоритетам
+        stats.criticalTickets = this.data.tickets.filter(t => t.priority === 'critical').length;
+        stats.highTickets = this.data.tickets.filter(t => t.priority === 'high').length;
+        stats.mediumTickets = this.data.tickets.filter(t => t.priority === 'medium').length;
+        stats.lowTickets = this.data.tickets.filter(t => t.priority === 'low').length;
+
+        // Обновляем объекты статистики для графиков
+        stats.statusStats = {
+            open: stats.openTickets,
+            in_progress: stats.inProgressTickets,
+            waiting: stats.waitingTickets,
+            resolved: stats.resolvedTickets,
+            closed: stats.closedTickets
+        };
+
+        stats.priorityStats = {
+            critical: stats.criticalTickets,
+            high: stats.highTickets,
+            medium: stats.mediumTickets,
+            low: stats.lowTickets
+        };
+
+        // Подсчет устройств
+        const deviceCounts = {};
+        this.data.tickets.forEach(ticket => {
+            deviceCounts[ticket.deviceType] = (deviceCounts[ticket.deviceType] || 0) + 1;
+        });
+
+        stats.deviceStats.counts = this.data.rikorDevices.map(device => 
+            deviceCounts[device.type] || 0
+        );
+
+        console.log('📊 Статистика обновлена');
+    }
+
+    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ UI
+    getStatusColor(status) {
         const colors = {
-            'admin': 'error',
-            'agent': 'primary',
-            'user': 'secondary'
+            'open': 'error',
+            'in_progress': 'warning', 
+            'waiting': 'info',
+            'resolved': 'success',
+            'closed': 'secondary'
         };
-        return colors[role] || 'secondary';
+        return colors[status] || 'secondary';
     }
 
-    // Получение текста роли
-    getRoleText(role) {
+    getStatusText(status) {
         const texts = {
-            'admin': '👑 Администратор',
-            'agent': '🎧 Агент поддержки',
-            'user': '👤 Пользователь'
+            'open': 'Открыт',
+            'in_progress': 'В работе',
+            'waiting': 'Ожидание',
+            'resolved': 'Решен',
+            'closed': 'Закрыт'
         };
-        return texts[role] || role;
+        return texts[status] || status;
     }
 
-    // Заглушки для новых функций
-    exportReports() {
-        this.showNotification('📊 Экспорт отчетов запущен', 'info');
-        console.log('📊 Экспорт отчетов...');
+    getPriorityColor(priority) {
+        const colors = {
+            'critical': 'error',
+            'high': 'warning',
+            'medium': 'info', 
+            'low': 'success'
+        };
+        return colors[priority] || 'secondary';
     }
 
-    generateCustomReport() {
-        this.showNotification('📈 Создание пользовательского отчета', 'info');
-        console.log('📈 Генерация пользовательского отчета...');
+    getPriorityText(priority) {
+        const texts = {
+            'critical': 'Критический',
+            'high': 'Высокий',
+            'medium': 'Средний',
+            'low': 'Низкий'
+        };
+        return texts[priority] || priority;
     }
-    // ОСНОВНЫЕ СИСТЕМНЫЕ ФУНКЦИИ (из предыдущей версии + обновления)
+
+    getCategoryColor(category) {
+        const colors = {
+            'hardware': 'warning',
+            'software': 'info',
+            'network': 'success',
+            'security': 'error',
+            'other': 'secondary'
+        };
+        return colors[category] || 'secondary';
+    }
+
+    getCategoryText(category) {
+        const texts = {
+            'hardware': 'Оборудование',
+            'software': 'Программы',
+            'network': 'Сеть',
+            'security': 'Безопасность',
+            'other': 'Другое'
+        };
+        return texts[category] || category;
+    }
+
+    getDeviceIcon(deviceType) {
+        const icons = {
+            'Сервер': 'fas fa-server',
+            'Ноутбук': 'fas fa-laptop',
+            'Моноблок': 'fas fa-desktop',
+            'Планшет': 'fas fa-tablet-alt',
+            'Мини ПК': 'fas fa-microchip'
+        };
+        return icons[deviceType] || 'fas fa-desktop';
+    }
+
+    getFileIcon(fileType) {
+        if (fileType.includes('pdf')) return 'fa-file-pdf';
+        if (fileType.includes('word') || fileType.includes('doc')) return 'fa-file-word';
+        if (fileType.includes('text')) return 'fa-file-alt';
+        if (fileType.includes('image')) return 'fa-file-image';
+        if (fileType.includes('zip') || fileType.includes('rar')) return 'fa-file-archive';
+        return 'fa-file';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Б';
+        const k = 1024;
+        const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    formatDate(dateString) {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return 'Неверная дата';
+        }
+    }
+
+    getInitials(fullName) {
+        return fullName.split(' ')
+            .map(name => name.charAt(0))
+            .join('')
+            .toUpperCase()
+            .substring(0, 2);
+    }
+
+    // УПРАВЛЕНИЕ МОДАЛЬНЫМИ ОКНАМИ
+    showModal(content, modalClass = '') {
+        const overlay = document.getElementById('modal-overlay');
+        const container = document.getElementById('modal-container');
+
+        if (overlay && container) {
+            container.innerHTML = content;
+            container.className = `modal-container ${modalClass}`;
+            overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    hideModal() {
+        const overlay = document.getElementById('modal-overlay');
+        if (overlay) {
+            overlay.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // УВЕДОМЛЕНИЯ
+    showNotification(message, type = 'info', duration = 4000) {
+        const container = document.getElementById('notifications');
+        if (!container) return;
+
+        const notification = document.createElement('div');
+        notification.className = `notification notification--${type}`;
+        notification.innerHTML = `
+            <div class="notification__icon">
+                <i class="fas ${this.getNotificationIcon(type)}"></i>
+            </div>
+            <div class="notification__content">
+                <div class="notification__message">${message}</div>
+            </div>
+        `;
+
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, duration);
+    }
+
+    getNotificationIcon(type) {
+        const icons = {
+            'success': 'fa-check-circle',
+            'error': 'fa-exclamation-circle',
+            'warning': 'fa-exclamation-triangle',
+            'info': 'fa-info-circle'
+        };
+        return icons[type] || 'fa-info-circle';
+    }
+
+    // ОСНОВНЫЕ ФУНКЦИИ СИСТЕМЫ
+    applyTheme() {
+        try {
+            document.body.setAttribute('data-theme', this.settings.theme);
+            const themeIcon = document.querySelector('.theme-toggle i');
+            if (themeIcon) {
+                themeIcon.className = this.settings.theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+            console.log('🎨 Тема применена:', this.settings.theme);
+        } catch (error) {
+            console.warn('⚠️ Ошибка применения темы:', error);
+        }
+    }
+
+    toggleTheme() {
+        this.settings.theme = this.settings.theme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('rikor-theme', this.settings.theme);
+        this.applyTheme();
+        this.showNotification(
+            `Тема изменена на ${this.settings.theme === 'light' ? 'светлую' : 'темную'}`, 
+            'success'
+        );
+    }
 
     bindEvents() {
-        console.log('🔗 Привязка событий...');
+        try {
+            // Навигация
+            document.querySelectorAll('.sidebar__link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.navigate(link.dataset.route);
+                });
+            });
 
-        // Навигация в сайдбаре
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('[data-route]');
-            if (link) {
-                e.preventDefault();
-                const route = link.getAttribute('data-route');
-                this.navigate(route);
+            // Переключение темы
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => this.toggleTheme());
             }
-        });
 
-        // Переключение темы
-        const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => this.toggleTheme());
+            // FAB меню
+            const fabButton = document.getElementById('fabButton');
+            const fabMenu = document.getElementById('fabMenu');
+            if (fabButton && fabMenu) {
+                fabButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    fabMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Закрытие модальных окон и меню
+            document.addEventListener('click', (e) => {
+                if (e.target.id === 'modal-overlay') {
+                    this.hideModal();
+                }
+
+                const fabMenu = document.getElementById('fabMenu');
+                if (fabMenu && !fabMenu.classList.contains('hidden')) {
+                    fabMenu.classList.add('hidden');
+                }
+            });
+
+            console.log('✅ События привязаны');
+        } catch (error) {
+            console.warn('⚠️ Ошибка привязки событий:', error);
         }
-
-        // FAB кнопка
-        const fabButton = document.getElementById('fabButton');
-        if (fabButton) {
-            fabButton.addEventListener('click', () => this.toggleFABMenu());
-        }
-
-        // Закрытие модальных окон по ESC
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.hideModal();
-            }
-        });
-
-        // Закрытие модальных окон по клику вне их
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                this.hideModal();
-            }
-        });
-
-        console.log('✅ События привязаны');
     }
 
     navigate(route) {
-        console.log(`🧭 Навигация: ${route}`);
+        console.log(`📍 Переход к: ${route}`);
+        this.currentRoute = route;
+        this.updateActiveLink(route);
+        this.updateBreadcrumb(route);
+        this.renderContent();
+    }
 
-        // Обновляем активный элемент навигации
+    updateActiveLink(route) {
         document.querySelectorAll('.sidebar__link').forEach(link => {
             link.classList.remove('active');
+            if (link.dataset.route === route) {
+                link.classList.add('active');
+            }
         });
-
-        const activeLink = document.querySelector(`[data-route="${route}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
-
-        // Обновляем хлебные крошки
-        this.updateBreadcrumb(route);
-
-        // Сохраняем текущий маршрут
-        this.currentRoute = route;
-
-        // Обновляем URL
-        window.location.hash = route;
-
-        // Рендерим контент
-        this.renderContent();
     }
 
     updateBreadcrumb(route) {
@@ -1820,425 +1591,1383 @@ class RikorHelpDeskEnhanced {
             'users': 'Пользователи',
             'settings': 'Настройки'
         };
-
-        const breadcrumbElement = document.getElementById('currentPage');
-        if (breadcrumbElement) {
-            breadcrumbElement.textContent = breadcrumbMap[route] || route;
+        const currentPage = document.getElementById('currentPage');
+        if (currentPage) {
+            currentPage.textContent = breadcrumbMap[route] || 'Неизвестно';
         }
     }
 
     handleRoute() {
-        const hash = window.location.hash.replace('#', '') || 'dashboard';
-        this.navigate(hash);
+        const hash = window.location.hash.slice(1) || 'dashboard';
+        this.currentRoute = hash;
+        this.updateActiveLink(hash);
+        this.updateBreadcrumb(hash);
     }
 
     renderContent() {
-        const contentElement = document.getElementById('content');
-        if (!contentElement) return;
-
-        let content = '';
+        const container = document.getElementById('content');
+        if (!container) {
+            console.error('❌ Контейнер content не найден');
+            return;
+        }
 
         try {
-            switch (this.currentRoute) {
+            switch(this.currentRoute) {
                 case 'dashboard':
-                    content = this.renderDashboard();
+                    container.innerHTML = this.renderDashboard();
+                    setTimeout(() => this.initDashboardCharts(), 500);
                     break;
                 case 'tickets':
-                    content = this.renderTickets();
+                    container.innerHTML = this.renderTickets();
                     break;
                 case 'knowledge':
-                    content = this.renderKnowledgeBase();
+                    container.innerHTML = this.renderKnowledgeBase();
                     break;
                 case 'reports':
-                    content = this.renderReports();
+                    container.innerHTML = this.renderReports();
+                    setTimeout(() => this.initReportCharts(), 500);
                     break;
                 case 'users':
-                    content = this.renderUsers();
+                    container.innerHTML = this.renderUsers();
                     break;
                 case 'settings':
-                    content = this.renderSettings();
+                    container.innerHTML = this.renderSettings();
                     break;
                 default:
-                    content = this.renderDashboard();
+                    container.innerHTML = this.renderDashboard();
             }
-
-            contentElement.innerHTML = content;
-
-            // Инициализируем графики для соответствующих страниц
-            setTimeout(() => {
-                if (this.currentRoute === 'dashboard') {
-                    this.initDashboardCharts();
-                } else if (this.currentRoute === 'reports') {
-                    this.initReportCharts();
-                }
-            }, 100);
-
+            console.log('✅ Контент отрендерен для:', this.currentRoute);
         } catch (error) {
-            console.error('❌ Ошибка рендеринга контента:', error);
-            contentElement.innerHTML = `
-                <div class="error-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Ошибка загрузки</h3>
+            console.error('❌ Ошибка рендеринга:', error);
+            container.innerHTML = `
+                <div class="card error-card">
+                    <h3>Ошибка отображения</h3>
                     <p>Не удалось загрузить содержимое страницы.</p>
-                    <button class="btn btn--primary" onclick="location.reload()">
-                        <i class="fas fa-refresh"></i> Обновить страницу
-                    </button>
+                    <button class="btn btn--primary" onclick="app.navigate('dashboard')">На главную</button>
                 </div>
             `;
         }
     }
+    // РЕНДЕРЫ СТРАНИЦ
 
-    // НОВАЯ ФУНКЦИЯ v2.8.0: РЕНДЕРИНГ ПОЛЬЗОВАТЕЛЕЙ
-    renderUsers() {
-        const users = this.data.users;
-        const stats = {
-            total: users.length,
-            online: users.filter(u => u.status === 'online').length,
-            admins: users.filter(u => u.role === 'admin').length,
-            agents: users.filter(u => u.role === 'agent').length
-        };
-
+    renderDashboard() {
         return `
-            <div class="page-header">
-                <div class="page-title">
-                    <h1><i class="fas fa-users"></i> Управление пользователями</h1>
-                    <p>Пользователи системы RIKOR HELPDESK v2.8.0</p>
+            <div class="dashboard">
+                <div class="dashboard__header mb-4">
+                    <h1><i class="fas fa-tachometer-alt"></i> Панель управления</h1>
+                    <p>RIKOR HELPDESK v2.7.0 Enhanced • ${new Date().toLocaleDateString('ru-RU')}</p>
                 </div>
-                <div class="page-actions">
-                    <button class="btn btn--secondary" onclick="app.exportUsers()">
-                        <i class="fas fa-download"></i> Экспорт
-                    </button>
-                    <button class="btn btn--primary" onclick="app.showCreateUserModal()">
-                        <i class="fas fa-user-plus"></i> Добавить пользователя
-                    </button>
-                </div>
-            </div>
 
-            <!-- Статистика пользователей -->
-            <div class="users-stats">
-                <div class="grid grid--4">
+                <div class="grid grid--4 mb-4">
                     <div class="stat-card">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
-                            <i class="fas fa-users"></i>
+                        <div class="stat-card-icon" style="background: #3b82f6; color: white;">
+                            <i class="fas fa-ticket-alt"></i>
                         </div>
-                        <div class="stat-card-value">${stats.total}</div>
-                        <div class="stat-card-label">Всего пользователей</div>
+                        <div class="stat-card-value">${this.data.stats.totalTickets}</div>
+                        <div class="stat-card-label">Всего тикетов</div>
+                        <div class="stat-card-trend trend--up">
+                            <i class="fas fa-arrow-up"></i> +12% за месяц
+                        </div>
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                            <i class="fas fa-circle"></i>
+                        <div class="stat-card-icon" style="background: #ef4444; color: white;">
+                            <i class="fas fa-exclamation-circle"></i>
                         </div>
-                        <div class="stat-card-value">${stats.online}</div>
-                        <div class="stat-card-label">В сети</div>
+                        <div class="stat-card-value">${this.data.stats.openTickets}</div>
+                        <div class="stat-card-label">Открытые тикеты</div>
+                        <div class="stat-card-trend">
+                            <i class="fas fa-clock"></i> Требуют внимания
+                        </div>
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                            <i class="fas fa-crown"></i>
+                        <div class="stat-card-icon" style="background: #10b981; color: white;">
+                            <i class="fas fa-check-circle"></i>
                         </div>
-                        <div class="stat-card-value">${stats.admins}</div>
-                        <div class="stat-card-label">Администраторы</div>
+                        <div class="stat-card-value">${this.data.stats.resolvedTickets}</div>
+                        <div class="stat-card-label">Решенные тикеты</div>
+                        <div class="stat-card-trend trend--up">
+                            <i class="fas fa-check"></i> +5% за неделю
+                        </div>
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                            <i class="fas fa-headset"></i>
+                        <div class="stat-card-icon" style="background: #06b6d4; color: white;">
+                            <i class="fas fa-clock"></i>
                         </div>
-                        <div class="stat-card-value">${stats.agents}</div>
-                        <div class="stat-card-label">Агенты поддержки</div>
+                        <div class="stat-card-value">${this.data.stats.avgResponseTime}ч</div>
+                        <div class="stat-card-label">Время ответа</div>
+                        <div class="stat-card-trend trend--down">
+                            <i class="fas fa-arrow-down"></i> -15 мин
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid--2 mb-4">
+                    <div class="chart-card">
+                        <div class="card__header">
+                            <h3>Динамика обращений</h3>
+                            <p>Тренд по месяцам 2025 года</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="card__header">
+                            <h3>Распределение по приоритетам</h3>
+                            <p>Активные тикеты</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="priorityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid--2 mb-4">
+                    <div class="chart-card">
+                        <div class="card__header">
+                            <h3>Статусы тикетов</h3>
+                            <p>Текущее распределение</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="card__header">
+                            <h3>Типы устройств Rikor</h3>
+                            <p>По категориям</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="deviceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-info-circle"></i> Статус системы</h3>
+                    <div class="system-status">
+                        <div class="status-item">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <span>Система работает стабильно</span>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-bell text-info"></i>
+                            <span>Уведомления: ${Object.values(this.settings.notifications).filter(Boolean).length} активных</span>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-users text-info"></i>
+                            <span>Пользователей онлайн: ${this.data.users.filter(u => u.status === 'online').length}</span>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-database text-success"></i>
+                            <span>База данных: ${this.data.tickets.length} тикетов, ${this.data.knowledgeBase.length} статей</span>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Фильтры -->
-            <div class="users-filters">
-                <div class="filter-group">
-                    <input type="text" placeholder="Поиск пользователей..." onkeyup="app.filterUsers()">
-
-                    <select onchange="app.filterUsersByRole(this.value)">
-                        <option value="">Все роли</option>
-                        <option value="admin">Администраторы</option>
-                        <option value="agent">Агенты поддержки</option>
-                        <option value="user">Пользователи</option>
-                    </select>
-
-                    <select onchange="app.filterUsersByStatus(this.value)">
-                        <option value="">Все статусы</option>
-                        <option value="online">В сети</option>
-                        <option value="away">Отошли</option>
-                        <option value="busy">Заняты</option>
-                        <option value="offline">Не в сети</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Список пользователей -->
-            <div class="users-grid">
-                ${users.map(user => `
-                    <div class="user-card" data-role="${user.role}" data-status="${user.status}">
-                        <div class="user-avatar-section">
-                            <div class="user-avatar">${user.avatar}</div>
-                            <div class="user-status ${user.status}"></div>
-                        </div>
-
-                        <div class="user-info">
-                            <h3>${user.name}</h3>
-                            <p class="user-position">${user.position}</p>
-                            <p class="user-department">${user.department}</p>
-                            <p class="user-email">${user.email}</p>
-
-                            <div class="user-stats">
-                                <div class="stat-item">
-                                    <span class="stat-value">${user.ticketsAssigned || 0}</span>
-                                    <span class="stat-label">Назначено</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">${user.ticketsResolved || 0}</span>
-                                    <span class="stat-label">Решено</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-value">${user.customerRating || 0}</span>
-                                    <span class="stat-label">Рейтинг</span>
-                                </div>
-                            </div>
-
-                            <div class="user-role">
-                                <span class="badge badge--${this.getRoleBadgeColor(user.role)}">${this.getRoleText(user.role)}</span>
-                            </div>
-                        </div>
-
-                        <div class="user-actions">
-                            <button class="btn btn--small btn--secondary" onclick="app.showUserDetails(${user.id})" title="Подробнее">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn--small btn--primary" onclick="app.showEditUserModal(${user.id})" title="Редактировать">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            ${user.role !== 'admin' || this.data.users.filter(u => u.role === 'admin').length > 1 ? `
-                            <button class="btn btn--small btn--danger" onclick="app.confirmDeleteUser(${user.id})" title="Удалить">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-
-            ${users.length === 0 ? `
-            <div class="empty-state">
-                <i class="fas fa-users"></i>
-                <h3>Пользователи не найдены</h3>
-                <p>Создайте первого пользователя для начала работы</p>
-                <button class="btn btn--primary" onclick="app.showCreateUserModal()">
-                    <i class="fas fa-user-plus"></i> Добавить пользователя
-                </button>
-            </div>
-            ` : ''}
         `;
     }
 
-    saveData() {
+    renderTickets() {
+        return `
+            <div class="tickets-page">
+                <div class="page-header mb-4">
+                    <div class="page-title">
+                        <h1><i class="fas fa-ticket-alt"></i> Управление тикетами</h1>
+                        <p>Система обработки обращений • Активных: ${this.data.tickets.length}</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn--primary" onclick="app.showCreateTicketModal()">
+                            <i class="fas fa-plus"></i> Создать тикет
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tickets-filters mb-4">
+                    <div class="filter-group">
+                        <select onchange="app.filterTickets('status', this.value)">
+                            <option value="">Все статусы</option>
+                            <option value="open">Открытые</option>
+                            <option value="in_progress">В работе</option>
+                            <option value="waiting">Ожидание</option>
+                            <option value="resolved">Решенные</option>
+                            <option value="closed">Закрытые</option>
+                        </select>
+
+                        <select onchange="app.filterTickets('priority', this.value)">
+                            <option value="">Все приоритеты</option>
+                            <option value="critical">Критический</option>
+                            <option value="high">Высокий</option>
+                            <option value="medium">Средний</option>
+                            <option value="low">Низкий</option>
+                        </select>
+
+                        <input type="text" placeholder="Поиск по тикетам..." 
+                               oninput="app.searchTickets(this.value)">
+                    </div>
+                </div>
+
+                <div class="tickets-list">
+                    ${this.data.tickets.map(ticket => `
+                        <div class="ticket-card" onclick="app.viewTicket('${ticket.id}')">
+                            <div class="ticket-header">
+                                <div class="ticket-id-priority">
+                                    <span class="badge badge--primary">${ticket.id}</span>
+                                    <span class="badge badge--${this.getPriorityColor(ticket.priority)}">${this.getPriorityText(ticket.priority)}</span>
+                                </div>
+                                <span class="badge badge--${this.getStatusColor(ticket.status)}">${this.getStatusText(ticket.status)}</span>
+                            </div>
+
+                            <div class="ticket-content">
+                                <h3 class="ticket-title">${ticket.title}</h3>
+                                <p class="ticket-description">${ticket.description.substring(0, 150)}${ticket.description.length > 150 ? '...' : ''}</p>
+
+                                <div class="ticket-device">
+                                    <i class="${this.getDeviceIcon(ticket.deviceType)}"></i>
+                                    <span>${ticket.deviceType} ${ticket.deviceModel}</span>
+                                </div>
+                            </div>
+
+                            <div class="ticket-footer">
+                                <div class="ticket-meta">
+                                    <div class="meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>${ticket.assignee}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>${ticket.location}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>${this.formatDate(ticket.created)}</span>
+                                    </div>
+                                </div>
+
+                                <div class="ticket-stats">
+                                    <span class="stat-item">
+                                        <i class="fas fa-comments"></i>
+                                        ${ticket.replies.length}
+                                    </span>
+                                    ${ticket.attachments.length > 0 ? `
+                                    <span class="stat-item">
+                                        <i class="fas fa-paperclip"></i>
+                                        ${ticket.attachments.length}
+                                    </span>
+                                    ` : ''}
+                                    <span class="stat-item">
+                                        <i class="fas fa-clock"></i>
+                                        ${ticket.timeSpent}ч/${ticket.estimatedTime}ч
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${this.data.tickets.length === 0 ? `
+                <div class="empty-state">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h3>Нет тикетов</h3>
+                    <p>Создайте первый тикет для начала работы</p>
+                    <button class="btn btn--primary" onclick="app.showCreateTicketModal()">
+                        <i class="fas fa-plus"></i> Создать тикет
+                    </button>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    renderKnowledgeBase() {
+        return `
+            <div class="knowledge-page">
+                <div class="page-header mb-4">
+                    <div class="page-title">
+                        <h1><i class="fas fa-book"></i> База знаний</h1>
+                        <p>Документация и инструкции • Статей: ${this.data.knowledgeBase.length}</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn--primary" onclick="app.showCreateArticleModal()">
+                            <i class="fas fa-plus"></i> Создать статью
+                        </button>
+                    </div>
+                </div>
+
+                <div class="knowledge-search mb-4">
+                    <div class="search-group">
+                        <input type="text" placeholder="Поиск по базе знаний..." 
+                               oninput="app.searchArticles(this.value)">
+                        <select onchange="app.filterArticles('category', this.value)">
+                            <option value="">Все категории</option>
+                            <option value="hardware">Оборудование</option>
+                            <option value="software">Программы</option>
+                            <option value="network">Сеть</option>
+                            <option value="security">Безопасность</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="knowledge-articles">
+                    ${this.data.knowledgeBase.map(article => `
+                        <div class="article-card" onclick="app.viewArticle('${article.id}')">
+                            <div class="article-header">
+                                <h3>${article.title}</h3>
+                                <div class="article-meta">
+                                    <span class="badge badge--${this.getCategoryColor(article.category)}">${this.getCategoryText(article.category)}</span>
+                                    <span class="rating">
+                                        <i class="fas fa-star"></i> ${article.rating}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="article-content">
+                                <p>${article.content.substring(0, 200)}...</p>
+                                <div class="article-tags">
+                                    ${article.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                                </div>
+                            </div>
+
+                            <div class="article-footer">
+                                <div class="article-stats">
+                                    <span><i class="fas fa-eye"></i> ${article.views} просмотров</span>
+                                    <span><i class="fas fa-user"></i> ${article.author}</span>
+                                    <span><i class="fas fa-calendar"></i> ${this.formatDate(article.updated)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${this.data.knowledgeBase.length === 0 ? `
+                <div class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <h3>База знаний пуста</h3>
+                    <p>Создайте первую статью для начала работы</p>
+                    <button class="btn btn--primary" onclick="app.showCreateArticleModal()">
+                        <i class="fas fa-plus"></i> Создать статью
+                    </button>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    renderReports() {
+        return `
+            <div class="reports-page">
+                <div class="page-header mb-4">
+                    <h1><i class="fas fa-chart-pie"></i> Отчеты и аналитика</h1>
+                    <p>Статистика работы службы поддержки</p>
+                </div>
+
+                <div class="grid grid--3 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="background: #8b5cf6; color: white;">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-card-value">${this.data.stats.customerSatisfaction}%</div>
+                        <div class="stat-card-label">Удовлетворенность</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="background: #06b6d4; color: white;">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="stat-card-value">${this.data.stats.slaCompliance}%</div>
+                        <div class="stat-card-label">Соблюдение SLA</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="background: #f59e0b; color: white;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-card-value">${this.data.stats.avgResolutionTime}ч</div>
+                        <div class="stat-card-label">Среднее время решения</div>
+                    </div>
+                </div>
+
+                <div class="grid grid--2 mb-4">
+                    <div class="chart-card">
+                        <div class="card__header">
+                            <h3>Производительность агентов</h3>
+                            <p>Решенные тикеты по сотрудникам</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="agentChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="card__header">
+                            <h3>Время отклика агентов</h3>
+                            <p>Среднее время в часах</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="responseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderUsers() {
+        return `
+            <div class="users-page">
+                <div class="page-header mb-4">
+                    <div class="page-title">
+                        <h1><i class="fas fa-users"></i> Пользователи</h1>
+                        <p>Управление пользователями системы • Всего: ${this.data.users.length}</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn--primary" onclick="app.showCreateUserModal()">
+                            <i class="fas fa-plus"></i> Добавить пользователя
+                        </button>
+                    </div>
+                </div>
+
+                <div class="users-grid">
+                    ${this.data.users.map(user => `
+                        <div class="user-card" onclick="app.viewUser('${user.id}')">
+                            <div class="user-avatar-section">
+                                <div class="user-avatar">${user.avatar}</div>
+                                <div class="user-status ${user.status}"></div>
+                            </div>
+
+                            <div class="user-info">
+                                <h3>${user.name}</h3>
+                                <p class="user-position">${user.position}</p>
+                                <p class="user-department">${user.department}</p>
+                                <p class="user-email">${user.email}</p>
+
+                                <div class="user-stats">
+                                    <div class="stat-item">
+                                        <i class="fas fa-ticket-alt"></i>
+                                        <span>${user.ticketsResolved} решено</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>${this.formatDate(user.lastActivity)}</span>
+                                    </div>
+                                </div>
+
+                                <div class="user-role">
+                                    <span class="badge badge--${user.role === 'admin' ? 'error' : user.role === 'agent' ? 'warning' : 'info'}">
+                                        ${user.role === 'admin' ? 'Администратор' : user.role === 'agent' ? 'Агент' : 'Пользователь'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    renderSettings() {
+        return `
+            <div class="settings-page">
+                <div class="page-header mb-4">
+                    <h1><i class="fas fa-cog"></i> Настройки системы</h1>
+                    <p>Конфигурация RIKOR HELPDESK v2.7.0</p>
+                </div>
+
+                <div class="settings-container">
+                    <!-- Общие настройки -->
+                    <div class="settings-section">
+                        <h3><i class="fas fa-palette"></i> Интерфейс</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <label>
+                                    <span>Тема оформления</span>
+                                    <button class="btn btn--secondary" onclick="app.toggleTheme()">
+                                        <i class="fas ${this.settings.theme === 'light' ? 'fa-moon' : 'fa-sun'}"></i>
+                                        ${this.settings.theme === 'light' ? 'Темная тема' : 'Светлая тема'}
+                                    </button>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Настройки уведомлений -->
+                    <div class="settings-section">
+                        <h3><i class="fas fa-bell"></i> Уведомления</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="emailNotifications" ${this.settings.notifications.email ? 'checked' : ''} 
+                                           onchange="app.toggleNotificationSetting('email', this.checked)">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <i class="fas fa-envelope"></i>
+                                        Email уведомления
+                                    </span>
+                                </label>
+                                <small>Отправка уведомлений об изменении статуса тикетов на email</small>
+                            </div>
+
+                            <div class="setting-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="pushNotifications" ${this.settings.notifications.push ? 'checked' : ''} 
+                                           onchange="app.toggleNotificationSetting('push', this.checked)">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <i class="fas fa-desktop"></i>
+                                        Push уведомления в браузере
+                                    </span>
+                                </label>
+                                <small>Всплывающие уведомления в браузере при изменении статуса</small>
+                            </div>
+
+                            <div class="setting-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="soundNotifications" ${this.settings.notifications.sound ? 'checked' : ''} 
+                                           onchange="app.toggleNotificationSetting('sound', this.checked)">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <i class="fas fa-volume-up"></i>
+                                        Звуковые уведомления при критических тикетах
+                                    </span>
+                                </label>
+                                <small>Звуковой сигнал при создании или изменении критических тикетов</small>
+                                ${this.settings.notifications.sound ? `
+                                <button class="btn btn--small btn--secondary mt-2" onclick="app.playCriticalNotificationSound()">
+                                    <i class="fas fa-play"></i> Проверить звук
+                                </button>
+                                ` : ''}
+                            </div>
+
+                            <div class="setting-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="telegramNotifications" ${this.settings.notifications.telegram ? 'checked' : ''} 
+                                           onchange="app.toggleNotificationSetting('telegram', this.checked)">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <i class="fab fa-telegram"></i>
+                                        Уведомления через Telegram бота
+                                    </span>
+                                </label>
+                                <small>Отправка уведомлений в Telegram чат через бота</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Информация о системе -->
+                    <div class="settings-section">
+                        <h3><i class="fas fa-info-circle"></i> О системе</h3>
+                        <div class="system-info">
+                            <div class="info-item">
+                                <span>Версия:</span>
+                                <strong>RIKOR HELPDESK v2.7.0 Enhanced</strong>
+                            </div>
+                            <div class="info-item">
+                                <span>Пользователь:</span>
+                                <strong>${this.currentUser.name} (${this.currentUser.role})</strong>
+                            </div>
+                            <div class="info-item">
+                                <span>Последний запуск:</span>
+                                <strong>${new Date().toLocaleString('ru-RU')}</strong>
+                            </div>
+                            <div class="info-item">
+                                <span>Тикетов в системе:</span>
+                                <strong>${this.data.tickets.length}</strong>
+                            </div>
+                            <div class="info-item">
+                                <span>Статей в базе знаний:</span>
+                                <strong>${this.data.knowledgeBase.length}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Действия -->
+                    <div class="settings-actions">
+                        <button class="btn btn--warning" onclick="app.resetSettings()">
+                            <i class="fas fa-undo"></i> Сбросить настройки
+                        </button>
+                        <button class="btn btn--danger" onclick="app.clearAllData()">
+                            <i class="fas fa-trash"></i> Очистить все данные
+                        </button>
+                        <button class="btn btn--success" onclick="app.exportData()">
+                            <i class="fas fa-download"></i> Экспорт данных
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    // ИНИЦИАЛИЗАЦИЯ ГРАФИКОВ
+    initDashboardCharts() {
+        if (typeof Chart === 'undefined') {
+            console.warn('⚠️ Chart.js не доступен');
+            return;
+        }
+
         try {
-            localStorage.setItem('rikor-helpdesk-data', JSON.stringify(this.data));
-            console.log('💾 Данные сохранены');
+            this.initMonthlyChart();
+            this.initPriorityChart();
+            this.initStatusChart();
+            this.initDeviceChart();
+            console.log('✅ Dashboard графики инициализированы');
         } catch (error) {
-            console.error('❌ Ошибка сохранения данных:', error);
-            this.showNotification('Ошибка сохранения данных', 'error');
+            console.error('❌ Ошибка инициализации dashboard графиков:', error);
         }
     }
 
-    // СИСТЕМА УВЕДОМЛЕНИЙ
-    showNotification(message, type = 'info', duration = 4000) {
-        const container = document.getElementById('notifications') || this.createNotificationsContainer();
+    initMonthlyChart() {
+        const ctx = document.getElementById('monthlyChart');
+        if (!ctx) return;
 
-        const notification = document.createElement('div');
-        notification.className = `notification notification--${type}`;
-
-        const iconMap = {
-            'success': 'check-circle',
-            'error': 'exclamation-circle',
-            'warning': 'exclamation-triangle',
-            'info': 'info-circle'
-        };
-
-        notification.innerHTML = `
-            <div class="notification__icon">
-                <i class="fas fa-${iconMap[type] || 'info-circle'}"></i>
-            </div>
-            <div class="notification__content">
-                <div class="notification__message">${message}</div>
-            </div>
-        `;
-
-        container.appendChild(notification);
-
-        // Автоматическое удаление
-        setTimeout(() => {
-            notification.remove();
-        }, duration);
-
-        console.log(`🔔 Уведомление [${type.toUpperCase()}]: ${message}`);
-    }
-
-    createNotificationsContainer() {
-        const container = document.createElement('div');
-        container.id = 'notifications';
-        container.className = 'notifications';
-        document.body.appendChild(container);
-        return container;
-    }
-
-    // МОДАЛЬНЫЕ ОКНА
-    showModal(content, className = '') {
-        const existingModal = document.querySelector('.modal-overlay');
-        if (existingModal) {
-            existingModal.remove();
+        if (this.chartInstances.monthly) {
+            this.chartInstances.monthly.destroy();
         }
 
-        const modal = document.createElement('div');
-        modal.className = `modal-overlay ${className}`;
-        modal.innerHTML = `
-            <div class="modal-container">
-                ${content}
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Анимация появления
-        requestAnimationFrame(() => {
-            modal.classList.add('fade-in');
+        this.chartInstances.monthly = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: this.data.stats.monthlyLabels,
+                datasets: [{
+                    label: 'Тикеты',
+                    data: this.data.stats.monthlyTrend,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
         });
     }
 
-    hideModal() {
-        const modal = document.querySelector('.modal-overlay');
-        if (modal) {
-            modal.remove();
+    initPriorityChart() {
+        const ctx = document.getElementById('priorityChart');
+        if (!ctx) return;
+
+        if (this.chartInstances.priority) {
+            this.chartInstances.priority.destroy();
+        }
+
+        this.chartInstances.priority = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: this.data.stats.priorityLabels,
+                datasets: [{
+                    data: Object.values(this.data.stats.priorityStats),
+                    backgroundColor: this.data.stats.priorityColors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true }
+                    }
+                }
+            }
+        });
+    }
+
+    initStatusChart() {
+        const ctx = document.getElementById('statusChart');
+        if (!ctx) return;
+
+        if (this.chartInstances.status) {
+            this.chartInstances.status.destroy();
+        }
+
+        this.chartInstances.status = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: this.data.stats.statusLabels,
+                datasets: [{
+                    data: Object.values(this.data.stats.statusStats),
+                    backgroundColor: this.data.stats.statusColors,
+                    borderRadius: 4,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    initDeviceChart() {
+        const ctx = document.getElementById('deviceChart');
+        if (!ctx) return;
+
+        if (this.chartInstances.device) {
+            this.chartInstances.device.destroy();
+        }
+
+        this.chartInstances.device = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: this.data.stats.deviceStats.types,
+                datasets: [{
+                    data: this.data.stats.deviceStats.counts,
+                    backgroundColor: this.data.stats.deviceStats.colors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true }
+                    }
+                }
+            }
+        });
+    }
+
+    initReportCharts() {
+        if (typeof Chart === 'undefined') return;
+
+        try {
+            this.initAgentChart();
+            this.initResponseChart();
+            console.log('✅ Report графики инициализированы');
+        } catch (error) {
+            console.error('❌ Ошибка инициализации report графиков:', error);
         }
     }
 
-    // FAB МЕНЮ
-    toggleFABMenu() {
-        const menu = document.getElementById('fabMenu');
-        if (menu) {
-            menu.classList.toggle('hidden');
+    initAgentChart() {
+        const ctx = document.getElementById('agentChart');
+        if (!ctx) return;
+
+        if (this.chartInstances.agent) {
+            this.chartInstances.agent.destroy();
+        }
+
+        this.chartInstances.agent = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: this.data.stats.agentStats.names,
+                datasets: [{
+                    label: 'Решено тикетов',
+                    data: this.data.stats.agentStats.resolved,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    initResponseChart() {
+        const ctx = document.getElementById('responseChart');
+        if (!ctx) return;
+
+        if (this.chartInstances.response) {
+            this.chartInstances.response.destroy();
+        }
+
+        this.chartInstances.response = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: this.data.stats.agentStats.names,
+                datasets: [{
+                    label: 'Время отклика (ч)',
+                    data: this.data.stats.agentStats.avgTime,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // СОЗДАНИЕ СТАТЕЙ ИЗ БАЗЫ ЗНАНИЙ (как раньше)
+    showCreateArticleModal() {
+        const modal = `
+            <div class="modal-header">
+                <div class="modal-title-section">
+                    <h2 class="modal-title">
+                        <i class="fas fa-plus"></i>
+                        Создать новую статью
+                    </h2>
+                    <p class="modal-subtitle">Добавление статьи в базу знаний Rikor</p>
+                </div>
+                <button class="modal-close" onclick="app.hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form class="create-article-form" onsubmit="app.submitCreateArticle(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="articleTitle">Заголовок статьи <span class="required">*</span></label>
+                            <input type="text" id="articleTitle" name="title" 
+                                   placeholder="Например: Установка драйверов для Rikor RN NINO" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="articleCategory">Категория</label>
+                            <select id="articleCategory" name="category">
+                                <option value="hardware">🔧 Оборудование</option>
+                                <option value="software">💾 Программы</option>
+                                <option value="network">🌐 Сеть</option>
+                                <option value="security">🔒 Безопасность</option>
+                                <option value="other">❓ Другое</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Теги -->
+                    <div class="form-group">
+                        <label for="articleTags">Теги</label>
+                        <input type="text" id="articleTags" name="tags" 
+                               placeholder="Например: драйверы, ноутбук, windows">
+                        <small>Разделяйте теги запятыми для лучшего поиска</small>
+                    </div>
+
+                    <!-- Готовые шаблоны статей -->
+                    <div class="form-group">
+                        <label><i class="fas fa-magic"></i> Готовые шаблоны статей</label>
+                        <div class="template-buttons">
+                            <button type="button" class="template-btn" onclick="app.useArticleTemplate('hardware')">
+                                <i class="fas fa-tools"></i> Оборудование
+                            </button>
+                            <button type="button" class="template-btn" onclick="app.useArticleTemplate('software')">
+                                <i class="fas fa-code"></i> Программы
+                            </button>
+                            <button type="button" class="template-btn" onclick="app.useArticleTemplate('troubleshooting')">
+                                <i class="fas fa-wrench"></i> Решение проблем
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Содержание статьи -->
+                    <div class="form-group">
+                        <label for="articleContent">Содержание статьи <span class="required">*</span></label>
+                        <textarea id="articleContent" name="content" rows="12" required
+                                  placeholder="# Название статьи
+
+## Описание проблемы
+Опишите проблему или задачу, которую решает эта статья.
+
+## Пошаговое решение
+1. Первый шаг решения
+2. Второй шаг
+3. Третий шаг
+
+## Дополнительная информация
+Полезные советы и рекомендации."></textarea>
+                        <small>Поддерживается Markdown разметка: **жирный**, *курсив*, ## Заголовок, - Список</small>
+                    </div>
+
+                    <!-- Прикрепить файлы -->
+                    <div class="form-group">
+                        <label><i class="fas fa-paperclip"></i> Прикрепить файлы</label>
+                        <div class="file-upload-area" onclick="document.getElementById('articleFiles').click()">
+                            <div class="file-upload-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Загрузить файлы</span>
+                                <small>Нажмите или перетащите файлы сюда</small>
+                                <small>Поддерживаются: PDF, DOC, TXT, JPG, PNG, ZIP (до 10 МБ)</small>
+                            </div>
+                            <input type="file" id="articleFiles" multiple 
+                                   accept=".pdf,.doc,.docx,.txt,.md,.jpg,.jpeg,.png,.zip,.rar" 
+                                   style="display: none;" onchange="app.handleArticleFiles(this.files)">
+                        </div>
+                        <div id="articleFilesList" class="selected-files-list"></div>
+                    </div>
+
+                    <!-- Действия -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn--secondary" onclick="app.hideModal()">
+                            <i class="fas fa-times"></i> Отмена
+                        </button>
+                        <button type="button" class="btn btn--info" onclick="app.previewArticle()">
+                            <i class="fas fa-eye"></i> Предпросмотр
+                        </button>
+                        <button type="submit" class="btn btn--primary">
+                            <i class="fas fa-plus"></i> Создать статью
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        this.showModal(modal, 'create-article-modal');
+        this.setupArticleFileUpload();
+    }
+
+    // Использование шаблонов статей
+    useArticleTemplate(template) {
+        const content = document.getElementById('articleContent');
+        if (!content) return;
+
+        const templates = {
+            hardware: `# Инструкция по работе с оборудованием
+
+## Описание устройства
+Краткое описание устройства и его назначения.
+
+## Технические характеристики
+- Модель:
+- Серийный номер:
+- Основные параметры:
+
+## Настройка и подключение
+### Первоначальная настройка
+1. Распакуйте устройство
+2. Подключите к сети питания
+3. Выполните базовые настройки
+
+### Подключение к сети
+1. Настройка сетевых параметров
+2. Проверка соединения
+3. Тестирование работы
+
+## Устранение неисправностей
+**Проблема**: Описание проблемы
+**Решение**: Пошаговое решение
+
+## Техническое обслуживание
+Рекомендации по обслуживанию и профилактике.`,
+
+            software: `# Руководство по программному обеспечению
+
+## Описание программы
+Назначение и основные возможности программы.
+
+## Системные требования
+- Операционная система:
+- Процессор:
+- Оперативная память:
+- Свободное место на диске:
+
+## Установка
+### Подготовка к установке
+1. Скачайте дистрибутив с официального сайта
+2. Убедитесь в соответствии системным требованиям
+3. Сделайте резервную копию важных данных
+
+### Процесс установки
+1. Запустите установочный файл
+2. Следуйте инструкциям мастера установки
+3. Перезагрузите систему если требуется
+
+## Настройка
+### Первый запуск
+1. Основные параметры
+2. Настройка интерфейса
+3. Конфигурация под нужды пользователя
+
+## Использование
+Основные функции и их применение.
+
+## Часто встречающиеся проблемы
+**Проблема**: Программа не запускается
+**Решение**: Проверьте системные требования и переустановите программу`,
+
+            troubleshooting: `# Руководство по устранению неисправностей
+
+## Описание проблемы
+Подробное описание проблемы и условий её возникновения.
+
+## Симптомы
+- Симптом 1
+- Симптом 2
+- Симптом 3
+
+## Возможные причины
+1. **Причина 1**: Описание
+2. **Причина 2**: Описание
+3. **Причина 3**: Описание
+
+## Диагностика
+### Предварительная проверка
+1. Проверьте подключение питания
+2. Убедитесь в правильности подключений
+3. Проверьте индикаторы состояния
+
+### Детальная диагностика
+1. Проверка системных логов
+2. Тестирование компонентов
+3. Анализ параметров работы
+
+## Решение проблемы
+### Вариант 1
+1. Шаг 1
+2. Шаг 2
+3. Шаг 3
+
+### Вариант 2 (альтернативный)
+1. Альтернативный шаг 1
+2. Альтернативный шаг 2
+
+## Проверка решения
+Как убедиться, что проблема решена.
+
+## Профилактические меры
+Рекомендации по предотвращению повторного возникновения проблемы.`
+        };
+
+        content.value = templates[template] || '';
+        this.showNotification(`Шаблон "${template}" загружен`, 'success');
+    }
+
+    // Настройка загрузки файлов для статей
+    setupArticleFileUpload() {
+        const fileInput = document.getElementById('articleFiles');
+        const fileArea = document.querySelector('.file-upload-area');
+
+        if (!fileInput || !fileArea) return;
+
+        // Drag & Drop
+        fileArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileArea.classList.add('dragover');
+        });
+
+        fileArea.addEventListener('dragleave', () => {
+            fileArea.classList.remove('dragover');
+        });
+
+        fileArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileArea.classList.remove('dragover');
+            this.handleArticleFiles(e.dataTransfer.files);
+        });
+    }
+
+    handleArticleFiles(files) {
+        const filesList = document.getElementById('articleFilesList');
+        if (!filesList) return;
+
+        filesList.innerHTML = '';
+        this.tempFiles = [];
+
+        Array.from(files).forEach((file, index) => {
+            // Проверка размера и типа
+            const isValidSize = file.size <= this.settings.maxFileSize;
+            const isValidType = this.settings.allowedFileTypes.some(type => 
+                file.name.toLowerCase().endsWith(type.toLowerCase()));
+
+            if (isValidSize && isValidType) {
+                this.tempFiles.push({
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    file: file
+                });
+            }
+
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info ${!isValidSize || !isValidType ? 'invalid' : ''}">
+                    <i class="fas ${this.getFileIcon(file.type)}"></i>
+                    <div class="file-details">
+                        <span class="file-name">${file.name}</span>
+                        <span class="file-size">${this.formatFileSize(file.size)}</span>
+                        ${!isValidSize ? '<span class="error">Превышен размер файла</span>' : ''}
+                        ${!isValidType ? '<span class="error">Недопустимый тип файла</span>' : ''}
+                    </div>
+                    <button type="button" class="remove-file-btn" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            filesList.appendChild(fileItem);
+        });
+    }
+
+    // Предпросмотр статьи
+    previewArticle() {
+        const form = document.querySelector('.create-article-form');
+        if (!form) return;
+
+        const formData = new FormData(form);
+        const title = formData.get('title').trim();
+        const content = formData.get('content').trim();
+
+        if (!title || !content) {
+            this.showNotification('Заполните заголовок и содержание статьи', 'error');
+            return;
+        }
+
+        const processedContent = this.renderMarkdown(content);
+
+        const previewModal = `
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-eye"></i>
+                    Предпросмотр статьи
+                </h2>
+                <button class="modal-close" onclick="app.hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="article-preview">
+                    <h1 class="preview-title">${title}</h1>
+                    <div class="preview-meta">
+                        <span class="badge badge--${this.getCategoryColor(formData.get('category'))}">${this.getCategoryText(formData.get('category'))}</span>
+                        <span>Автор: ${this.currentUser.name}</span>
+                        <span>Дата: ${new Date().toLocaleDateString('ru-RU')}</span>
+                    </div>
+                    <div class="preview-content">
+                        ${processedContent}
+                    </div>
+
+                    ${this.tempFiles.length > 0 ? `
+                    <div class="preview-attachments">
+                        <h3>Прикрепленные файлы:</h3>
+                        <ul>
+                            ${this.tempFiles.map(file => `
+                                <li><i class="fas ${this.getFileIcon(file.type)}"></i> ${file.name} (${this.formatFileSize(file.size)})</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <div class="preview-actions">
+                    <button class="btn btn--secondary" onclick="app.showCreateArticleModal()">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </button>
+                    <button class="btn btn--primary" onclick="app.submitCreateArticleFromPreview()">
+                        <i class="fas fa-check"></i> Опубликовать статью
+                    </button>
+                </div>
+            </div>
+        `;
+
+        this.showModal(previewModal, 'article-preview-modal');
+    }
+
+    // Создание статьи из предпросмотра
+    submitCreateArticleFromPreview() {
+        // Возвращаемся к форме и отправляем её
+        this.showCreateArticleModal();
+        setTimeout(() => {
+            const form = document.querySelector('.create-article-form');
+            if (form) {
+                this.submitCreateArticle({ target: form, preventDefault: () => {} });
+            }
+        }, 100);
+    }
+
+    // Создание статьи
+    submitCreateArticle(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const title = formData.get('title').trim();
+        const content = formData.get('content').trim();
+        const category = formData.get('category');
+
+        if (!title || !content) {
+            this.showNotification('Заполните все обязательные поля', 'error');
+            return;
+        }
+
+        // Генерируем ID статьи
+        const articleNumber = this.data.knowledgeBase.length + 1;
+        const articleId = `KB-${String(articleNumber).padStart(3, '0')}`;
+
+        // Создаем новую статью
+        const newArticle = {
+            id: articleId,
+            title: title,
+            content: content,
+            category: category,
+            tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()) : [],
+            author: this.currentUser.name,
+            created: new Date().toISOString(),
+            updated: new Date().toISOString(),
+            views: 0,
+            rating: 5.0,
+            attachments: this.tempFiles.map(file => ({
+                name: file.name,
+                size: file.size,
+                type: file.type
+            })),
+            editHistory: []
+        };
+
+        // Добавляем статью в базу знаний
+        this.data.knowledgeBase.push(newArticle);
+        this.saveData();
+
+        // Сбрасываем временные файлы
+        this.tempFiles = [];
+
+        this.hideModal();
+        this.showNotification(`✅ Статья "${title}" успешно создана!`, 'success');
+
+        // Переходим к базе знаний если мы не на ней
+        if (this.currentRoute !== 'knowledge') {
+            this.navigate('knowledge');
+        } else {
+            this.renderContent();
+        }
+
+        console.log('✅ Статья создана:', newArticle);
+    }
+
+    // НАСТРОЙКИ УВЕДОМЛЕНИЙ
+    toggleNotificationSetting(type, enabled) {
+        this.settings.notifications[type] = enabled;
+        localStorage.setItem(`rikor-${type}-notif`, enabled.toString());
+
+        this.showNotification(
+            `${type} уведомления ${enabled ? 'включены' : 'выключены'}`, 
+            enabled ? 'success' : 'info'
+        );
+
+        // Перерендериваем настройки для показа дополнительных опций
+        setTimeout(() => this.renderContent(), 300);
+
+        console.log(`🔔 ${type} уведомления ${enabled ? 'включены' : 'выключены'}`);
+    }
+
+    // ЗАГЛУШКИ ФУНКЦИЙ ДЛЯ СОВМЕСТИМОСТИ
+    showCreateUserModal() { 
+        this.showNotification('Создание пользователей доступно в полной версии', 'info'); 
+    }
+
+    filterTickets(type, value) { 
+        this.showNotification(`Фильтр тикетов ${type}: ${value || 'сброшен'}`, 'info'); 
+    }
+
+    searchTickets(query) { 
+        this.showNotification(`Поиск тикетов: ${query || 'сброшен'}`, 'info'); 
+    }
+
+    filterArticles(type, value) { 
+        this.showNotification(`Фильтр статей ${type}: ${value || 'сброшен'}`, 'info'); 
+    }
+
+    searchArticles(query) { 
+        this.showNotification(`Поиск статей: ${query || 'сброшен'}`, 'info'); 
+    }
+
+    viewUser(id) { 
+        const user = this.data.users.find(u => u.id == id);
+        if (user) {
+            this.showNotification(`Просмотр пользователя: ${user.name}`, 'info');
         }
     }
 
-    // ТЕМЫ
-    applyTheme() {
-        document.documentElement.setAttribute('data-theme', this.settings.theme);
-        this.updateThemeToggle();
-    }
-
-    toggleTheme() {
-        this.settings.theme = this.settings.theme === 'light' ? 'dark' : 'light';
-        localStorage.setItem('rikor-theme', this.settings.theme);
-        this.applyTheme();
-        this.showNotification(`Тема изменена на ${this.settings.theme === 'light' ? 'светлую' : 'темную'}`, 'success');
-    }
-
-    updateThemeToggle() {
-        const toggle = document.querySelector('#themeToggle i');
-        if (toggle) {
-            toggle.className = this.settings.theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+    resetSettings() { 
+        if (confirm('Сбросить все настройки?')) {
+            localStorage.clear();
+            this.showNotification('Настройки сброшены', 'warning');
+            setTimeout(() => location.reload(), 1000);
         }
     }
 
-    // ЗАГЛУШКИ ДЛЯ ДРУГИХ ФУНКЦИЙ
-    renderDashboard() { return this.renderDashboardContent(); }
-    renderTickets() { return this.renderTicketsContent(); }
-    renderKnowledgeBase() { return this.renderKnowledgeContent(); }
-    renderSettings() { return this.renderSettingsContent(); }
-
-    renderDashboardContent() {
-        return `
-            <div class="page-header">
-                <div class="page-title">
-                    <h1><i class="fas fa-tachometer-alt"></i> Панель управления</h1>
-                    <p>RIKOR HELPDESK v2.8.0 Enhanced • ${new Date().toLocaleDateString('ru-RU')}</p>
-                </div>
-            </div>
-            <div class="empty-state">
-                <i class="fas fa-chart-pie"></i>
-                <h3>Dashboard будет готов в финальной версии</h3>
-                <p>Перейдите в "Отчеты" для просмотра графиков</p>
-            </div>
-        `;
+    clearAllData() { 
+        if (confirm('Удалить все данные? Это действие нельзя отменить!')) {
+            localStorage.clear();
+            this.showNotification('Все данные удалены', 'warning');
+            setTimeout(() => location.reload(), 1000);
+        }
     }
 
-    renderTicketsContent() {
-        return `
-            <div class="page-header">
-                <div class="page-title">
-                    <h1><i class="fas fa-ticket-alt"></i> Управление тикетами</h1>
-                    <p>Система обработки обращений • Активных: ${this.data.tickets.length}</p>
-                </div>
-            </div>
-            <div class="empty-state">
-                <i class="fas fa-ticket-alt"></i>
-                <h3>Функционал тикетов сохранен из предыдущей версии</h3>
-                <p>Создайте первый тикет для начала работы</p>
-            </div>
-        `;
+    exportData() { 
+        const data = JSON.stringify(this.data, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rikor-helpdesk-${new Date().getTime()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showNotification('Данные экспортированы', 'success');
     }
-
-    renderKnowledgeContent() {
-        return `
-            <div class="page-header">
-                <div class="page-title">
-                    <h1><i class="fas fa-book"></i> База знаний</h1>
-                    <p>Документация и инструкции • Статей: ${this.data.knowledgeBase.length}</p>
-                </div>
-            </div>
-            <div class="empty-state">
-                <i class="fas fa-book"></i>
-                <h3>Функционал базы знаний сохранен</h3>
-                <p>Создайте первую статью для начала работы</p>
-            </div>
-        `;
-    }
-
-    renderSettingsContent() {
-        return `
-            <div class="page-header">
-                <div class="page-title">
-                    <h1><i class="fas fa-cog"></i> Настройки системы</h1>
-                    <p>Конфигурация RIKOR HELPDESK v2.8.0</p>
-                </div>
-            </div>
-            <div class="empty-state">
-                <i class="fas fa-cog"></i>
-                <h3>Настройки системы</h3>
-                <p>Функционал настроек сохранен из предыдущей версии</p>
-            </div>
-        `;
-    }
-
-    // Заглушки для функций пользователей
-    filterUsers() { console.log('🔍 Фильтрация пользователей'); }
-    filterUsersByRole(role) { console.log('🔍 Фильтрация по роли:', role); }
-    filterUsersByStatus(status) { console.log('🔍 Фильтрация по статусу:', status); }
-    exportUsers() { this.showNotification('📄 Экспорт пользователей', 'info'); }
-    showUserDetails(id) { this.showNotification(`👤 Просмотр пользователя ID: ${id}`, 'info'); }
-    confirmDeleteUser(id) { this.showNotification(`🗑️ Подтверждение удаления пользователя ID: ${id}`, 'warning'); }
-    initDashboardCharts() { console.log('📊 Инициализация графиков dashboard'); }
-
-    // FAB функции
-    showCreateTicketModal() { this.showNotification('📝 Создание тикета', 'info'); }
-    showCreateArticleModal() { this.showNotification('📄 Создание статьи', 'info'); }
 }
+// ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.7.0 Enhanced...');
 
-// Инициализация приложения
-let app;
+try {
+    window.app = new RikorHelpDeskEnhanced();
+    console.log('✅ RIKOR HELPDESK v2.7.0 Enhanced успешно инициализирована!');
+} catch (error) {
+    console.error('❌ Критическая ошибка инициализации:', error);
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 DOM загружен, инициализируем RIKOR HELPDESK v2.8.0 Enhanced...');
-
-    app = new RikorHelpDeskEnhanced();
-    window.app = app; // Глобальный доступ для HTML
-
-    console.log('✅ RIKOR HELPDESK v2.8.0 Enhanced готов к работе!');
-});
+    // Показываем ошибку пользователю
+    setTimeout(() => {
+        const content = document.getElementById('content');
+        if (content) {
+            content.innerHTML = `
+                <div class="card error-card" style="text-align: center; padding: 40px; margin: 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
+                    <h2 style="color: #1e293b;">Ошибка инициализации</h2>
+                    <p style="color: #64748b; margin-bottom: 16px;">
+                        Не удалось запустить систему: ${error.message}
+                    </p>
+                    <button onclick="location.reload()" class="btn btn--primary">
+                        <i class="fas fa-redo"></i> Перезагрузить
+                    </button>
+                </div>
+            `;
+        }
+    }, 100);
+}

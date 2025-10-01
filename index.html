@@ -3,35 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RIKOR HELPDESK v2.8.0 Enhanced</title>
+    <title>RIKOR HELPDESK v2.7.0 Enhanced - Система управления IT-поддержкой</title>
+    <meta name="description" content="Современная система управления IT-поддержкой с созданием тикетов и просмотром статей">
+    <meta name="keywords" content="helpdesk, IT поддержка, тикеты, RIKOR, база знаний, создание тикетов">
 
-    <!-- External Libraries -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
-
-    <!-- Main Styles -->
+    <!-- Стили -->
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- PWA мета-теги -->
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="RIKOR HELPDESK">
+
+    <!-- Chart.js для графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
 </head>
 <body>
     <div id="app">
-        <!-- Sidebar -->
+        <!-- Sidebar навигация -->
         <nav class="sidebar">
-            <!-- Sidebar Brand -->
             <div class="sidebar__brand">
-                <div class="sidebar__logo">
-                    <i class="fas fa-headset"></i>
-                </div>
+                <div class="sidebar__logo">🛠️</div>
                 <div class="sidebar__brand-text">
                     <div class="sidebar__title">RIKOR HELPDESK</div>
-                    <div class="sidebar__subtitle">v2.8.0 Enhanced</div>
+                    <div class="sidebar__subtitle">v2.7.0 Enhanced</div>
                 </div>
-                <button class="theme-toggle" id="themeToggle">
+                <button class="theme-toggle" id="themeToggle" title="Переключить тему">
                     <i class="fas fa-moon"></i>
                 </button>
             </div>
 
-            <!-- Navigation -->
             <div class="sidebar__nav">
                 <a href="#dashboard" class="sidebar__link active" data-route="dashboard">
                     <i class="fas fa-tachometer-alt"></i>
@@ -62,7 +66,6 @@
                 </a>
             </div>
 
-            <!-- User Profile -->
             <div class="sidebar__profile">
                 <div class="sidebar__avatar">ПС</div>
                 <div class="sidebar__profile-info">
@@ -73,9 +76,9 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
+        <!-- Основное содержимое -->
         <main class="main-content">
-            <!-- Breadcrumb -->
+            <!-- Хлебные крошки -->
             <div class="breadcrumb">
                 <i class="fas fa-home"></i>
                 <span>RIKOR HelpDesk</span>
@@ -83,48 +86,51 @@
                 <span id="currentPage">Панель управления</span>
             </div>
 
-            <!-- Content Area -->
+            <!-- Контент страниц -->
             <div class="content" id="content">
-                <!-- Loading Screen -->
                 <div class="loading">
-                    <div class="loading__icon">
-                        <i class="fas fa-cog fa-spin"></i>
-                    </div>
-                    <h2>RIKOR HELPDESK v2.8.0 Enhanced</h2>
-                    <p>Загрузка системы управления IT-поддержкой...</p>
-                    <div class="loading__features">
-                        <p>✨ Новое: Графики в отчетах + Управление пользователями</p>
-                    </div>
+                    <i class="fas fa-cog fa-spin" style="font-size: 32px; color: #3b82f6; margin-bottom: 16px;"></i>
+                    <div style="font-size: 16px; color: #1e293b; margin-bottom: 8px;">RIKOR HELPDESK v2.7.0 Enhanced</div>
+                    <div style="font-size: 14px; color: #64748b;">Загрузка системы управления IT-поддержкой...</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 8px;">✨ Новое: Создание тикетов + просмотр статей</div>
                 </div>
             </div>
         </main>
-
-        <!-- FAB Menu -->
-        <div class="fab-menu hidden" id="fabMenu">
-            <div class="fab-menu__item" onclick="app.showCreateTicketModal()">
-                <i class="fas fa-plus"></i>
-                <span>Создать тикет</span>
-            </div>
-            <div class="fab-menu__item" onclick="app.showCreateArticleModal()">
-                <i class="fas fa-file-plus"></i>
-                <span>Создать статью</span>
-            </div>
-            <div class="fab-menu__item" onclick="app.showCreateUserModal()">
-                <i class="fas fa-user-plus"></i>
-                <span>Добавить пользователя</span>
-            </div>
-        </div>
-
-        <!-- FAB Button -->
-        <button class="fab" id="fabButton">
-            <i class="fas fa-plus"></i>
-        </button>
     </div>
 
-    <!-- Notifications Container -->
+    <!-- Модальные окна -->
+    <div class="modal-overlay hidden" id="modal-overlay">
+        <div class="modal-container" id="modal-container"></div>
+    </div>
+
+    <!-- FAB кнопка -->
+    <button class="fab" id="fabButton" title="Быстрые действия">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- FAB меню -->
+    <div class="fab-menu hidden" id="fabMenu">
+        <div class="fab-menu__item" onclick="app?.showCreateTicketModal?.()">
+            <i class="fas fa-ticket-alt"></i>
+            <span>Создать тикет</span>
+        </div>
+        <div class="fab-menu__item" onclick="app?.showCreateArticleModal?.()">
+            <i class="fas fa-edit"></i>
+            <span>Создать статью</span>
+        </div>
+        <div class="fab-menu__item" onclick="app?.showCreateUserModal?.()">
+            <i class="fas fa-user-plus"></i>
+            <span>Добавить пользователя</span>
+        </div>
+    </div>
+
+    <!-- Контейнер уведомлений -->
     <div class="notifications" id="notifications"></div>
 
-    <!-- Scripts -->
+    <!-- Скрытый input для загрузки файлов -->
+    <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt,.md,.jpg,.jpeg,.png,.zip,.rar" style="display: none;">
+
+    <!-- Основной JavaScript -->
     <script src="app.js"></script>
 </body>
 </html>
