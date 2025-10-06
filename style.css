@@ -2495,3 +2495,482 @@ body {
         padding: 12px;
     }
 }
+
+/* =============================================
+   СТИЛИ ДЛЯ УПРАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯМИ v2.8.0
+   ============================================= */
+
+/* Фильтры пользователей */
+.users-filters {
+    background: var(--rikor-bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--rikor-border-light);
+    box-shadow: var(--rikor-shadow-card);
+}
+
+.users-filters .filter-group {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.users-filters .search-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--rikor-border);
+    border-radius: 8px;
+    background: var(--rikor-bg-primary);
+    color: var(--rikor-text-primary);
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.users-filters .search-input:focus {
+    outline: none;
+    border-color: var(--rikor-primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.users-filters select {
+    padding: 12px 16px;
+    border: 1px solid var(--rikor-border);
+    border-radius: 8px;
+    background: var(--rikor-bg-secondary);
+    color: var(--rikor-text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.users-filters select:focus {
+    outline: none;
+    border-color: var(--rikor-primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+/* Сетка пользователей */
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* Карточки пользователей */
+.user-card {
+    background: var(--rikor-bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--rikor-border-light);
+    box-shadow: var(--rikor-shadow-card);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--rikor-shadow-card-hover);
+    border-color: var(--rikor-primary-light);
+}
+
+.user-avatar-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--rikor-primary), var(--rikor-primary-light));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+}
+
+.user-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--rikor-primary), var(--rikor-primary-light));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
+}
+
+.user-status {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid var(--rikor-bg-secondary);
+}
+
+.user-status.online {
+    background: var(--rikor-success);
+}
+
+.user-status.away {
+    background: var(--rikor-warning);
+}
+
+.user-status.offline {
+    background: var(--rikor-text-light);
+}
+
+.user-status.disabled {
+    background: var(--rikor-error);
+}
+
+.user-info {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.user-info h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--rikor-text-primary);
+    margin-bottom: 4px;
+}
+
+.user-position {
+    font-size: 14px;
+    color: var(--rikor-text-secondary);
+    margin-bottom: 2px;
+}
+
+.user-department {
+    font-size: 13px;
+    color: var(--rikor-text-muted);
+    margin-bottom: 2px;
+}
+
+.user-email {
+    font-size: 12px;
+    color: var(--rikor-text-muted);
+    margin-bottom: 8px;
+}
+
+.user-phone {
+    font-size: 12px;
+    color: var(--rikor-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.user-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 16px 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--rikor-border-light);
+    border-bottom: 1px solid var(--rikor-border-light);
+}
+
+.user-stats .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--rikor-text-muted);
+}
+
+.user-role {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.user-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.user-status-large {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-status-large.online {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--rikor-success);
+}
+
+.user-status-large.away {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--rikor-warning);
+}
+
+.user-status-large.offline {
+    background: rgba(148, 163, 184, 0.1);
+    color: var(--rikor-text-light);
+}
+
+/* Подробный просмотр пользователя */
+.user-detail-view {
+    max-width: 600px;
+}
+
+.user-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--rikor-border-light);
+}
+
+.user-detail-info h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--rikor-text-primary);
+    margin-bottom: 4px;
+}
+
+.user-detail-info .position {
+    font-size: 16px;
+    color: var(--rikor-text-secondary);
+    margin-bottom: 8px;
+}
+
+.user-detail-info .department {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.user-detail-content {
+    margin-bottom: 24px;
+}
+
+.detail-section {
+    margin-bottom: 24px;
+}
+
+.detail-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--rikor-text-primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rikor-border-light);
+}
+
+.detail-item .label {
+    font-weight: 500;
+    color: var(--rikor-text-secondary);
+}
+
+.detail-item .value {
+    color: var(--rikor-text-primary);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.stats-grid .stat-item {
+    text-align: center;
+    padding: 16px;
+    background: var(--rikor-bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--rikor-border-light);
+}
+
+.stats-grid .stat-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--rikor-text-primary);
+    margin-bottom: 4px;
+    display: block;
+}
+
+.stats-grid .stat-label {
+    font-size: 12px;
+    color: var(--rikor-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.assigned-tickets {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.ticket-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--rikor-bg-primary);
+    border: 1px solid var(--rikor-border-light);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ticket-summary:hover {
+    background: var(--rikor-bg-hover);
+    border-color: var(--rikor-primary-light);
+}
+
+.ticket-id {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rikor-primary);
+    min-width: 80px;
+}
+
+.ticket-title {
+    flex: 1;
+    font-size: 14px;
+    color: var(--rikor-text-primary);
+}
+
+.user-detail-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rikor-border-light);
+}
+
+/* Модальные окна для пользователей */
+.create-user-modal,
+.edit-user-modal,
+.user-detail-modal {
+    width: 800px;
+    max-width: 90vw;
+}
+
+.create-user-form,
+.edit-user-form {
+    max-width: none;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .users-filters .filter-group {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .users-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-filters .filter-group {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .users-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .user-card {
+        padding: 16px;
+    }
+
+    .user-detail-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .create-user-modal,
+    .edit-user-modal,
+    .user-detail-modal {
+        width: 95vw;
+        margin: 20px;
+    }
+}
+
+/* Темная тема для пользователей */
+[data-theme="dark"] .user-card {
+    background: var(--rikor-bg-secondary);
+    border-color: var(--rikor-border);
+}
+
+[data-theme="dark"] .users-filters {
+    background: var(--rikor-bg-secondary);
+    border-color: var(--rikor-border);
+}
+
+[data-theme="dark"] .users-filters .search-input {
+    background: var(--rikor-bg-primary);
+    border-color: var(--rikor-border);
+    color: var(--rikor-text-primary);
+}
+
+[data-theme="dark"] .users-filters select {
+    background: var(--rikor-bg-secondary);
+    border-color: var(--rikor-border);
+    color: var(--rikor-text-primary);
+}
+
+[data-theme="dark"] .ticket-summary {
+    background: var(--rikor-bg-primary);
+    border-color: var(--rikor-border);
+}
+
+[data-theme="dark"] .stats-grid .stat-item {
+    background: var(--rikor-bg-primary);
+    border-color: var(--rikor-border);
+}

@@ -1,9 +1,9 @@
-// RIKOR HELPDESK v2.7.0 Enhanced - ФИНАЛЬНАЯ ВЕРСИЯ
+// RIKOR HELPDESK v2.8.0 User Management - ФИНАЛЬНАЯ ВЕРСИЯ
 // Добавлено создание тикетов + просмотр статей
 
 class RikorHelpDeskEnhanced {
     constructor() {
-        console.log('🚀 RIKOR HELPDESK v2.7.0 Enhanced - Загрузка...');
+        console.log('🚀 RIKOR HELPDESK v2.8.0 User Management - Загрузка...');
 
         this.currentRoute = 'dashboard';
         this.currentUser = {
@@ -57,7 +57,7 @@ class RikorHelpDeskEnhanced {
             this.renderContent();
 
             setTimeout(() => {
-                this.showNotification('✅ RIKOR HELPDESK v2.7.0 Enhanced готов к работе!', 'success');
+                this.showNotification('✅ RIKOR HELPDESK v2.8.0 User Management готов к работе!', 'success');
             }, 1000);
 
             console.log('✅ Система инициализирована');
@@ -345,37 +345,34 @@ class RikorHelpDeskEnhanced {
     }
 
     // СОЗДАНИЕ НОВОГО ТИКЕТА (как на первом скрине)
+    
+    // Обновление функции создания тикетов с назначением
     showCreateTicketModal() {
         const modal = `
             <div class="modal-header">
-                <h2 class="modal-title">
-                    <i class="fas fa-plus"></i>
-                    Создать новый тикет
-                </h2>
-                <p class="modal-subtitle">Регистрация нового обращения в службу поддержки Rikor</p>
+                <h2 class="modal-title"><i class="fas fa-plus"></i> Регистрация нового обращения</h2>
+                <p class="modal-subtitle">Создание тикета в службе поддержки Rikor</p>
                 <button class="modal-close" onclick="app.hideModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-
             <div class="modal-body">
                 <form class="create-ticket-form" onsubmit="app.submitCreateTicket(event)">
                     <div class="form-row">
-                        <!-- Заголовок тикета -->
+                        <!-- Краткое описание -->
                         <div class="form-group">
-                            <label for="ticketTitle">Заголовок тикета <span class="required">*</span></label>
+                            <label for="ticketTitle">Краткое описание проблемы <span class="required">*</span></label>
                             <input type="text" id="ticketTitle" name="title" 
-                                   placeholder="Кратко опишите проблему" required>
+                                   placeholder="Кратко опишите суть проблемы" required>
                         </div>
-
-                        <!-- Тип устройства -->
+                        <!-- Тип устройства Rikor -->
                         <div class="form-group">
                             <label for="deviceType">Тип устройства Rikor <span class="required">*</span></label>
                             <select id="deviceType" name="deviceType" required onchange="app.updateDeviceModels(this.value)">
-                                <option value="">Выберите устройство Rikor</option>
-                                ${this.data.rikorDevices.map(device => `
-                                    <option value="${device.type}">${device.type}</option>
-                                `).join('')}
+                                <option value="">Выберите тип устройства Rikor</option>
+                                ${this.data.rikorDevices.map(device => 
+                                    `<option value="${device.type}">${device.type}</option>`
+                                ).join('')}
                             </select>
                         </div>
                     </div>
@@ -383,12 +380,12 @@ class RikorHelpDeskEnhanced {
                     <!-- Подробное описание -->
                     <div class="form-group">
                         <label for="ticketDescription">Подробное описание проблемы <span class="required">*</span></label>
-                        <textarea id="ticketDescription" name="description" rows="6" required
+                        <textarea id="ticketDescription" name="description" rows="6" required 
                                   placeholder="Опишите проблему максимально подробно:
-- Что случилось?
-- При каких обстоятельствах?
-- Какие действия предпринимались?
-- Есть ли коды ошибок?"></textarea>
+• Что именно происходит?
+• При каких условиях возникает проблема?
+• Какие действия уже предпринимались?
+• Есть ли сообщения об ошибках?"></textarea>
                     </div>
 
                     <div class="form-row">
@@ -396,15 +393,14 @@ class RikorHelpDeskEnhanced {
                         <div class="form-group">
                             <label for="deviceModel">Модель устройства</label>
                             <select id="deviceModel" name="deviceModel">
-                                <option value="">Например: RP6224, RN NINO 203.1/15</option>
+                                <option value="">Сначала выберите тип устройства</option>
                             </select>
                         </div>
-
                         <!-- Серийный номер -->
                         <div class="form-group">
                             <label for="serialNumber">Серийный номер</label>
                             <input type="text" id="serialNumber" name="serialNumber" 
-                                   placeholder="S/N устройства Rikor">
+                                   placeholder="SN устройства Rikor">
                         </div>
                     </div>
 
@@ -413,22 +409,21 @@ class RikorHelpDeskEnhanced {
                         <div class="form-group">
                             <label for="priority">Приоритет <span class="required">*</span></label>
                             <select id="priority" name="priority" required>
-                                <option value="medium">🟡 Средний - Рабочие задачи</option>
-                                <option value="high">🟠 Высокий - Важные проблемы</option>
-                                <option value="critical">🔴 Критический - Блокирующие проблемы</option>
-                                <option value="low">🟢 Низкий - Небольшие улучшения</option>
+                                <option value="medium">Средний - плановые задачи</option>
+                                <option value="high">Высокий - влияет на работу</option>
+                                <option value="critical">Критичный - блокирует работу</option>
+                                <option value="low">Низкий - некритичные проблемы</option>
                             </select>
                         </div>
-
                         <!-- Категория -->
                         <div class="form-group">
                             <label for="category">Категория</label>
                             <select id="category" name="category">
-                                <option value="hardware">🔧 Оборудование</option>
-                                <option value="software">💾 Программы</option>
-                                <option value="network">🌐 Сеть</option>
-                                <option value="security">🔒 Безопасность</option>
-                                <option value="other">❓ Другое</option>
+                                <option value="hardware">Аппаратные проблемы</option>
+                                <option value="software">Программные проблемы</option>
+                                <option value="network">Сетевые проблемы</option>
+                                <option value="security">Безопасность</option>
+                                <option value="other">Прочее</option>
                             </select>
                         </div>
                     </div>
@@ -440,36 +435,36 @@ class RikorHelpDeskEnhanced {
                             <input type="text" id="location" name="location" 
                                    placeholder="Например: Офис 1, Комната 205">
                         </div>
-
-                        <!-- Исполнитель -->
+                        <!-- НОВОЕ: Назначить исполнителя -->
                         <div class="form-group">
-                            <label for="assignee">Исполнитель</label>
+                            <label for="assignee">Назначить исполнителя</label>
                             <select id="assignee" name="assignee">
-                                <option value="">Назначить автоматически</option>
-                                ${this.data.users.filter(user => user.role === 'agent' || user.role === 'admin').map(user => `
-                                    <option value="${user.name}">${user.name} - ${user.position}</option>
-                                `).join('')}
+                                <option value="">Автоматическое назначение</option>
+                                ${this.getActiveAgents().map(user => 
+                                    `<option value="${user.name}">${user.name} - ${user.position}</option>`
+                                ).join('')}
                             </select>
+                            <small>Оставьте пустым для автоматического назначения на свободного агента</small>
                         </div>
                     </div>
 
                     <!-- Теги -->
                     <div class="form-group">
-                        <label for="tags">Теги</label>
+                        <label for="tags">Теги для поиска</label>
                         <input type="text" id="tags" name="tags" 
-                               placeholder="Например: rikor, сервер, перегрев">
-                        <small>Разделяйте теги запятыми для лучшего поиска</small>
+                               placeholder="Например: rikor, питание, драйверы">
+                        <small>Ключевые слова через запятую для быстрого поиска</small>
                     </div>
 
-                    <!-- Прикрепить файлы -->
+                    <!-- Прикрепленные файлы -->
                     <div class="form-group">
-                        <label><i class="fas fa-paperclip"></i> Прикрепить файлы</label>
+                        <label><i class="fas fa-paperclip"></i> Прикрепленные файлы</label>
                         <div class="file-upload-area" onclick="document.getElementById('ticketFiles').click()">
                             <div class="file-upload-content">
                                 <i class="fas fa-cloud-upload-alt"></i>
-                                <span>Загрузить файлы</span>
-                                <small>Нажмите или перетащите файлы сюда</small>
-                                <small>Поддерживаются: PDF, DOC, TXT, JPG, PNG, ZIP (до 10 МБ)</small>
+                                <span>Нажмите для выбора файлов или перетащите сюда</span>
+                                <small>Поддерживаемые форматы:</small>
+                                <small>PDF, DOC, TXT, JPG, PNG, ZIP (макс. 10 МБ)</small>
                             </div>
                             <input type="file" id="ticketFiles" multiple 
                                    accept=".pdf,.doc,.docx,.txt,.md,.jpg,.jpeg,.png,.zip,.rar" 
@@ -588,6 +583,8 @@ class RikorHelpDeskEnhanced {
     }
 
     // Создание тикета
+    
+    // Обновленная функция создания тикета с поддержкой назначения
     submitCreateTicket(event) {
         event.preventDefault();
 
@@ -608,6 +605,29 @@ class RikorHelpDeskEnhanced {
         const ticketNumber = this.data.tickets.length + 1;
         const ticketId = `RIK-2025-${String(ticketNumber).padStart(3, '0')}`;
 
+        // Определяем исполнителя
+        let assignee = formData.get('assignee');
+
+        // Если исполнитель не выбран - автоматическое назначение
+        if (!assignee) {
+            const activeAgents = this.getActiveAgents();
+            if (activeAgents.length > 0) {
+                // Назначаем на агента с наименьшей нагрузкой
+                const agentTicketCounts = activeAgents.map(agent => ({
+                    agent: agent,
+                    count: this.data.tickets.filter(t => t.assignee === agent.name && 
+                                                   (t.status === 'open' || t.status === 'inprogress')).length
+                }));
+
+                const leastBusyAgent = agentTicketCounts.reduce((min, current) => 
+                    current.count < min.count ? current : min
+                );
+
+                assignee = leastBusyAgent.agent.name;
+                console.log(`🎯 Автоматически назначено на ${assignee} (нагрузка: ${leastBusyAgent.count} тикетов)`);
+            }
+        }
+
         // Создаем новый тикет
         const newTicket = {
             id: ticketId,
@@ -619,24 +639,22 @@ class RikorHelpDeskEnhanced {
             deviceType: deviceType,
             deviceModel: formData.get('deviceModel') || '',
             serialNumber: formData.get('serialNumber') || '',
-            assignee: formData.get('assignee') || 'Автоназначение',
+            assignee: assignee || '',
             reporter: this.currentUser.name,
             created: new Date().toISOString(),
             updated: new Date().toISOString(),
-            location: formData.get('location') || 'Не указано',
+            location: formData.get('location') || '',
             timeSpent: 0,
             estimatedTime: priority === 'critical' ? 1 : priority === 'high' ? 2 : 4,
             tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()) : [],
-            replies: [
-                {
-                    id: Date.now(),
-                    author: this.currentUser.name,
-                    message: `Тикет создан. Статус: ${this.getStatusText('open')}`,
-                    created: new Date().toISOString(),
-                    type: 'status_change',
-                    files: []
-                }
-            ],
+            replies: [{
+                id: Date.now(),
+                author: this.currentUser.name,
+                message: `Тикет создан. Статус: ${this.getStatusText('open')}`,
+                created: new Date().toISOString(),
+                type: 'statuschange',
+                files: []
+            }],
             attachments: this.tempFiles.map(file => ({
                 name: file.name,
                 size: file.size,
@@ -644,28 +662,28 @@ class RikorHelpDeskEnhanced {
             }))
         };
 
-        // Добавляем тикет в базу данных
+        // Добавляем тикет
         this.data.tickets.push(newTicket);
         this.updateTicketStats();
         this.saveData();
 
-        // Отправляем уведомления о новом тикете
+        // Отправляем уведомления
         this.sendNewTicketNotifications(newTicket);
 
-        // Сбрасываем временные файлы
+        // Очищаем временные файлы
         this.tempFiles = [];
 
         this.hideModal();
-        this.showNotification(`✅ Тикет ${ticketId} успешно создан!`, 'success');
+        this.showNotification(`Тикет ${ticketId} успешно создан${assignee ? ` и назначен на ${assignee}` : ''}!`, 'success');
 
-        // Переходим к тикетам если мы не на них
+        // Переходим к тикетам если не находимся там
         if (this.currentRoute !== 'tickets') {
             this.navigate('tickets');
         } else {
             this.renderContent();
         }
 
-        console.log('✅ Тикет создан:', newTicket);
+        console.log('✅ Создан новый тикет:', newTicket);
     }
 
     // Отправка уведомлений о новом тикете
@@ -1655,7 +1673,7 @@ class RikorHelpDeskEnhanced {
             <div class="dashboard">
                 <div class="dashboard__header mb-4">
                     <h1><i class="fas fa-tachometer-alt"></i> Панель управления</h1>
-                    <p>RIKOR HELPDESK v2.7.0 Enhanced • ${new Date().toLocaleDateString('ru-RU')}</p>
+                    <p>RIKOR HELPDESK v2.8.0 User Management • ${new Date().toLocaleDateString('ru-RU')}</p>
                 </div>
 
                 <div class="grid grid--4 mb-4">
@@ -2018,13 +2036,15 @@ class RikorHelpDeskEnhanced {
         `;
     }
 
+    
+    // Обновленная функция рендеринга пользователей
     renderUsers() {
         return `
             <div class="users-page">
                 <div class="page-header mb-4">
                     <div class="page-title">
-                        <h1><i class="fas fa-users"></i> Пользователи</h1>
-                        <p>Управление пользователями системы • Всего: ${this.data.users.length}</p>
+                        <h1><i class="fas fa-users"></i> Управление пользователями</h1>
+                        <p>Управление пользователями системы • ${this.data.users.length} пользователей</p>
                     </div>
                     <div class="page-actions">
                         <button class="btn btn--primary" onclick="app.showCreateUserModal()">
@@ -2033,42 +2053,273 @@ class RikorHelpDeskEnhanced {
                     </div>
                 </div>
 
+                <!-- Статистика пользователей -->
+                <div class="grid grid--4 mb-4">
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="background: #3b82f6; color: white;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-card-value">${this.data.users.length}</div>
+                        <div class="stat-card-label">Всего пользователей</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="background: #10b981; color: white;">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-card-value">${this.data.users.filter(u => u.status === 'online').length}</div>
+                        <div class="stat-card-label">Онлайн</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="background: #f59e0b; color: white;">
+                            <i class="fas fa-user-cog"></i>
+                        </div>
+                        <div class="stat-card-value">${this.data.users.filter(u => u.role === 'agent' || u.role === 'admin').length}</div>
+                        <div class="stat-card-label">Агентов</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="background: #8b5cf6; color: white;">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <div class="stat-card-value">${this.data.users.reduce((sum, u) => sum + (u.ticketsResolved || 0), 0)}</div>
+                        <div class="stat-card-label">Решено тикетов</div>
+                    </div>
+                </div>
+
+                <!-- Фильтры пользователей -->
+                <div class="users-filters mb-4">
+                    <div class="filter-group">
+                        <input type="text" placeholder="Поиск по имени или email..." 
+                               oninput="app.searchUsers(this.value)" class="search-input">
+                        <select onchange="app.filterUsers('role', this.value)">
+                            <option value="">Все роли</option>
+                            <option value="admin">Администраторы</option>
+                            <option value="agent">Агенты</option>
+                            <option value="user">Пользователи</option>
+                        </select>
+                        <select onchange="app.filterUsers('department', this.value)">
+                            <option value="">Все отделы</option>
+                            <option value="IT">IT отдел</option>
+                            <option value="HR">HR отдел</option>
+                            <option value="Бухгалтерия">Бухгалтерия</option>
+                            <option value="Продажи">Продажи</option>
+                            <option value="Маркетинг">Маркетинг</option>
+                            <option value="Администрация">Администрация</option>
+                        </select>
+                        <select onchange="app.filterUsers('status', this.value)">
+                            <option value="">Все статусы</option>
+                            <option value="online">Онлайн</option>
+                            <option value="away">Отошел</option>
+                            <option value="offline">Офлайн</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Список пользователей -->
                 <div class="users-grid">
                     ${this.data.users.map(user => `
-                        <div class="user-card" onclick="app.viewUser('${user.id}')">
+                        <div class="user-card" onclick="app.viewUser(${user.id})">
                             <div class="user-avatar-section">
                                 <div class="user-avatar">${user.avatar}</div>
                                 <div class="user-status ${user.status}"></div>
                             </div>
-
                             <div class="user-info">
                                 <h3>${user.name}</h3>
                                 <p class="user-position">${user.position}</p>
                                 <p class="user-department">${user.department}</p>
                                 <p class="user-email">${user.email}</p>
-
-                                <div class="user-stats">
-                                    <div class="stat-item">
-                                        <i class="fas fa-ticket-alt"></i>
-                                        <span>${user.ticketsResolved} решено</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <i class="fas fa-clock"></i>
-                                        <span>${this.formatDate(user.lastActivity)}</span>
-                                    </div>
+                                ${user.phone ? `<p class="user-phone"><i class="fas fa-phone"></i> ${user.phone}</p>` : ''}
+                            </div>
+                            <div class="user-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>${user.ticketsResolved || 0}</span>
                                 </div>
-
-                                <div class="user-role">
-                                    <span class="badge badge--${user.role === 'admin' ? 'error' : user.role === 'agent' ? 'warning' : 'info'}">
-                                        ${user.role === 'admin' ? 'Администратор' : user.role === 'agent' ? 'Агент' : 'Пользователь'}
-                                    </span>
+                                <div class="stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${this.formatDate(user.lastActivity)}</span>
                                 </div>
+                            </div>
+                            <div class="user-role">
+                                <span class="badge badge--${user.role === 'admin' ? 'error' : user.role === 'agent' ? 'warning' : 'info'}">
+                                    ${user.role === 'admin' ? 'Администратор' : user.role === 'agent' ? 'Агент' : 'Пользователь'}
+                                </span>
+                            </div>
+                            <div class="user-actions">
+                                <button class="btn btn--small btn--secondary" 
+                                        onclick="event.stopPropagation(); app.showEditUserModal(${user.id})" 
+                                        title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn--small btn--${(user.isActive === false || user.status === 'disabled') ? 'success' : 'warning'}" 
+                                        onclick="event.stopPropagation(); app.toggleUserStatus(${user.id})" 
+                                        title="${(user.isActive === false || user.status === 'disabled') ? 'Активировать' : 'Деактивировать'}">
+                                    <i class="fas fa-${(user.isActive === false || user.status === 'disabled') ? 'play' : 'pause'}"></i>
+                                </button>
                             </div>
                         </div>
                     `).join('')}
                 </div>
+
+                ${this.data.users.length === 0 ? `
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <h3>Нет пользователей</h3>
+                        <p>Создайте первого пользователя системы</p>
+                        <button class="btn btn--primary" onclick="app.showCreateUserModal()">
+                            <i class="fas fa-plus"></i> Добавить пользователя
+                        </button>
+                    </div>
+                ` : ''}
             </div>
         `;
+    }
+
+    // Поиск пользователей
+    searchUsers(query) {
+        // Эта функция будет работать с существующим DOM для быстрого поиска
+        const cards = document.querySelectorAll('.user-card');
+        const searchTerm = query.toLowerCase();
+
+        cards.forEach(card => {
+            const userName = card.querySelector('h3').textContent.toLowerCase();
+            const userEmail = card.querySelector('.user-email').textContent.toLowerCase();
+
+            if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        console.log('🔍 Поиск пользователей:', query);
+    }
+
+    // Фильтрация пользователей
+    filterUsers(filterType, filterValue) {
+        const cards = document.querySelectorAll('.user-card');
+
+        cards.forEach((card, index) => {
+            const user = this.data.users[index];
+            let shouldShow = true;
+
+            if (filterValue && user[filterType] !== filterValue) {
+                shouldShow = false;
+            }
+
+            card.style.display = shouldShow ? 'block' : 'none';
+        });
+
+        console.log(`🔍 Фильтр ${filterType}:`, filterValue);
+    }
+
+    // Просмотр подробной информации о пользователе
+    viewUser(userId) {
+        const user = this.data.users.find(u => u.id === userId);
+        if (!user) {
+            this.showNotification('Пользователь не найден', 'error');
+            return;
+        }
+
+        const modal = `
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-user"></i> ${user.name}</h2>
+                <p class="modal-subtitle">Подробная информация о пользователе</p>
+                <button class="modal-close" onclick="app.hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="user-detail-view">
+                    <div class="user-detail-header">
+                        <div class="user-avatar-large">${user.avatar}</div>
+                        <div class="user-detail-info">
+                            <h2>${user.name}</h2>
+                            <p class="position">${user.position}</p>
+                            <p class="department">
+                                <span class="badge badge--${user.role === 'admin' ? 'error' : user.role === 'agent' ? 'warning' : 'info'}">
+                                    ${user.role === 'admin' ? 'Администратор' : user.role === 'agent' ? 'Агент' : 'Пользователь'}
+                                </span>
+                                <span class="badge badge--secondary">${user.department}</span>
+                            </p>
+                        </div>
+                        <div class="user-status-large ${user.status}">
+                            ${user.status === 'online' ? 'Онлайн' : user.status === 'away' ? 'Отошел' : 'Офлайн'}
+                        </div>
+                    </div>
+
+                    <div class="user-detail-content">
+                        <div class="detail-section">
+                            <h4><i class="fas fa-address-card"></i> Контактная информация</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="label">Email:</span>
+                                    <span class="value">${user.email}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Телефон:</span>
+                                    <span class="value">${user.phone || 'Не указан'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Отдел:</span>
+                                    <span class="value">${user.department}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Должность:</span>
+                                    <span class="value">${user.position}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4><i class="fas fa-chart-line"></i> Статистика работы</h4>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">${user.ticketsResolved || 0}</div>
+                                    <div class="stat-label">Решено тикетов</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${this.data.tickets.filter(t => t.assignee === user.name && t.status === 'inprogress').length}</div>
+                                    <div class="stat-label">В работе</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${this.formatDate(user.lastActivity)}</div>
+                                    <div class="stat-label">Последняя активность</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${(user.role === 'agent' || user.role === 'admin') ? `
+                            <div class="detail-section">
+                                <h4><i class="fas fa-tasks"></i> Назначенные тикеты</h4>
+                                <div class="assigned-tickets">
+                                    ${this.data.tickets.filter(t => t.assignee === user.name).map(ticket => `
+                                        <div class="ticket-summary" onclick="app.hideModal(); app.viewTicket('${ticket.id}')">
+                                            <span class="ticket-id">${ticket.id}</span>
+                                            <span class="ticket-title">${ticket.title}</span>
+                                            <span class="badge badge--${this.getStatusColor(ticket.status)}">${this.getStatusText(ticket.status)}</span>
+                                            <span class="badge badge--${this.getPriorityColor(ticket.priority)}">${this.getPriorityText(ticket.priority)}</span>
+                                        </div>
+                                    `).join('') || '<p class="text-muted">Нет назначенных тикетов</p>'}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="user-detail-actions">
+                        <button class="btn btn--primary" onclick="app.showEditUserModal(${user.id})">
+                            <i class="fas fa-edit"></i> Редактировать
+                        </button>
+                        <button class="btn btn--${(user.isActive === false || user.status === 'disabled') ? 'success' : 'warning'}" 
+                                onclick="app.toggleUserStatus(${user.id}); app.hideModal();">
+                            <i class="fas fa-${(user.isActive === false || user.status === 'disabled') ? 'play' : 'pause'}"></i>
+                            ${(user.isActive === false || user.status === 'disabled') ? 'Активировать' : 'Деактивировать'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.showModal(modal, 'user-detail-modal');
     }
 
     renderSettings() {
@@ -2165,7 +2416,7 @@ class RikorHelpDeskEnhanced {
                         <div class="system-info">
                             <div class="info-item">
                                 <span>Версия:</span>
-                                <strong>RIKOR HELPDESK v2.7.0 Enhanced</strong>
+                                <strong>RIKOR HELPDESK v2.8.0 User Management</strong>
                             </div>
                             <div class="info-item">
                                 <span>Пользователь:</span>
@@ -2888,8 +3139,334 @@ class RikorHelpDeskEnhanced {
     }
 
     // ЗАГЛУШКИ ФУНКЦИЙ ДЛЯ СОВМЕСТИМОСТИ
-    showCreateUserModal() { 
-        this.showNotification('Создание пользователей доступно в полной версии', 'info'); 
+    
+    // =============================================
+    // УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ - v2.8.0 
+    // =============================================
+
+    showCreateUserModal() {
+        const modal = `
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-user-plus"></i> Добавление нового пользователя</h2>
+                <p class="modal-subtitle">Заполните информацию о новом пользователе системы</p>
+                <button class="modal-close" onclick="app.hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="create-user-form" onsubmit="app.submitCreateUser(event)">
+                    <div class="form-row">
+                        <!-- Основная информация -->
+                        <div class="form-group">
+                            <label for="userName">ФИО пользователя <span class="required">*</span></label>
+                            <input type="text" id="userName" name="name" required 
+                                   placeholder="Введите полное имя пользователя">
+                        </div>
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="userEmail">Email адрес <span class="required">*</span></label>
+                            <input type="email" id="userEmail" name="email" required 
+                                   placeholder="user@rikor.ru">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Телефон -->
+                        <div class="form-group">
+                            <label for="userPhone">Телефон</label>
+                            <input type="tel" id="userPhone" name="phone" 
+                                   placeholder="+7 (XXX) XXX-XX-XX">
+                        </div>
+                        <!-- Должность -->
+                        <div class="form-group">
+                            <label for="userPosition">Должность <span class="required">*</span></label>
+                            <input type="text" id="userPosition" name="position" required 
+                                   placeholder="Должность пользователя">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Отдел -->
+                        <div class="form-group">
+                            <label for="userDepartment">Отдел <span class="required">*</span></label>
+                            <select id="userDepartment" name="department" required>
+                                <option value="">Выберите отдел</option>
+                                <option value="IT">IT отдел</option>
+                                <option value="Бухгалтерия">Бухгалтерия</option>
+                                <option value="HR">HR отдел</option>
+                                <option value="Продажи">Продажи</option>
+                                <option value="Маркетинг">Маркетинг</option>
+                                <option value="Администрация">Администрация</option>
+                            </select>
+                        </div>
+                        <!-- Роль -->
+                        <div class="form-group">
+                            <label for="userRole">Роль в системе <span class="required">*</span></label>
+                            <select id="userRole" name="role" required>
+                                <option value="">Выберите роль</option>
+                                <option value="admin">Администратор</option>
+                                <option value="agent">Агент поддержки</option>
+                                <option value="user">Пользователь</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Действия -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn--secondary" onclick="app.hideModal()">
+                            <i class="fas fa-times"></i> Отмена
+                        </button>
+                        <button type="submit" class="btn btn--primary">
+                            <i class="fas fa-plus"></i> Создать пользователя
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        this.showModal(modal, 'create-user-modal');
+    }
+
+    // Создание нового пользователя
+    submitCreateUser(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const name = formData.get('name').trim();
+        const email = formData.get('email').trim();
+        const phone = formData.get('phone') ? formData.get('phone').trim() : '';
+        const position = formData.get('position').trim();
+        const department = formData.get('department');
+        const role = formData.get('role');
+
+        // Валидация
+        if (!name || !email || !position || !department || !role) {
+            this.showNotification('Заполните все обязательные поля', 'error');
+            return;
+        }
+
+        // Проверка уникальности email
+        if (this.data.users.some(u => u.email === email)) {
+            this.showNotification('Пользователь с таким email уже существует', 'error');
+            return;
+        }
+
+        // Генерация ID пользователя
+        const userId = Math.max(...this.data.users.map(u => u.id), 0) + 1;
+
+        // Создаем нового пользователя
+        const newUser = {
+            id: userId,
+            name: name,
+            email: email,
+            phone: phone,
+            role: role,
+            department: department,
+            position: position,
+            avatar: this.getInitials(name),
+            status: 'offline',
+            ticketsResolved: 0,
+            lastActivity: new Date().toISOString()
+        };
+
+        // Добавляем в данные
+        this.data.users.push(newUser);
+        this.saveData();
+
+        this.hideModal();
+        this.showNotification(`Пользователь ${name} успешно создан`, 'success');
+
+        // Обновляем интерфейс если находимся на странице пользователей
+        if (this.currentRoute === 'users') {
+            this.renderContent();
+        }
+
+        console.log('✅ Создан новый пользователь:', newUser);
+    }
+
+    // Показать модальное окно редактирования пользователя
+    showEditUserModal(userId) {
+        const user = this.data.users.find(u => u.id === userId);
+        if (!user) {
+            this.showNotification('Пользователь не найден', 'error');
+            return;
+        }
+
+        const modal = `
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-user-edit"></i> Редактирование пользователя</h2>
+                <p class="modal-subtitle">Изменение информации пользователя ${user.name}</p>
+                <button class="modal-close" onclick="app.hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="edit-user-form" onsubmit="app.submitEditUser(event, ${userId})">
+                    <div class="form-row">
+                        <!-- Основная информация -->
+                        <div class="form-group">
+                            <label for="editUserName">ФИО пользователя <span class="required">*</span></label>
+                            <input type="text" id="editUserName" name="name" required 
+                                   value="${user.name}" placeholder="Введите полное имя пользователя">
+                        </div>
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="editUserEmail">Email адрес <span class="required">*</span></label>
+                            <input type="email" id="editUserEmail" name="email" required 
+                                   value="${user.email}" placeholder="user@rikor.ru">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Телефон -->
+                        <div class="form-group">
+                            <label for="editUserPhone">Телефон</label>
+                            <input type="tel" id="editUserPhone" name="phone" 
+                                   value="${user.phone || ''}" placeholder="+7 (XXX) XXX-XX-XX">
+                        </div>
+                        <!-- Должность -->
+                        <div class="form-group">
+                            <label for="editUserPosition">Должность <span class="required">*</span></label>
+                            <input type="text" id="editUserPosition" name="position" required 
+                                   value="${user.position}" placeholder="Должность пользователя">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Отдел -->
+                        <div class="form-group">
+                            <label for="editUserDepartment">Отдел <span class="required">*</span></label>
+                            <select id="editUserDepartment" name="department" required>
+                                <option value="">Выберите отдел</option>
+                                <option value="IT" ${user.department === 'IT' ? 'selected' : ''}>IT отдел</option>
+                                <option value="Бухгалтерия" ${user.department === 'Бухгалтерия' ? 'selected' : ''}>Бухгалтерия</option>
+                                <option value="HR" ${user.department === 'HR' ? 'selected' : ''}>HR отдел</option>
+                                <option value="Продажи" ${user.department === 'Продажи' ? 'selected' : ''}>Продажи</option>
+                                <option value="Маркетинг" ${user.department === 'Маркетинг' ? 'selected' : ''}>Маркетинг</option>
+                                <option value="Администрация" ${user.department === 'Администрация' ? 'selected' : ''}>Администрация</option>
+                            </select>
+                        </div>
+                        <!-- Роль -->
+                        <div class="form-group">
+                            <label for="editUserRole">Роль в системе <span class="required">*</span></label>
+                            <select id="editUserRole" name="role" required>
+                                <option value="">Выберите роль</option>
+                                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Администратор</option>
+                                <option value="agent" ${user.role === 'agent' ? 'selected' : ''}>Агент поддержки</option>
+                                <option value="user" ${user.role === 'user' ? 'selected' : ''}>Пользователь</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Действия -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn--secondary" onclick="app.hideModal()">
+                            <i class="fas fa-times"></i> Отмена
+                        </button>
+                        <button type="submit" class="btn btn--primary">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        this.showModal(modal, 'edit-user-modal');
+    }
+
+    // Обновление пользователя
+    submitEditUser(event, userId) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const name = formData.get('name').trim();
+        const email = formData.get('email').trim();
+        const phone = formData.get('phone') ? formData.get('phone').trim() : '';
+        const position = formData.get('position').trim();
+        const department = formData.get('department');
+        const role = formData.get('role');
+
+        // Валидация
+        if (!name || !email || !position || !department || !role) {
+            this.showNotification('Заполните все обязательные поля', 'error');
+            return;
+        }
+
+        // Найдем пользователя
+        const userIndex = this.data.users.findIndex(u => u.id === userId);
+        if (userIndex === -1) {
+            this.showNotification('Пользователь не найден', 'error');
+            return;
+        }
+
+        // Проверка уникальности email (исключая текущего пользователя)
+        if (this.data.users.some(u => u.email === email && u.id !== userId)) {
+            this.showNotification('Пользователь с таким email уже существует', 'error');
+            return;
+        }
+
+        // Обновляем данные пользователя
+        const user = this.data.users[userIndex];
+        user.name = name;
+        user.email = email;
+        user.phone = phone;
+        user.position = position;
+        user.department = department;
+        user.role = role;
+        user.avatar = this.getInitials(name);
+
+        this.saveData();
+
+        this.hideModal();
+        this.showNotification(`Данные пользователя ${name} успешно обновлены`, 'success');
+
+        // Обновляем интерфейс если находимся на странице пользователей
+        if (this.currentRoute === 'users') {
+            this.renderContent();
+        }
+
+        console.log('✅ Обновлен пользователь:', user);
+    }
+
+    // Деактивация/активация пользователя
+    toggleUserStatus(userId) {
+        const user = this.data.users.find(u => u.id === userId);
+        if (!user) {
+            this.showNotification('Пользователь не найден', 'error');
+            return;
+        }
+
+        // Переключаем статус (если есть поле isActive, иначе используем status)
+        if (user.hasOwnProperty('isActive')) {
+            user.isActive = !user.isActive;
+            user.status = user.isActive ? 'offline' : 'disabled';
+        } else {
+            user.status = user.status === 'disabled' ? 'offline' : 'disabled';
+        }
+
+        this.saveData();
+
+        const statusText = (user.isActive === false || user.status === 'disabled') ? 'деактивирован' : 'активирован';
+        this.showNotification(`Пользователь ${user.name} ${statusText}`, 'success');
+
+        // Обновляем интерфейс если находимся на странице пользователей
+        if (this.currentRoute === 'users') {
+            this.renderContent();
+        }
+
+        console.log(`✅ Пользователь ${user.name} ${statusText}`);
+    }
+
+    // Получить активных агентов для назначения тикетов
+    getActiveAgents() {
+        return this.data.users.filter(u => 
+            (u.role === 'agent' || u.role === 'admin') && 
+            (u.status !== 'disabled' && u.isActive !== false)
+        );
     }
 
     filterTickets(type, value) { 
@@ -2944,11 +3521,11 @@ class RikorHelpDeskEnhanced {
     }
 }
 // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.7.0 Enhanced...');
+console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.8.0 User Management...');
 
 try {
     window.app = new RikorHelpDeskEnhanced();
-    console.log('✅ RIKOR HELPDESK v2.7.0 Enhanced успешно инициализирована!');
+    console.log('✅ RIKOR HELPDESK v2.8.0 User Management успешно инициализирована!');
 } catch (error) {
     console.error('❌ Критическая ошибка инициализации:', error);
 

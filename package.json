@@ -1,7 +1,7 @@
 {
-  "name": "rikor-helpdesk-v2.7.0-enhanced",
-  "version": "2.7.0",
-  "description": "Система управления IT-поддержкой с созданием тикетов и просмотром статей",
+  "name": "rikor-helpdesk-v2.8.0-user-management",
+  "version": "2.8.0",
+  "description": "Система управления IT-поддержкой с полным управлением пользователями и назначением тикетов на исполнителей",
   "main": "index.html",
   "keywords": ["helpdesk", "support", "tickets", "knowledge-base", "rikor"],
   "author": "RIKOR Development Team",
