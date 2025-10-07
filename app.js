@@ -1,9 +1,9 @@
-// RIKOR HELPDESK v2.8.0 User Management - ФИНАЛЬНАЯ ВЕРСИЯ
+// RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management - ФИНАЛЬНАЯ ВЕРСИЯ
 // Добавлено создание тикетов + просмотр статей
 
-class RikorHelpDeskEnhanced {
+class RikorHelpDeskAdvanced {
     constructor() {
-        console.log('🚀 RIKOR HELPDESK v2.8.0 User Management - Загрузка...');
+        console.log('🚀 RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management - Загрузка...');
 
         this.currentRoute = 'dashboard';
         this.currentUser = {
@@ -43,6 +43,7 @@ class RikorHelpDeskEnhanced {
         this.chartInstances = {};
         this.tempFiles = [];
         this.currentTicket = null;
+        this.ticketFiles = {}; // Хранилище файлов для тикетов
 
         this.init();
     }
@@ -57,7 +58,7 @@ class RikorHelpDeskEnhanced {
             this.renderContent();
 
             setTimeout(() => {
-                this.showNotification('✅ RIKOR HELPDESK v2.8.0 User Management готов к работе!', 'success');
+                this.showNotification('✅ RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management готов к работе!', 'success');
             }, 1000);
 
             console.log('✅ Система инициализирована');
@@ -342,6 +343,383 @@ class RikorHelpDeskEnhanced {
         } catch (error) {
             console.error('❌ Ошибка сохранения данных:', error);
         }
+    }
+
+    // НОВЫЕ МЕТОДЫ ДЛЯ НАЗНАЧЕНИЯ ТИКЕТОВ И РАБОТЫ С ФАЙЛАМИ
+
+    // Показать модальное окно назначения тикета
+    showAssignTicketModal(ticketId) {
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) {
+            this.showNotification('Тикет не найден', 'error');
+            return;
+        }
+
+        // Получаем только агентов и администраторов для назначения
+        const assignableUsers = this.data.users.filter(u => u.role === 'agent' || u.role === 'admin');
+
+        const userOptions = assignableUsers.map(user => {
+            const isSelected = ticket.assigneeId === user.id ? 'selected' : '';
+            const statusIcon = user.status === 'online' ? '🟢' : 
+                              user.status === 'busy' ? '🔴' : 
+                              user.status === 'away' ? '🟡' : '⚫';
+            const workload = user.ticketsAssigned || 0;
+
+            return `<option value="${user.id}" ${isSelected}>
+                ${statusIcon} ${user.name} (${user.position}) - Нагрузка: ${workload} тикетов
+            </option>`;
+        }).join('');
+
+        const modal = `
+            <div class="modal-overlay" onclick="helpdesk.hideModal()">
+                <div class="modal-container" onclick="event.stopPropagation()" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <div>
+                            <div class="modal-title">
+                                <i class="fas fa-user-cog"></i>
+                                Назначение тикета
+                            </div>
+                            <div class="modal-subtitle">Тикет: ${ticket.id} - ${ticket.title}</div>
+                        </div>
+                        <button class="modal-close" onclick="helpdesk.hideModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="form-section">
+                            <label class="form-label">
+                                <i class="fas fa-user"></i>
+                                Назначить исполнителя
+                            </label>
+                            <select id="assignTicketUser" class="form-input">
+                                <option value="">— Не назначен —</option>
+                                ${userOptions}
+                            </select>
+                        </div>
+
+                        <div class="form-section">
+                            <label class="form-label">
+                                <i class="fas fa-clock"></i>
+                                Приоритет задачи
+                            </label>
+                            <select id="assignTicketPriority" class="form-input">
+                                <option value="low" ${ticket.priority === 'low' ? 'selected' : ''}>🟢 Низкий</option>
+                                <option value="medium" ${ticket.priority === 'medium' ? 'selected' : ''}>🟡 Средний</option>
+                                <option value="high" ${ticket.priority === 'high' ? 'selected' : ''}>🟠 Высокий</option>
+                                <option value="critical" ${ticket.priority === 'critical' ? 'selected' : ''}>🔴 Критический</option>
+                            </select>
+                        </div>
+
+                        <div class="form-section">
+                            <label class="form-label">
+                                <i class="fas fa-comment"></i>
+                                Комментарий к назначению
+                            </label>
+                            <textarea id="assignTicketComment" class="form-input" rows="3" 
+                                placeholder="Дополнительные инструкции или комментарии для исполнителя..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn--secondary" onclick="helpdesk.hideModal()">
+                                <i class="fas fa-times"></i>
+                                Отмена
+                            </button>
+                            <button class="btn btn--primary" onclick="helpdesk.assignTicket('${ticketId}')">
+                                <i class="fas fa-check"></i>
+                                Назначить тикет
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modal);
+    }
+
+    // Назначить тикет на пользователя  
+    assignTicket(ticketId) {
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) {
+            this.showNotification('Тикет не найден', 'error');
+            return;
+        }
+
+        const userId = document.getElementById('assignTicketUser').value;
+        const priority = document.getElementById('assignTicketPriority').value;
+        const comment = document.getElementById('assignTicketComment').value.trim();
+
+        let assignee = null;
+        let assigneeId = null;
+
+        if (userId) {
+            const user = this.data.users.find(u => u.id == userId);
+            if (user) {
+                assignee = user.name;
+                assigneeId = user.id;
+
+                // Увеличиваем нагрузку пользователя
+                user.ticketsAssigned = (user.ticketsAssigned || 0) + (ticket.assigneeId ? 0 : 1);
+            }
+        }
+
+        // Уменьшаем нагрузку предыдущего исполнителя
+        if (ticket.assigneeId && ticket.assigneeId !== assigneeId) {
+            const prevUser = this.data.users.find(u => u.id === ticket.assigneeId);
+            if (prevUser && prevUser.ticketsAssigned > 0) {
+                prevUser.ticketsAssigned--;
+            }
+        }
+
+        // Обновляем тикет
+        ticket.assignee = assignee;
+        ticket.assigneeId = assigneeId;
+        ticket.priority = priority;
+        ticket.updated = new Date().toISOString();
+
+        // Добавляем комментарий о назначении
+        if (comment || ticket.assignee) {
+            const reply = {
+                id: ticket.replies.length + 1,
+                author: this.currentUser.name,
+                authorId: this.currentUser.id,
+                message: comment || `Тикет назначен на ${assignee || 'неназначенный статус'}`,
+                created: new Date().toISOString(),
+                type: 'assignment',
+                assignedTo: assignee,
+                assignedToId: assigneeId,
+                files: []
+            };
+
+            ticket.replies.push(reply);
+        }
+
+        this.saveData();
+        this.hideModal();
+        this.renderContent();
+
+        const message = assignee 
+            ? `Тикет ${ticketId} успешно назначен на ${assignee}`
+            : `Исполнитель тикета ${ticketId} снят`;
+
+        this.showNotification(message, 'success');
+    }
+
+    // Показать модальное окно добавления файлов к тикету
+    showAddFilesModal(ticketId) {
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) {
+            this.showNotification('Тикет не найден', 'error');
+            return;
+        }
+
+        const modal = `
+            <div class="modal-overlay" onclick="helpdesk.hideModal()">
+                <div class="modal-container" onclick="event.stopPropagation()" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <div>
+                            <div class="modal-title">
+                                <i class="fas fa-paperclip"></i>
+                                Добавить файлы к тикету
+                            </div>
+                            <div class="modal-subtitle">Тикет: ${ticket.id} - ${ticket.title}</div>
+                        </div>
+                        <button class="modal-close" onclick="helpdesk.hideModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="file-upload-section">
+                            <div class="upload-area" id="fileUploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="upload-text">
+                                    <div class="upload-title">Перетащите файлы сюда или нажмите для выбора</div>
+                                    <div class="upload-subtitle">
+                                        Максимальный размер: 50MB
+                                    </div>
+                                </div>
+                                <input type="file" id="ticketFileInput" multiple 
+                                       onchange="helpdesk.handleTicketFileSelect(event, '${ticketId}')" 
+                                       style="display: none;">
+                            </div>
+
+                            <div class="selected-files" id="selectedFiles" style="display: none;">
+                                <h4><i class="fas fa-list"></i> Выбранные файлы:</h4>
+                                <div class="files-list" id="filesList"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <label class="form-label">
+                                <i class="fas fa-comment"></i>
+                                Комментарий к файлам
+                            </label>
+                            <textarea id="filesComment" class="form-input" rows="3" 
+                                placeholder="Описание прикрепленных файлов..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn--secondary" onclick="helpdesk.hideModal()">
+                                <i class="fas fa-times"></i>
+                                Отмена
+                            </button>
+                            <button class="btn btn--primary" onclick="helpdesk.uploadTicketFiles('${ticketId}')" id="uploadFilesBtn" disabled>
+                                <i class="fas fa-upload"></i>
+                                Добавить файлы
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modal);
+
+        // Обработчики для загрузки файлов
+        const uploadArea = document.getElementById('fileUploadArea');
+        uploadArea.onclick = () => {
+            document.getElementById('ticketFileInput').click();
+        };
+    }
+
+    // Обработка выбора файлов для тикета
+    handleTicketFileSelect(event, ticketId) {
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
+
+        const selectedFilesDiv = document.getElementById('selectedFiles');
+        const filesListDiv = document.getElementById('filesList');
+        const uploadBtn = document.getElementById('uploadFilesBtn');
+
+        // Отобразить выбранные файлы
+        const filesHtml = files.map((file, index) => {
+            const fileSize = this.formatFileSize(file.size);
+
+            return `
+                <div class="selected-file-item" data-index="${index}">
+                    <div class="file-info">
+                        <i class="fas fa-file file-icon"></i>
+                        <div class="file-details">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${fileSize}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        filesListDiv.innerHTML = filesHtml;
+        selectedFilesDiv.style.display = 'block';
+        uploadBtn.disabled = false;
+
+        // Сохраняем файлы для загрузки
+        this.tempFiles = files;
+    }
+
+    // Загрузить файлы к тикету
+    uploadTicketFiles(ticketId) {
+        if (!this.tempFiles || this.tempFiles.length === 0) {
+            this.showNotification('Не выбраны файлы для загрузки', 'warning');
+            return;
+        }
+
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) {
+            this.showNotification('Тикет не найден', 'error');
+            return;
+        }
+
+        const comment = document.getElementById('filesComment').value.trim();
+
+        // Инициализируем массив файлов для тикета если его нет
+        if (!this.ticketFiles[ticketId]) {
+            this.ticketFiles[ticketId] = [];
+        }
+
+        // Симуляция загрузки файлов
+        const uploadedFiles = [];
+
+        for (let file of this.tempFiles) {
+            const uploadedFile = {
+                id: Date.now() + Math.random(),
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                uploadedAt: new Date().toISOString(),
+                uploadedBy: this.currentUser.name,
+                uploadedById: this.currentUser.id
+            };
+
+            uploadedFiles.push(uploadedFile);
+            this.ticketFiles[ticketId].push(uploadedFile);
+        }
+
+        // Добавляем комментарий с файлами
+        const reply = {
+            id: ticket.replies.length + 1,
+            author: this.currentUser.name,
+            authorId: this.currentUser.id,
+            message: comment || `Добавлено файлов: ${uploadedFiles.length}`,
+            created: new Date().toISOString(),
+            type: 'files',
+            files: uploadedFiles.map(f => ({
+                id: f.id,
+                name: f.name,
+                size: f.size,
+                type: f.type
+            }))
+        };
+
+        ticket.replies.push(reply);
+        ticket.updated = new Date().toISOString();
+
+        this.saveData();
+        this.hideModal();
+        this.renderContent();
+
+        this.showNotification(`Успешно добавлено ${uploadedFiles.length} файлов к тикету ${ticketId}`, 'success');
+
+        // Очищаем временные файлы
+        this.tempFiles = [];
+    }
+
+    // Обновление назначения тикета быстрым способом
+    updateTicketAssignee(ticketId, userId) {
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) return;
+
+        let assignee = null;
+        let assigneeId = null;
+
+        if (userId) {
+            const user = this.data.users.find(u => u.id == userId);
+            if (user) {
+                assignee = user.name;
+                assigneeId = user.id;
+            }
+        }
+
+        ticket.assignee = assignee;
+        ticket.assigneeId = assigneeId;
+        ticket.updated = new Date().toISOString();
+
+        this.saveData();
+        this.showNotification(assignee ? `Тикет назначен на ${assignee}` : 'Исполнитель снят', 'success');
+    }
+
+    // Форматировать размер файла
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Байт';
+
+        const k = 1024;
+        const sizes = ['Байт', 'КБ', 'МБ', 'ГБ'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     // СОЗДАНИЕ НОВОГО ТИКЕТА (как на первом скрине)
@@ -1673,7 +2051,7 @@ class RikorHelpDeskEnhanced {
             <div class="dashboard">
                 <div class="dashboard__header mb-4">
                     <h1><i class="fas fa-tachometer-alt"></i> Панель управления</h1>
-                    <p>RIKOR HELPDESK v2.8.0 User Management • ${new Date().toLocaleDateString('ru-RU')}</p>
+                    <p>RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management • ${new Date().toLocaleDateString('ru-RU')}</p>
                 </div>
 
                 <div class="grid grid--4 mb-4">
@@ -2416,7 +2794,7 @@ class RikorHelpDeskEnhanced {
                         <div class="system-info">
                             <div class="info-item">
                                 <span>Версия:</span>
-                                <strong>RIKOR HELPDESK v2.8.0 User Management</strong>
+                                <strong>RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management</strong>
                             </div>
                             <div class="info-item">
                                 <span>Пользователь:</span>
@@ -3521,11 +3899,11 @@ class RikorHelpDeskEnhanced {
     }
 }
 // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.8.0 User Management...');
+console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management...');
 
 try {
-    window.app = new RikorHelpDeskEnhanced();
-    console.log('✅ RIKOR HELPDESK v2.8.0 User Management успешно инициализирована!');
+    window.app = new RikorHelpDeskAdvanced();
+    console.log('✅ RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management успешно инициализирована!');
 } catch (error) {
     console.error('❌ Критическая ошибка инициализации:', error);
 
@@ -3547,4 +3925,15 @@ try {
             `;
         }
     }, 100);
+}
+
+// Инициализация приложения при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Запуск RIKOR HELPDESK v2.9.0 Advanced...');
+    window.helpdesk = new RikorHelpDeskAdvanced();
+});
+
+// Экспорт для использования в других модулях (если требуется)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = RikorHelpDeskAdvanced;
 }
