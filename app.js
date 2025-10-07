@@ -275,7 +275,7 @@ class RikorHelpDeskAdvanced {
             rikorDevices: [
                 {
                     type: "Ноутбук",
-                    models: ["RN NINO 203.1/15", "RN NINO 203.1/17", "RN ULTRA 301.2/15", "RN ULTRA 301.2/17", "RN GAMING 401.1/15"]
+                    models: ["RN ARZ 103.1/15", "RN ARZ 103.2/15", "RN SPB 301.1/15", "RN MSK 401.1/16", "RN NINO 200.1/15", "RN NINO 201.2/15", "RN NINO 203.1/15", "RN NINO 203.1/17", "RN NINO 203.2/14", "RN NINO 203.1/17"]
                 },
                 {
                     type: "Сервер", 
@@ -283,7 +283,7 @@ class RikorHelpDeskAdvanced {
                 },
                 {
                     type: "Моноблок",
-                    models: ["RA-AIO 24", "RA-AIO 27", "RA-AIO 32", "RA-PRO 24", "RA-PRO 27"]
+                    models: ["AIO 201.1/27"]
                 },
                 {
                     type: "Планшет",
@@ -291,7 +291,7 @@ class RikorHelpDeskAdvanced {
                 },
                 {
                     type: "Мини ПК",
-                    models: ["RM-MINI 100", "RM-MINI 200", "RM-MICRO 50", "RM-STICK 32", "RM-BOX 128"]
+                    models: ["USFF 101.1", "USFF 102.1", "USFF 103.1", "USFF 104.1", "USFF 105.1"]
                 }
             ],
             stats: {
