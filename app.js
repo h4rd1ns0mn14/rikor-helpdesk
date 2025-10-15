@@ -3899,41 +3899,42 @@ class RikorHelpDeskAdvanced {
     }
 }
 // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management...');
+console.log('🚀 Подготовка к запуску RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management...');
 
-try {
-    window.app = new RikorHelpDeskAdvanced();
-    console.log('✅ RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management успешно инициализирована!');
-} catch (error) {
-    console.error('❌ Критическая ошибка инициализации:', error);
-
-    // Показываем ошибку пользователю
-    setTimeout(() => {
-        const content = document.getElementById('content');
-        if (content) {
-            content.innerHTML = `
-                <div class="card error-card" style="text-align: center; padding: 40px; margin: 20px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
-                    <h2 style="color: #1e293b;">Ошибка инициализации</h2>
-                    <p style="color: #64748b; margin-bottom: 16px;">
-                        Не удалось запустить систему: ${error.message}
-                    </p>
-                    <button onclick="location.reload()" class="btn btn--primary">
-                        <i class="fas fa-redo"></i> Перезагрузить
-                    </button>
-                </div>
-            `;
-        }
-    }, 100);
+// ИСПРАВЛЕНИЕ: Ждем полной загрузки DOM перед инициализацией
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    // DOM уже загружен
+    initApp();
 }
 
-// Инициализация приложения при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Запуск RIKOR HELPDESK v2.9.0 Advanced...');
-    window.helpdesk = new RikorHelpDeskAdvanced();
-});
+function initApp() {
+    console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management...');
 
-// Экспорт для использования в других модулях (если требуется)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = RikorHelpDeskAdvanced;
+    try {
+        window.app = new RikorHelpDeskAdvanced();
+        console.log('✅ RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management успешно инициализирована!');
+    } catch (error) {
+        console.error('❌ Критическая ошибка инициализации:', error);
+
+        // Показываем ошибку пользователю
+        setTimeout(() => {
+            const content = document.getElementById('content');
+            if (content) {
+                content.innerHTML = `
+                    <div class="card error-card" style="text-align: center; padding: 40px; margin: 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
+                        <h2 style="color: #1e293b;">Ошибка инициализации</h2>
+                        <p style="color: #64748b; margin-bottom: 16px;">
+                            Не удалось запустить систему: ${error.message}
+                        </p>
+                        <button onclick="location.reload()" class="btn btn--primary">
+                            <i class="fas fa-redo"></i> Перезагрузить
+                        </button>
+                    </div>
+                `;
+            }
+        }, 100);
+    }
 }
