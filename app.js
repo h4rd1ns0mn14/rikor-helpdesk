@@ -2170,7 +2170,10 @@ class RikorHelpDeskAdvanced {
     }
 
     renderTickets() {
-        return `
+        const savedFilters = this.currentTicketFilters || {};
+        const savedSearch = this.currentTicketSearch || '';
+
+        const ticketsHtml = `
             <div class="tickets-page">
                 <div class="page-header mb-4">
                     <div class="page-title">
@@ -2186,7 +2189,7 @@ class RikorHelpDeskAdvanced {
 
                 <div class="tickets-filters mb-4">
                     <div class="filter-group">
-                        <select onchange="app.filterTickets('status', this.value)">
+                        <select onchange="app.filterTickets('status', this.value)" id="statusFilter">
                             <option value="">Все статусы</option>
                             <option value="open">Открытые</option>
                             <option value="in_progress">В работе</option>
@@ -2195,7 +2198,7 @@ class RikorHelpDeskAdvanced {
                             <option value="closed">Закрытые</option>
                         </select>
 
-                        <select onchange="app.filterTickets('priority', this.value)">
+                        <select onchange="app.filterTickets('priority', this.value)" id="priorityFilter">
                             <option value="">Все приоритеты</option>
                             <option value="critical">Критический</option>
                             <option value="high">Высокий</option>
@@ -2204,83 +2207,131 @@ class RikorHelpDeskAdvanced {
                         </select>
 
                         <input type="text" placeholder="Поиск по тикетам..." 
-                               oninput="app.searchTickets(this.value)">
+                               oninput="app.searchTickets(this.value)" id="searchInput" value="${savedSearch}">
                     </div>
                 </div>
 
                 <div class="tickets-list">
-                    ${this.data.tickets.map(ticket => `
-                        <div class="ticket-card" onclick="app.viewTicket('${ticket.id}')">
-                            <div class="ticket-header">
-                                <div class="ticket-id-priority">
-                                    <span class="badge badge--primary">${ticket.id}</span>
-                                    <span class="badge badge--${this.getPriorityColor(ticket.priority)}">${this.getPriorityText(ticket.priority)}</span>
-                                </div>
-                                <span class="badge badge--${this.getStatusColor(ticket.status)}">${this.getStatusText(ticket.status)}</span>
-                            </div>
-
-                            <div class="ticket-content">
-                                <h3 class="ticket-title">${ticket.title}</h3>
-                                <p class="ticket-description">${ticket.description.substring(0, 150)}${ticket.description.length > 150 ? '...' : ''}</p>
-
-                                <div class="ticket-device">
-                                    <i class="${this.getDeviceIcon(ticket.deviceType)}"></i>
-                                    <span>${ticket.deviceType} ${ticket.deviceModel}</span>
-                                </div>
-                            </div>
-
-                            <div class="ticket-footer">
-                                <div class="ticket-meta">
-                                    <div class="meta-item">
-                                        <i class="fas fa-user"></i>
-                                        <span>${ticket.assignee}</span>
-                                    </div>
-                                    <div class="meta-item">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        <span>${ticket.location}</span>
-                                    </div>
-                                    <div class="meta-item">
-                                        <i class="fas fa-clock"></i>
-                                        <span>${this.formatDate(ticket.created)}</span>
-                                    </div>
-                                </div>
-
-                                <div class="ticket-stats">
-                                    <span class="stat-item">
-                                        <i class="fas fa-comments"></i>
-                                        ${ticket.replies.length}
-                                    </span>
-                                    ${ticket.attachments.length > 0 ? `
-                                    <span class="stat-item">
-                                        <i class="fas fa-paperclip"></i>
-                                        ${ticket.attachments.length}
-                                    </span>
-                                    ` : ''}
-                                    <span class="stat-item">
-                                        <i class="fas fa-clock"></i>
-                                        ${ticket.timeSpent}ч/${ticket.estimatedTime}ч
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
+                    ${this.renderTicketsList()}
                 </div>
 
                 ${this.data.tickets.length === 0 ? `
                 <div class="empty-state">
                     <i class="fas fa-ticket-alt"></i>
-                    <h3>Нет тикетов</h3>
-                    <p>Создайте первый тикет для начала работы</p>
-                    <button class="btn btn--primary" onclick="app.showCreateTicketModal()">
-                        <i class="fas fa-plus"></i> Создать тикет
-                    </button>
+                    <h3>Нет доступных тикетов</h3>
+                    <p>Создайте новый тикет для начала работы</p>
                 </div>
                 ` : ''}
             </div>
         `;
+
+        // После рендера восстанавливаем значения фильтров
+        setTimeout(() => {
+            if (savedFilters.status) {
+                const statusFilter = document.getElementById('statusFilter');
+                if (statusFilter) statusFilter.value = savedFilters.status;
+            }
+            if (savedFilters.priority) {
+                const priorityFilter = document.getElementById('priorityFilter');
+                if (priorityFilter) priorityFilter.value = savedFilters.priority;
+            }
+        }, 0);
+
+        return ticketsHtml;
     }
 
-    renderKnowledgeBase() {
+    // Метод для отрисовки списка тикетов с учетом фильтров
+    renderTicketsList() {
+        let tickets = [...this.data.tickets];
+
+        // Применяем фильтры если они есть
+        if (this.currentTicketFilters) {
+            Object.keys(this.currentTicketFilters).forEach(filterType => {
+                const filterValue = this.currentTicketFilters[filterType];
+                tickets = tickets.filter(ticket => {
+                    return ticket[filterType] === filterValue;
+                });
+            });
+        }
+
+        // Применяем поиск если он есть
+        if (this.currentTicketSearch && this.currentTicketSearch.trim() !== '') {
+            const searchQuery = this.currentTicketSearch.toLowerCase();
+            tickets = tickets.filter(ticket => {
+                return ticket.id.toLowerCase().includes(searchQuery) ||
+                       ticket.title.toLowerCase().includes(searchQuery) ||
+                       ticket.description.toLowerCase().includes(searchQuery) ||
+                       ticket.assignee.toLowerCase().includes(searchQuery) ||
+                       ticket.location.toLowerCase().includes(searchQuery);
+            });
+        }
+
+        if (tickets.length === 0 && (this.currentTicketFilters || this.currentTicketSearch)) {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h3>Тикетов не найдено</h3>
+                    <p>Попробуйте изменить параметры фильтрации или поиска</p>
+                </div>
+            `;
+        }
+
+        return tickets.map(ticket => `
+            <div class="ticket-card" onclick="app.viewTicket('${ticket.id}')">
+                <div class="ticket-header">
+                    <div class="ticket-id-priority">
+                        <span class="badge badge--primary">${ticket.id}</span>
+                        <span class="badge badge--${this.getPriorityColor(ticket.priority)}">${this.getPriorityText(ticket.priority)}</span>
+                    </div>
+                    <span class="badge badge--${this.getStatusColor(ticket.status)}">${this.getStatusText(ticket.status)}</span>
+                </div>
+
+                <div class="ticket-content">
+                    <h3 class="ticket-title">${ticket.title}</h3>
+                    <p class="ticket-description">${ticket.description.substring(0, 150)}${ticket.description.length > 150 ? '...' : ''}</p>
+
+                    <div class="ticket-device">
+                        <i class="${this.getDeviceIcon(ticket.deviceType)}"></i>
+                        <span>${ticket.deviceType} ${ticket.deviceModel}</span>
+                    </div>
+                </div>
+
+                <div class="ticket-footer">
+                    <div class="ticket-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>${ticket.assignee}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${ticket.location}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>${this.formatDate(ticket.created)}</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-stats">
+                        <span class="stat-item">
+                            <i class="fas fa-comments"></i>
+                            ${ticket.replies.length}
+                        </span>
+                        ${ticket.attachments.length > 0 ? `
+                        <span class="stat-item">
+                            <i class="fas fa-paperclip"></i>
+                            ${ticket.attachments.length}
+                        </span>
+                        ` : ''}
+                        <span class="stat-item">
+                            <i class="fas fa-clock"></i>
+                            ${ticket.timeSpent}ч/${ticket.estimatedTime}ч
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }    renderKnowledgeBase() {
         return `
             <div class="knowledge-page">
                 <div class="page-header mb-4">
@@ -3847,12 +3898,128 @@ class RikorHelpDeskAdvanced {
         );
     }
 
-    filterTickets(type, value) { 
-        this.showNotification(`Фильтр тикетов ${type}: ${value || 'сброшен'}`, 'info'); 
+    filterTickets(type, value) {
+        this.currentTicketFilters = this.currentTicketFilters || {};
+
+        // Обновляем фильтр
+        if (value) {
+            this.currentTicketFilters[type] = value;
+        } else {
+            delete this.currentTicketFilters[type];
+        }
+
+        // Перерисовываем список тикетов с учетом фильтров
+        this.updateTicketsList();
+
+        this.showNotification(`Фильтр тикетов ${type}: ${value || 'сброшен'}`, 'info');
     }
 
-    searchTickets(query) { 
-        this.showNotification(`Поиск тикетов: ${query || 'сброшен'}`, 'info'); 
+    searchTickets(query) {
+        this.currentTicketSearch = query;
+        this.updateTicketsList();
+        this.showNotification(`Поиск тикетов: ${query || 'сброшен'}`, 'info');
+    }
+
+    // Новый метод для обновления списка тикетов с учетом фильтров
+    updateTicketsList() {
+        let filteredTickets = [...this.data.tickets];
+
+        // Применяем фильтры
+        if (this.currentTicketFilters) {
+            Object.keys(this.currentTicketFilters).forEach(filterType => {
+                const filterValue = this.currentTicketFilters[filterType];
+                filteredTickets = filteredTickets.filter(ticket => {
+                    return ticket[filterType] === filterValue;
+                });
+            });
+        }
+
+        // Применяем поиск
+        if (this.currentTicketSearch && this.currentTicketSearch.trim() !== '') {
+            const searchQuery = this.currentTicketSearch.toLowerCase();
+            filteredTickets = filteredTickets.filter(ticket => {
+                return ticket.id.toLowerCase().includes(searchQuery) ||
+                       ticket.title.toLowerCase().includes(searchQuery) ||
+                       ticket.description.toLowerCase().includes(searchQuery) ||
+                       ticket.assignee.toLowerCase().includes(searchQuery) ||
+                       ticket.location.toLowerCase().includes(searchQuery);
+            });
+        }
+
+        // Обновляем отображение тикетов
+        const ticketsList = document.querySelector('.tickets-list');
+        if (ticketsList) {
+            ticketsList.innerHTML = this.renderFilteredTickets(filteredTickets);
+        }
+    }
+
+    // Новый метод для отрисовки отфильтрованных тикетов
+    renderFilteredTickets(tickets) {
+        if (tickets.length === 0) {
+            return `
+                <div class="empty-state">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h3>Тикетов не найдено</h3>
+                    <p>Попробуйте изменить параметры фильтрации или поиска</p>
+                </div>
+            `;
+        }
+
+        return tickets.map(ticket => `
+            <div class="ticket-card" onclick="app.viewTicket('${ticket.id}')">
+                <div class="ticket-header">
+                    <div class="ticket-id-priority">
+                        <span class="badge badge--primary">${ticket.id}</span>
+                        <span class="badge badge--${this.getPriorityColor(ticket.priority)}">${this.getPriorityText(ticket.priority)}</span>
+                    </div>
+                    <span class="badge badge--${this.getStatusColor(ticket.status)}">${this.getStatusText(ticket.status)}</span>
+                </div>
+
+                <div class="ticket-content">
+                    <h3 class="ticket-title">${ticket.title}</h3>
+                    <p class="ticket-description">${ticket.description.substring(0, 150)}${ticket.description.length > 150 ? '...' : ''}</p>
+
+                    <div class="ticket-device">
+                        <i class="${this.getDeviceIcon(ticket.deviceType)}"></i>
+                        <span>${ticket.deviceType} ${ticket.deviceModel}</span>
+                    </div>
+                </div>
+
+                <div class="ticket-footer">
+                    <div class="ticket-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>${ticket.assignee}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${ticket.location}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>${this.formatDate(ticket.created)}</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-stats">
+                        <span class="stat-item">
+                            <i class="fas fa-comments"></i>
+                            ${ticket.replies.length}
+                        </span>
+                        ${ticket.attachments.length > 0 ? `
+                        <span class="stat-item">
+                            <i class="fas fa-paperclip"></i>
+                            ${ticket.attachments.length}
+                        </span>
+                        ` : ''}
+                        <span class="stat-item">
+                            <i class="fas fa-clock"></i>
+                            ${ticket.timeSpent}ч/${ticket.estimatedTime}ч
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
     }
 
     filterArticles(type, value) { 
