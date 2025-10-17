@@ -1,9 +1,9 @@
-// RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management - ФИНАЛЬНАЯ ВЕРСИЯ
+// RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management - ФИНАЛЬНАЯ ВЕРСИЯ
 // Добавлено создание тикетов + просмотр статей
 
 class RikorHelpDeskAdvanced {
     constructor() {
-        console.log('🚀 RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management - Загрузка...');
+        console.log('🚀 RIKOR HELPDESK v2.10.0 - File Upload to Existing Tickets - Загрузка...');
 
         this.currentRoute = 'dashboard';
         this.currentUser = {
@@ -58,7 +58,7 @@ class RikorHelpDeskAdvanced {
             this.renderContent();
 
             setTimeout(() => {
-                this.showNotification('✅ RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management готов к работе!', 'success');
+                this.showNotification('✅ RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management готов к работе!', 'success');
             }, 1000);
 
             console.log('✅ Система инициализирована');
@@ -371,7 +371,7 @@ class RikorHelpDeskAdvanced {
         }).join('');
 
         const modal = `
-            <div class="modal-overlay" onclick="helpdesk.hideModal()">
+            <div class="modal-overlay" onclick="app.hideModal()">
                 <div class="modal-container" onclick="event.stopPropagation()" style="max-width: 600px;">
                     <div class="modal-header">
                         <div>
@@ -381,7 +381,7 @@ class RikorHelpDeskAdvanced {
                             </div>
                             <div class="modal-subtitle">Тикет: ${ticket.id} - ${ticket.title}</div>
                         </div>
-                        <button class="modal-close" onclick="helpdesk.hideModal()">
+                        <button class="modal-close" onclick="app.hideModal()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -421,11 +421,11 @@ class RikorHelpDeskAdvanced {
                         </div>
 
                         <div class="form-actions">
-                            <button class="btn btn--secondary" onclick="helpdesk.hideModal()">
+                            <button class="btn btn--secondary" onclick="app.hideModal()">
                                 <i class="fas fa-times"></i>
                                 Отмена
                             </button>
-                            <button class="btn btn--primary" onclick="helpdesk.assignTicket('${ticketId}')">
+                            <button class="btn btn--primary" onclick="app.assignTicket('${ticketId}')">
                                 <i class="fas fa-check"></i>
                                 Назначить тикет
                             </button>
@@ -515,8 +515,8 @@ class RikorHelpDeskAdvanced {
         }
 
         const modal = `
-            <div class="modal-overlay" onclick="helpdesk.hideModal()">
-                <div class="modal-container" onclick="event.stopPropagation()" style="max-width: 600px;">
+            <div class="modal-overlay" onclick="app.hideModal()">
+                <div class="modal-container file-upload-modal" onclick="event.stopPropagation()">
                     <div class="modal-header">
                         <div>
                             <div class="modal-title">
@@ -525,49 +525,49 @@ class RikorHelpDeskAdvanced {
                             </div>
                             <div class="modal-subtitle">Тикет: ${ticket.id} - ${ticket.title}</div>
                         </div>
-                        <button class="modal-close" onclick="helpdesk.hideModal()">
+                        <button class="modal-close" onclick="app.hideModal()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
 
                     <div class="modal-body">
-                        <div class="file-upload-section">
+                        <div class="file-upload-zone">
                             <div class="upload-area" id="fileUploadArea">
-                                <div class="upload-icon">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                </div>
-                                <div class="upload-text">
-                                    <div class="upload-title">Перетащите файлы сюда или нажмите для выбора</div>
-                                    <div class="upload-subtitle">
-                                        Максимальный размер: 50MB
+                                <div class="upload-content">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <div class="upload-text">
+                                        <h3>Перетащите файлы сюда или нажмите для выбора</h3>
+                                        <p>Максимальный размер: 50MB</p>
                                     </div>
                                 </div>
                                 <input type="file" id="ticketFileInput" multiple 
-                                       onchange="helpdesk.handleTicketFileSelect(event, '${ticketId}')" 
+                                       accept=".pdf,.doc,.docx,.txt,.md,.jpg,.jpeg,.png,.zip,.rar"
                                        style="display: none;">
                             </div>
 
-                            <div class="selected-files" id="selectedFiles" style="display: none;">
-                                <h4><i class="fas fa-list"></i> Выбранные файлы:</h4>
-                                <div class="files-list" id="filesList"></div>
+                            <div class="selected-files-section" id="selectedFilesSection" style="display: none;">
+                                <h4><i class="fas fa-list"></i> Выбранные файлы</h4>
+                                <div class="files-preview" id="filesPreview"></div>
                             </div>
                         </div>
 
-                        <div class="form-section">
-                            <label class="form-label">
+                        <div class="comment-section">
+                            <label for="filesComment" class="comment-label">
                                 <i class="fas fa-comment"></i>
                                 Комментарий к файлам
                             </label>
-                            <textarea id="filesComment" class="form-input" rows="3" 
+                            <textarea id="filesComment" class="comment-textarea" rows="3" 
                                 placeholder="Описание прикрепленных файлов..."></textarea>
                         </div>
 
-                        <div class="form-actions">
-                            <button class="btn btn--secondary" onclick="helpdesk.hideModal()">
+                        <div class="modal-actions">
+                            <button class="btn btn--cancel" onclick="app.hideModal()">
                                 <i class="fas fa-times"></i>
                                 Отмена
                             </button>
-                            <button class="btn btn--primary" onclick="helpdesk.uploadTicketFiles('${ticketId}')" id="uploadFilesBtn" disabled>
+                            <button class="btn btn--upload" onclick="app.uploadTicketFiles('${ticketId}')" id="uploadFilesBtn" disabled>
                                 <i class="fas fa-upload"></i>
                                 Добавить файлы
                             </button>
@@ -579,11 +579,166 @@ class RikorHelpDeskAdvanced {
 
         document.body.insertAdjacentHTML('beforeend', modal);
 
-        // Обработчики для загрузки файлов
+        // Настройка обработчиков событий
+        this.setupFileUploadHandlers(ticketId);
+    }
+
+    
+    // Настройка обработчиков событий для загрузки файлов
+    setupFileUploadHandlers(ticketId) {
         const uploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('ticketFileInput');
+
+        // Клик по области загрузки
         uploadArea.onclick = () => {
-            document.getElementById('ticketFileInput').click();
+            fileInput.click();
         };
+
+        // Drag & Drop обработчики
+        uploadArea.ondragover = (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        };
+
+        uploadArea.ondragleave = (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        };
+
+        uploadArea.ondrop = (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length > 0) {
+                this.processSelectedFiles(files, ticketId);
+            }
+        };
+
+        // Обработчик изменения input файлов
+        fileInput.onchange = (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                this.processSelectedFiles(files, ticketId);
+            }
+        };
+    }
+
+    // Обработка выбранных файлов
+    processSelectedFiles(files, ticketId) {
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        const allowedTypes = ['.pdf', '.doc', '.docx', '.txt', '.md', '.jpg', '.jpeg', '.png', '.zip', '.rar'];
+
+        const validFiles = [];
+        const invalidFiles = [];
+
+        files.forEach(file => {
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            const isValidType = allowedTypes.includes(fileExtension);
+            const isValidSize = file.size <= maxSize;
+
+            if (isValidType && isValidSize) {
+                validFiles.push(file);
+            } else {
+                invalidFiles.push({
+                    file: file,
+                    reason: !isValidType ? 'Неподдерживаемый тип файла' : 'Превышен максимальный размер файла'
+                });
+            }
+        });
+
+        if (invalidFiles.length > 0) {
+            const errorMsg = invalidFiles.map(item => `${item.file.name}: ${item.reason}`).join('\n');
+            this.showNotification(`Некорректные файлы:\n${errorMsg}`, 'error');
+        }
+
+        if (validFiles.length > 0) {
+            this.displaySelectedFiles(validFiles);
+            this.tempFiles = validFiles;
+
+            // Активируем кнопку загрузки
+            const uploadBtn = document.getElementById('uploadFilesBtn');
+            if (uploadBtn) {
+                uploadBtn.disabled = false;
+            }
+        }
+    }
+
+    // Отображение выбранных файлов
+    displaySelectedFiles(files) {
+        const selectedSection = document.getElementById('selectedFilesSection');
+        const filesPreview = document.getElementById('filesPreview');
+
+        if (!selectedSection || !filesPreview) return;
+
+        const filesHtml = files.map((file, index) => {
+            const fileSize = this.formatFileSize(file.size);
+            const fileIcon = this.getFileIcon(file.name);
+
+            return `
+                <div class="file-item" data-index="${index}">
+                    <div class="file-icon">
+                        <i class="${fileIcon}"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name" title="${file.name}">${file.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                    </div>
+                    <button class="remove-file-btn" onclick="helpdesk.removeSelectedFile(${index})" title="Удалить файл">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        filesPreview.innerHTML = filesHtml;
+        selectedSection.style.display = 'block';
+    }
+
+    // Получение иконки файла по расширению
+    getFileIcon(filename) {
+        const extension = filename.split('.').pop().toLowerCase();
+        const iconMap = {
+            pdf: 'fas fa-file-pdf',
+            doc: 'fas fa-file-word',
+            docx: 'fas fa-file-word',
+            txt: 'fas fa-file-alt',
+            md: 'fas fa-file-code',
+            jpg: 'fas fa-file-image',
+            jpeg: 'fas fa-file-image',
+            png: 'fas fa-file-image',
+            zip: 'fas fa-file-archive',
+            rar: 'fas fa-file-archive'
+        };
+        return iconMap[extension] || 'fas fa-file';
+    }
+
+    // Форматирование размера файла
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Б';
+
+        const k = 1024;
+        const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    // Удаление выбранного файла
+    removeSelectedFile(index) {
+        if (this.tempFiles && this.tempFiles.length > index) {
+            this.tempFiles.splice(index, 1);
+
+            if (this.tempFiles.length === 0) {
+                const selectedSection = document.getElementById('selectedFilesSection');
+                const uploadBtn = document.getElementById('uploadFilesBtn');
+
+                if (selectedSection) selectedSection.style.display = 'none';
+                if (uploadBtn) uploadBtn.disabled = true;
+            } else {
+                this.displaySelectedFiles(this.tempFiles);
+            }
+        }
     }
 
     // Обработка выбора файлов для тикета
@@ -591,33 +746,7 @@ class RikorHelpDeskAdvanced {
         const files = Array.from(event.target.files);
         if (files.length === 0) return;
 
-        const selectedFilesDiv = document.getElementById('selectedFiles');
-        const filesListDiv = document.getElementById('filesList');
-        const uploadBtn = document.getElementById('uploadFilesBtn');
-
-        // Отобразить выбранные файлы
-        const filesHtml = files.map((file, index) => {
-            const fileSize = this.formatFileSize(file.size);
-
-            return `
-                <div class="selected-file-item" data-index="${index}">
-                    <div class="file-info">
-                        <i class="fas fa-file file-icon"></i>
-                        <div class="file-details">
-                            <div class="file-name">${file.name}</div>
-                            <div class="file-size">${fileSize}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        filesListDiv.innerHTML = filesHtml;
-        selectedFilesDiv.style.display = 'block';
-        uploadBtn.disabled = false;
-
-        // Сохраняем файлы для загрузки
-        this.tempFiles = files;
+        this.processSelectedFiles(files, ticketId);
     }
 
     // Загрузить файлы к тикету
@@ -1472,6 +1601,9 @@ class RikorHelpDeskAdvanced {
                                 <button type="submit" class="btn btn--primary btn--small">
                                     <i class="fas fa-paper-plane"></i> Отправить
                                 </button>
+                                <button type="button" class="btn btn--info btn--small" onclick="app.showAddFilesModal('${ticket.id}')">
+                                    <i class="fas fa-paperclip"></i> Добавить файлы
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -1851,11 +1983,31 @@ class RikorHelpDeskAdvanced {
     }
 
     hideModal() {
-        const overlay = document.getElementById('modal-overlay');
-        if (overlay) {
+        // Сначала пытаемся найти статический модальный overlay по ID
+        let overlay = document.getElementById('modal-overlay');
+        if (overlay && !overlay.classList.contains('hidden')) {
             overlay.classList.add('hidden');
             document.body.style.overflow = 'auto';
+            return;
         }
+
+        // Если статический не найден или скрыт, ищем динамически созданные модальные окна
+        const dynamicOverlays = document.querySelectorAll('.modal-overlay:not([id])');
+        dynamicOverlays.forEach(overlay => {
+            overlay.remove();
+        });
+
+        // Также ищем любые видимые модальные overlay
+        const allOverlays = document.querySelectorAll('.modal-overlay');
+        allOverlays.forEach(overlay => {
+            if (overlay.id === 'modal-overlay') {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.remove();
+            }
+        });
+
+        document.body.style.overflow = 'auto';
     }
 
     // УВЕДОМЛЕНИЯ
@@ -2051,7 +2203,7 @@ class RikorHelpDeskAdvanced {
             <div class="dashboard">
                 <div class="dashboard__header mb-4">
                     <h1><i class="fas fa-tachometer-alt"></i> Панель управления</h1>
-                    <p>RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management • ${new Date().toLocaleDateString('ru-RU')}</p>
+                    <p>RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management • ${new Date().toLocaleDateString('ru-RU')}</p>
                 </div>
 
                 <div class="grid grid--4 mb-4">
@@ -2845,7 +2997,7 @@ class RikorHelpDeskAdvanced {
                         <div class="system-info">
                             <div class="info-item">
                                 <span>Версия:</span>
-                                <strong>RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management</strong>
+                                <strong>RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management</strong>
                             </div>
                             <div class="info-item">
                                 <span>Пользователь:</span>
@@ -4066,7 +4218,7 @@ class RikorHelpDeskAdvanced {
     }
 }
 // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-console.log('🚀 Подготовка к запуску RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management...');
+console.log('🚀 Подготовка к запуску RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management...');
 
 // ИСПРАВЛЕНИЕ: Ждем полной загрузки DOM перед инициализацией
 if (document.readyState === 'loading') {
@@ -4077,11 +4229,11 @@ if (document.readyState === 'loading') {
 }
 
 function initApp() {
-    console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management...');
+    console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management...');
 
     try {
         window.app = new RikorHelpDeskAdvanced();
-        console.log('✅ RIKOR HELPDESK v2.9.0 Advanced Assignment & File Management успешно инициализирована!');
+        console.log('✅ RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management успешно инициализирована!');
     } catch (error) {
         console.error('❌ Критическая ошибка инициализации:', error);
 
