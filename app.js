@@ -1,9 +1,9 @@
-// RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management - ФИНАЛЬНАЯ ВЕРСИЯ
+// RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management - ФИНАЛЬНАЯ ВЕРСИЯ
 // Добавлено создание тикетов + просмотр статей
 
 class RikorHelpDeskAdvanced {
     constructor() {
-        console.log('🚀 RIKOR HELPDESK v2.10.0 - File Upload to Existing Tickets - Загрузка...');
+        console.log('🚀 RIKOR HELPDESK v2.11.0 - Enhanced Status Buttons & Improved Design - Загрузка...');
 
         this.currentRoute = 'dashboard';
         this.currentUser = {
@@ -58,7 +58,7 @@ class RikorHelpDeskAdvanced {
             this.renderContent();
 
             setTimeout(() => {
-                this.showNotification('✅ RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management готов к работе!', 'success');
+                this.showNotification('✅ RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management готов к работе!', 'success');
             }, 1000);
 
             console.log('✅ Система инициализирована');
@@ -2203,7 +2203,7 @@ class RikorHelpDeskAdvanced {
             <div class="dashboard">
                 <div class="dashboard__header mb-4">
                     <h1><i class="fas fa-tachometer-alt"></i> Панель управления</h1>
-                    <p>RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management • ${new Date().toLocaleDateString('ru-RU')}</p>
+                    <p>RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management • ${new Date().toLocaleDateString('ru-RU')}</p>
                 </div>
 
                 <div class="grid grid--4 mb-4">
@@ -2997,7 +2997,7 @@ class RikorHelpDeskAdvanced {
                         <div class="system-info">
                             <div class="info-item">
                                 <span>Версия:</span>
-                                <strong>RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management</strong>
+                                <strong>RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management</strong>
                             </div>
                             <div class="info-item">
                                 <span>Пользователь:</span>
@@ -4218,7 +4218,7 @@ class RikorHelpDeskAdvanced {
     }
 }
 // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-console.log('🚀 Подготовка к запуску RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management...');
+console.log('🚀 Подготовка к запуску RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management...');
 
 // ИСПРАВЛЕНИЕ: Ждем полной загрузки DOM перед инициализацией
 if (document.readyState === 'loading') {
@@ -4229,11 +4229,11 @@ if (document.readyState === 'loading') {
 }
 
 function initApp() {
-    console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management...');
+    console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management...');
 
     try {
         window.app = new RikorHelpDeskAdvanced();
-        console.log('✅ RIKOR HELPDESK v2.10.0 Advanced Assignment & File Management успешно инициализирована!');
+        console.log('✅ RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management успешно инициализирована!');
     } catch (error) {
         console.error('❌ Критическая ошибка инициализации:', error);
 

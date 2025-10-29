@@ -1,9 +1,16 @@
 {
   "name": "rikor-helpdesk-v2.10.1-file-upload-fixed",
-  "version": "2.10.1",
-  "description": "Система управления IT-поддержкой с исправленной функциональностью загрузки файлов в тикеты",
+  "version": "2.11.0",
+  "description": "RIKOR HelpDesk - Современная система управления технической поддержкой с обновленным дизайном кнопок статуса и расширенными возможностями",
   "main": "index.html",
-  "keywords": ["helpdesk", "support", "tickets", "knowledge-base", "rikor", "file-upload"],
+  "keywords": [
+    "helpdesk",
+    "ticketing",
+    "support",
+    "rikor",
+    "it-support",
+    "service-desk"
+  ],
   "author": "RIKOR Development Team",
   "license": "MIT",
   "changelog": {
@@ -18,5 +25,12 @@
         "Добавлены адаптивные стили для мобильных устройств"
       ]
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/rikor-helpdesk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/rikor-helpdesk/issues"
   }
 }
