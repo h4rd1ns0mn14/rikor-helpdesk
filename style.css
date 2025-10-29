@@ -3570,3 +3570,250 @@ body {
 /* ============================================
    КОНЕЦ СТИЛЕЙ КНОПОК СТАТУСА
    ============================================ */
+
+
+/* ============================================
+   SLA МОНИТОРИНГ v2.13.0
+   ============================================ */
+
+.sla-tab-content {
+    padding: 20px;
+}
+
+.sla-container {
+    background: var(--rikor-bg-tertiary);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.sla-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--rikor-border);
+}
+
+.sla-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--rikor-text-primary);
+}
+
+.sla-overall {
+    font-size: 14px;
+}
+
+.sla-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.sla-metric {
+    background: var(--rikor-bg-secondary);
+    border-radius: 10px;
+    padding: 16px;
+    border: 2px solid var(--rikor-border);
+    transition: all 0.3s ease;
+}
+
+.sla-metric:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sla-metric.critical {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, var(--rikor-bg-secondary), rgba(239, 68, 68, 0.05));
+}
+
+.sla-metric.warning {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, var(--rikor-bg-secondary), rgba(245, 158, 11, 0.05));
+}
+
+.sla-metric.breached {
+    border-color: #dc2626;
+    background: linear-gradient(135deg, var(--rikor-bg-secondary), rgba(220, 38, 38, 0.08));
+}
+
+.sla-metric.met {
+    border-color: #10b981;
+    background: linear-gradient(135deg, var(--rikor-bg-secondary), rgba(16, 185, 129, 0.05));
+}
+
+.sla-metric-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.sla-metric-icon {
+    font-size: 20px;
+}
+
+.sla-metric-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rikor-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sla-metric-body {
+    margin-bottom: 12px;
+}
+
+.sla-metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--rikor-primary);
+    margin-bottom: 4px;
+}
+
+.sla-metric-limit {
+    font-size: 12px;
+    color: var(--rikor-text-muted);
+}
+
+.sla-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--rikor-border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.sla-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.sla-progress-fill.warning {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.sla-progress-fill.critical {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+    animation: pulse-sla 2s infinite;
+}
+
+.sla-metric-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sla-info {
+    background: var(--rikor-bg-secondary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--rikor-text-secondary);
+    line-height: 1.8;
+}
+
+.sla-info strong {
+    color: var(--rikor-text-primary);
+}
+
+/* SLA Badges */
+.sla-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.sla-met {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.sla-ok {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.sla-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.sla-critical {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    animation: pulse-sla 2s infinite;
+}
+
+.sla-breached {
+    background: linear-gradient(135deg, #991b1b, #7f1d1d);
+    color: white;
+}
+
+.sla-pending {
+    background: var(--rikor-bg-tertiary);
+    color: var(--rikor-text-muted);
+    border: 1px solid var(--rikor-border);
+}
+
+/* SLA индикатор на карточке тикета */
+.sla-indicator {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+}
+
+.sla-indicator-critical,
+.sla-indicator-breached {
+    animation: pulse-sla 2s infinite;
+}
+
+/* Анимация пульсации */
+@keyframes pulse-sla {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+        transform: scale(1.05);
+    }
+}
+
+/* Темная тема */
+[data-theme="dark"] .sla-container {
+    background: var(--rikor-bg-secondary);
+}
+
+[data-theme="dark"] .sla-metric {
+    background: var(--rikor-bg-tertiary);
+}
+
+[data-theme="dark"] .sla-info {
+    background: var(--rikor-bg-tertiary);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .sla-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .sla-metric-value {
+        font-size: 24px;
+    }
+}

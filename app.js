@@ -1,9 +1,9 @@
-// RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management - ФИНАЛЬНАЯ ВЕРСИЯ
+// RIKOR HELPDESK v2.13.0 Advanced Assignment & File Management - ФИНАЛЬНАЯ ВЕРСИЯ
 // Добавлено создание тикетов + просмотр статей
 
 class RikorHelpDeskAdvanced {
     constructor() {
-        console.log('🚀 RIKOR HELPDESK v2.11.0 - Enhanced Status Buttons & Improved Design - Загрузка...');
+        console.log('🚀 RIKOR HELPDESK v2.13.0 - Enhanced Status Buttons & Improved Design - Загрузка...');
 
         this.currentRoute = 'dashboard';
         this.currentUser = {
@@ -58,7 +58,7 @@ class RikorHelpDeskAdvanced {
             this.renderContent();
 
             setTimeout(() => {
-                this.showNotification('✅ RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management готов к работе!', 'success');
+                this.showNotification('✅ RIKOR HELPDESK v2.13.0 Advanced Assignment & File Management готов к работе!', 'success');
             }, 1000);
 
             console.log('✅ Система инициализирована');
@@ -2203,7 +2203,7 @@ class RikorHelpDeskAdvanced {
             <div class="dashboard">
                 <div class="dashboard__header mb-4">
                     <h1><i class="fas fa-tachometer-alt"></i> Панель управления</h1>
-                    <p>RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management • ${new Date().toLocaleDateString('ru-RU')}</p>
+                    <p>RIKOR HELPDESK v2.13.0 Advanced Assignment & File Management • ${new Date().toLocaleDateString('ru-RU')}</p>
                 </div>
 
                 <div class="grid grid--4 mb-4">
@@ -2997,7 +2997,7 @@ class RikorHelpDeskAdvanced {
                         <div class="system-info">
                             <div class="info-item">
                                 <span>Версия:</span>
-                                <strong>RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management</strong>
+                                <strong>RIKOR HELPDESK v2.13.0 Advanced Assignment & File Management</strong>
                             </div>
                             <div class="info-item">
                                 <span>Пользователь:</span>
@@ -4218,7 +4218,7 @@ class RikorHelpDeskAdvanced {
     }
 }
 // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-console.log('🚀 Подготовка к запуску RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management...');
+console.log('🚀 Подготовка к запуску RIKOR HELPDESK v2.13.0 Advanced Assignment & File Management...');
 
 // ИСПРАВЛЕНИЕ: Ждем полной загрузки DOM перед инициализацией
 if (document.readyState === 'loading') {
@@ -4229,11 +4229,11 @@ if (document.readyState === 'loading') {
 }
 
 function initApp() {
-    console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management...');
+    console.log('🚀 Создание экземпляра RIKOR HELPDESK v2.13.0 Advanced Assignment & File Management...');
 
     try {
         window.app = new RikorHelpDeskAdvanced();
-        console.log('✅ RIKOR HELPDESK v2.11.0 Advanced Assignment & File Management успешно инициализирована!');
+        console.log('✅ RIKOR HELPDESK v2.13.0 Advanced Assignment & File Management успешно инициализирована!');
     } catch (error) {
         console.error('❌ Критическая ошибка инициализации:', error);
 
@@ -4257,3 +4257,321 @@ function initApp() {
         }, 100);
     }
 }
+
+
+// ===================================================================
+// SLA МОНИТОРИНГ - АВТОМАТИЧЕСКОЕ ОТСЛЕЖИВАНИЕ (v2.13.0)
+// ===================================================================
+
+// SLA правила по приоритетам
+const SLA_RULES = {
+    'Критический': {
+        responseTime: 1,    // часы - время первого ответа
+        resolutionTime: 4   // часы - время решения
+    },
+    'Высокий': {
+        responseTime: 2,
+        resolutionTime: 8
+    },
+    'Средний': {
+        responseTime: 4,
+        resolutionTime: 24
+    },
+    'Низкий': {
+        responseTime: 8,
+        resolutionTime: 48
+    }
+};
+
+if (typeof RikorHelpDeskAdvanced !== 'undefined') {
+
+    // Расчет SLA для тикета
+    RikorHelpDeskAdvanced.prototype.calculateSLA = function(ticketId) {
+        const ticket = this.data.tickets.find(t => t.id === ticketId);
+        if (!ticket) return null;
+
+        const rules = SLA_RULES[ticket.priority] || SLA_RULES['Средний'];
+        const createdDate = new Date(ticket.createdAt);
+        const now = new Date();
+        const elapsedHours = (now - createdDate) / (1000 * 60 * 60);
+
+        // Время первого ответа
+        let firstResponse = null;
+        let responseStatus = 'pending';
+        let responseRemaining = rules.responseTime - elapsedHours;
+
+        if (ticket.replies && ticket.replies.length > 0) {
+            const firstReply = ticket.replies[0];
+            const replyDate = new Date(firstReply.created);
+            const responseHours = (replyDate - createdDate) / (1000 * 60 * 60);
+            firstResponse = responseHours;
+
+            if (responseHours <= rules.responseTime) {
+                responseStatus = 'met';     // Выполнен
+            } else {
+                responseStatus = 'breached'; // Нарушен
+            }
+        } else {
+            if (elapsedHours > rules.responseTime) {
+                responseStatus = 'breached';
+                responseRemaining = 0;
+            } else if (responseRemaining < rules.responseTime * 0.25) {
+                responseStatus = 'critical'; // Критично - осталось менее 25%
+            } else if (responseRemaining < rules.responseTime * 0.5) {
+                responseStatus = 'warning';  // Внимание - осталось менее 50%
+            } else {
+                responseStatus = 'ok';       // В норме
+            }
+        }
+
+        // Время решения
+        let resolution = null;
+        let resolutionStatus = 'pending';
+        let resolutionRemaining = rules.resolutionTime - elapsedHours;
+
+        if (ticket.status === 'Решен' || ticket.status === 'Закрыт') {
+            const resolvedDate = ticket.resolvedAt ? new Date(ticket.resolvedAt) : now;
+            const resolutionHours = (resolvedDate - createdDate) / (1000 * 60 * 60);
+            resolution = resolutionHours;
+
+            if (resolutionHours <= rules.resolutionTime) {
+                resolutionStatus = 'met';
+            } else {
+                resolutionStatus = 'breached';
+            }
+        } else {
+            if (elapsedHours > rules.resolutionTime) {
+                resolutionStatus = 'breached';
+                resolutionRemaining = 0;
+            } else if (resolutionRemaining < rules.resolutionTime * 0.25) {
+                resolutionStatus = 'critical';
+            } else if (resolutionRemaining < rules.resolutionTime * 0.5) {
+                resolutionStatus = 'warning';
+            } else {
+                resolutionStatus = 'ok';
+            }
+        }
+
+        // Общий статус
+        let overall = 'ok';
+        if (responseStatus === 'breached' || resolutionStatus === 'breached') {
+            overall = 'breached';
+        } else if (responseStatus === 'critical' || resolutionStatus === 'critical') {
+            overall = 'critical';
+        } else if (responseStatus === 'warning' || resolutionStatus === 'warning') {
+            overall = 'warning';
+        } else if (responseStatus === 'met' && resolutionStatus === 'met') {
+            overall = 'met';
+        }
+
+        return {
+            response: {
+                limit: rules.responseTime,
+                actual: firstResponse,
+                status: responseStatus,
+                remaining: Math.max(0, responseRemaining)
+            },
+            resolution: {
+                limit: rules.resolutionTime,
+                actual: resolution,
+                status: resolutionStatus,
+                remaining: Math.max(0, resolutionRemaining)
+            },
+            overall: overall,
+            priority: ticket.priority
+        };
+    };
+
+    // Получить бейдж SLA
+    RikorHelpDeskAdvanced.prototype.getSLABadge = function(status, compact = false) {
+        const badges = {
+            'met': `<span class="sla-badge sla-met">${compact ? '✓' : '✓ Выполнен'}</span>`,
+            'ok': `<span class="sla-badge sla-ok">${compact ? '⏱' : '⏱ В норме'}</span>`,
+            'warning': `<span class="sla-badge sla-warning">${compact ? '⚠' : '⚠ Внимание'}</span>`,
+            'critical': `<span class="sla-badge sla-critical">${compact ? '🔥' : '🔥 Критично'}</span>`,
+            'breached': `<span class="sla-badge sla-breached">${compact ? '✗' : '✗ Нарушен'}</span>`,
+            'pending': `<span class="sla-badge sla-pending">${compact ? '⏳' : '⏳ Ожидание'}</span>`
+        };
+        return badges[status] || badges['pending'];
+    };
+
+    // Отобразить SLA информацию
+    RikorHelpDeskAdvanced.prototype.showSLA = function(ticketId) {
+        const sla = this.calculateSLA(ticketId);
+        if (!sla) return '<div class="sla-error">Ошибка расчета SLA</div>';
+
+        const formatTime = (hours) => {
+            if (hours === null) return '-';
+            if (hours < 1) return `${Math.round(hours * 60)} мин`;
+            if (hours < 24) return `${hours.toFixed(1)} ч`;
+            return `${(hours / 24).toFixed(1)} дн`;
+        };
+
+        return `
+            <div class="sla-container">
+                <div class="sla-header">
+                    <h4>📊 SLA Мониторинг</h4>
+                    <div class="sla-overall">${this.getSLABadge(sla.overall)}</div>
+                </div>
+
+                <div class="sla-metrics">
+                    <div class="sla-metric ${sla.response.status}">
+                        <div class="sla-metric-header">
+                            <span class="sla-metric-icon">⏱️</span>
+                            <span class="sla-metric-label">Время первого ответа</span>
+                        </div>
+                        <div class="sla-metric-body">
+                            <div class="sla-metric-value">
+                                ${sla.response.actual !== null ? formatTime(sla.response.actual) : `Осталось: ${formatTime(sla.response.remaining)}`}
+                            </div>
+                            <div class="sla-metric-limit">Лимит: ${formatTime(sla.response.limit)}</div>
+                            ${sla.response.status !== 'met' && sla.response.status !== 'breached' && sla.response.remaining > 0 ? 
+                                `<div class="sla-progress-bar">
+                                    <div class="sla-progress-fill ${sla.response.status}" 
+                                         style="width: ${Math.min(100, (sla.response.remaining / sla.response.limit) * 100)}%">
+                                    </div>
+                                </div>` : ''}
+                        </div>
+                        <div class="sla-metric-footer">${this.getSLABadge(sla.response.status)}</div>
+                    </div>
+
+                    <div class="sla-metric ${sla.resolution.status}">
+                        <div class="sla-metric-header">
+                            <span class="sla-metric-icon">✅</span>
+                            <span class="sla-metric-label">Время решения</span>
+                        </div>
+                        <div class="sla-metric-body">
+                            <div class="sla-metric-value">
+                                ${sla.resolution.actual !== null ? formatTime(sla.resolution.actual) : `Осталось: ${formatTime(sla.resolution.remaining)}`}
+                            </div>
+                            <div class="sla-metric-limit">Лимит: ${formatTime(sla.resolution.limit)}</div>
+                            ${sla.resolution.status !== 'met' && sla.resolution.status !== 'breached' && sla.resolution.remaining > 0 ? 
+                                `<div class="sla-progress-bar">
+                                    <div class="sla-progress-fill ${sla.resolution.status}" 
+                                         style="width: ${Math.min(100, (sla.resolution.remaining / sla.resolution.limit) * 100)}%">
+                                    </div>
+                                </div>` : ''}
+                        </div>
+                        <div class="sla-metric-footer">${this.getSLABadge(sla.resolution.status)}</div>
+                    </div>
+                </div>
+
+                <div class="sla-info">
+                    <strong>Приоритет:</strong> ${sla.priority}<br>
+                    <strong>Правила SLA:</strong> Ответ ${formatTime(sla.response.limit)} / Решение ${formatTime(sla.resolution.limit)}
+                </div>
+            </div>
+        `;
+    };
+
+    // Получить компактный индикатор SLA для карточки тикета
+    RikorHelpDeskAdvanced.prototype.getSLAIndicator = function(ticketId) {
+        const sla = this.calculateSLA(ticketId);
+        if (!sla || sla.overall === 'met' || sla.overall === 'pending') return '';
+
+        return `<div class="sla-indicator sla-indicator-${sla.overall}" title="SLA статус">${this.getSLABadge(sla.overall, true)}</div>`;
+    };
+
+    console.log('✅ SLA мониторинг загружен');
+}
+
+// Автоматический мониторинг SLA
+setInterval(() => {
+    if (window.app && window.app.data && window.app.data.tickets) {
+        window.app.data.tickets.forEach(ticket => {
+            if (ticket.status !== 'Решен' && ticket.status !== 'Закрыт') {
+                const sla = window.app.calculateSLA(ticket.id);
+                if (sla && (sla.overall === 'breached' || sla.overall === 'critical')) {
+                    console.warn(`⚠️ SLA Alert: Тикет #${ticket.id} - ${ticket.title} - Статус: ${sla.overall}`);
+                }
+            }
+        });
+    }
+}, 60000); // Проверка каждую минуту
+
+
+// Интеграция SLA во viewTicket
+window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (window.app && typeof window.app.viewTicket === 'function') {
+            const originalViewTicket = window.app.viewTicket;
+
+            window.app.viewTicket = function(ticketId) {
+                originalViewTicket.call(this, ticketId);
+
+                // Добавляем вкладку SLA
+                setTimeout(() => {
+                    const modalBody = document.querySelector('.modal-body.compact');
+                    if (modalBody && typeof this.showSLA === 'function') {
+                        let tabsContainer = modalBody.querySelector('.ticket-tabs');
+
+                        if (!tabsContainer) {
+                            const firstSection = modalBody.querySelector('.section');
+                            if (firstSection) {
+                                tabsContainer = document.createElement('div');
+                                tabsContainer.className = 'ticket-tabs';
+                                tabsContainer.innerHTML = `
+                                    <button class="ticket-tab active" data-tab="details">📋 Детали</button>
+                                    <button class="ticket-tab" data-tab="sla">📊 SLA</button>
+                                `;
+                                modalBody.insertBefore(tabsContainer, firstSection);
+
+                                // Оборачиваем контент
+                                const detailsContent = document.createElement('div');
+                                detailsContent.className = 'tab-content active';
+                                detailsContent.setAttribute('data-content', 'details');
+
+                                const sections = Array.from(modalBody.querySelectorAll('.section'));
+                                sections.forEach(s => detailsContent.appendChild(s));
+                                modalBody.appendChild(detailsContent);
+
+                                // SLA контент
+                                const slaContent = document.createElement('div');
+                                slaContent.className = 'tab-content sla-tab-content';
+                                slaContent.setAttribute('data-content', 'sla');
+                                slaContent.innerHTML = this.showSLA(ticketId);
+                                modalBody.appendChild(slaContent);
+
+                                // Обработчики вкладок
+                                tabsContainer.querySelectorAll('.ticket-tab').forEach(tab => {
+                                    tab.addEventListener('click', () => {
+                                        tabsContainer.querySelectorAll('.ticket-tab').forEach(t => t.classList.remove('active'));
+                                        modalBody.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                                        tab.classList.add('active');
+                                        const contentId = tab.getAttribute('data-tab');
+                                        const content = modalBody.querySelector(`[data-content="${contentId}"]`);
+                                        if (content) content.classList.add('active');
+                                    });
+                                });
+                            }
+                        } else {
+                            // Добавляем вкладку SLA если её еще нет
+                            if (!tabsContainer.querySelector('[data-tab="sla"]')) {
+                                const slaTab = document.createElement('button');
+                                slaTab.className = 'ticket-tab';
+                                slaTab.setAttribute('data-tab', 'sla');
+                                slaTab.innerHTML = '📊 SLA';
+                                tabsContainer.appendChild(slaTab);
+
+                                const slaContent = document.createElement('div');
+                                slaContent.className = 'tab-content sla-tab-content';
+                                slaContent.setAttribute('data-content', 'sla');
+                                slaContent.innerHTML = this.showSLA(ticketId);
+                                modalBody.appendChild(slaContent);
+
+                                slaTab.addEventListener('click', () => {
+                                    tabsContainer.querySelectorAll('.ticket-tab').forEach(t => t.classList.remove('active'));
+                                    modalBody.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                                    slaTab.classList.add('active');
+                                    slaContent.classList.add('active');
+                                });
+                            }
+                        }
+                    }
+                }, 100);
+            };
+
+            console.log('✅ SLA интеграция активирована');
+        }
+    }, 600);
+});
